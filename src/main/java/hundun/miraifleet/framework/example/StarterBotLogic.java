@@ -1,17 +1,9 @@
 package hundun.miraifleet.framework.example;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import hundun.miraifleet.framework.core.botlogic.BaseBotLogic;
-import hundun.miraifleet.framework.core.function.BaseFunction;
 import hundun.miraifleet.framework.starter.botlogic.function.MiraiCodeFunction;
 import hundun.miraifleet.framework.starter.botlogic.function.RepeatFunction;
-import net.mamoe.mirai.console.command.CommandManager;
 import net.mamoe.mirai.console.plugin.jvm.JvmPlugin;
-import net.mamoe.mirai.event.Event;
-import net.mamoe.mirai.event.EventChannel;
-import net.mamoe.mirai.event.GlobalEventChannel;
 
 /**
  * @author hundun

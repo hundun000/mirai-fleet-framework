@@ -27,7 +27,7 @@ apply plugin: 'java-library'
 
 
 
-group = 'PrinzEugenPlugin'
+group = 'example'
 version = '0.0.1-SNAPSHOT'
 sourceCompatibility = '11'
 

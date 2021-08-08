@@ -5,7 +5,6 @@ import java.io.IOException;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import hundun.miraifleet.framework.core.data.PluginPrivateConfig;
 import net.mamoe.mirai.utils.MiraiLogger;
 
 

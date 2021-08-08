@@ -8,7 +8,6 @@ import hundun.miraifleet.framework.core.data.FunctionPrivateConfig;
 import hundun.miraifleet.framework.core.data.PluginPrivateConfig;
 import hundun.miraifleet.framework.core.function.BaseFunction;
 import hundun.miraifleet.framework.core.helper.Utils;
-import net.mamoe.mirai.console.command.CommandManager;
 import net.mamoe.mirai.console.plugin.jvm.JvmPlugin;
 import net.mamoe.mirai.event.Event;
 import net.mamoe.mirai.event.EventChannel;
@@ -36,7 +35,7 @@ public abstract class BaseBotLogic {
         
         EventChannel<Event> eventChannel = GlobalEventChannel.INSTANCE.parentScope(plugin);
         
-        StringBuilder commands = new StringBuilder();
+//        StringBuilder commands = new StringBuilder();
         StringBuilder listenerHosts = new StringBuilder();
         
         for (BaseFunction<?> function : functions) {
