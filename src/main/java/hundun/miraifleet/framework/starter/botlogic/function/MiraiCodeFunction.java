@@ -1,4 +1,4 @@
-package hundun.miraifleet.frame.starter.botlogic.function;
+package hundun.miraifleet.framework.starter.botlogic.function;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -9,9 +9,9 @@ import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import hundun.miraifleet.frame.core.data.EventInfo;
-import hundun.miraifleet.frame.core.data.SessionId;
-import hundun.miraifleet.frame.core.function.BaseFunction;
+import hundun.miraifleet.framework.core.data.EventInfo;
+import hundun.miraifleet.framework.core.data.SessionId;
+import hundun.miraifleet.framework.core.function.BaseFunction;
 import net.mamoe.mirai.console.command.CommandSender;
 import net.mamoe.mirai.console.command.CompositeCommand;
 import net.mamoe.mirai.console.command.MemberCommandSender;

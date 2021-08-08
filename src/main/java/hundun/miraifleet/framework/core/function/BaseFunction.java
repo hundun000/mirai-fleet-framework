@@ -1,4 +1,4 @@
-package hundun.miraifleet.frame.core.function;
+package hundun.miraifleet.framework.core.function;
 
 import java.util.HashMap;
 import java.util.List;

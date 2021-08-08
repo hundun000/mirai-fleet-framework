@@ -1,8 +1,8 @@
-package hundun.miraifleet.frame.starter.plugin;
+package hundun.miraifleet.framework.starter.plugin;
 
 import org.jetbrains.annotations.NotNull;
 
-import hundun.miraifleet.frame.starter.botlogic.StarterBotLogic;
+import hundun.miraifleet.framework.starter.botlogic.StarterBotLogic;
 import net.mamoe.mirai.console.command.CommandManager;
 import net.mamoe.mirai.console.extension.PluginComponentStorage;
 import net.mamoe.mirai.console.plugin.jvm.JavaPlugin;

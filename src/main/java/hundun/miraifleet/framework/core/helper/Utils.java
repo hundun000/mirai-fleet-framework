@@ -1,10 +1,10 @@
-package hundun.miraifleet.frame.core.helper;
+package hundun.miraifleet.framework.core.helper;
 
 import java.io.File;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import hundun.miraifleet.frame.core.data.configuration.AppPrivateSettings;
-import hundun.miraifleet.frame.core.data.configuration.AppPublicSettings;
+import hundun.miraifleet.framework.core.data.configuration.AppPrivateSettings;
+import hundun.miraifleet.framework.core.data.configuration.AppPublicSettings;
 
 
 

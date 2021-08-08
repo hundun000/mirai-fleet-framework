@@ -1,4 +1,4 @@
-package hundun.miraifleet.frame.starter.botlogic.function;
+package hundun.miraifleet.framework.starter.botlogic.function;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -8,10 +8,10 @@ import java.util.Map;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
 
-import hundun.miraifleet.frame.core.data.EventInfo;
-import hundun.miraifleet.frame.core.data.SessionId;
-import hundun.miraifleet.frame.core.function.BaseFunction;
-import hundun.miraifleet.frame.starter.botlogic.function.MiraiCodeFunction.SessionData;
+import hundun.miraifleet.framework.core.data.EventInfo;
+import hundun.miraifleet.framework.core.data.SessionId;
+import hundun.miraifleet.framework.core.function.BaseFunction;
+import hundun.miraifleet.framework.starter.botlogic.function.MiraiCodeFunction.SessionData;
 import net.mamoe.mirai.console.plugin.jvm.JvmPlugin;
 import net.mamoe.mirai.event.EventHandler;
 import net.mamoe.mirai.event.events.GroupMessageEvent;

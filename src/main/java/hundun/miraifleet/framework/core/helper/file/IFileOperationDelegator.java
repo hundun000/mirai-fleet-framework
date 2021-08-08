@@ -1,4 +1,4 @@
-package hundun.miraifleet.frame.core.helper.file;
+package hundun.miraifleet.framework.core.helper.file;
 
 import java.io.File;
 import java.io.InputStream;

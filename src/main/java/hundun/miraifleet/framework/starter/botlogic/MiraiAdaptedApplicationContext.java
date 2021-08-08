@@ -1,4 +1,4 @@
-package hundun.miraifleet.frame.starter.botlogic;
+package hundun.miraifleet.framework.starter.botlogic;
 
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 

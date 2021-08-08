@@ -1,4 +1,4 @@
-package hundun.miraifleet.frame.core.configuration.feign;
+package hundun.miraifleet.framework.core.configuration.feign;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -10,7 +10,7 @@ import feign.codec.Decoder;
 import feign.codec.Encoder;
 import feign.jackson.JacksonDecoder;
 import feign.jackson.JacksonEncoder;
-import hundun.miraifleet.frame.core.export.IConsole;
+import hundun.miraifleet.framework.core.export.IConsole;
 
 /**
  * @author hundun
