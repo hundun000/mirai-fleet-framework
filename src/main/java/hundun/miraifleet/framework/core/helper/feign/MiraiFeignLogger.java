@@ -1,4 +1,4 @@
-package hundun.miraifleet.framework.core.configuration.feign;
+package hundun.miraifleet.framework.core.helper.feign;
 
 import java.io.IOException;
 

@@ -19,14 +19,14 @@ public class FileOperationDelegate {
 
     IFileOperationDelegator provider;
     
-    public FileOperationDelegate(IFileOperationDelegator delegator) {
-        this.provider = delegator;
+    public FileOperationDelegate(IFileOperationDelegator kcwikiService) {
+        this.provider = kcwikiService;
     }
 
 
     
     private File fromCache(String fileId, File rootCacheFolder) {
-        String subFolerName = provider.getCacheSubFolderName();
+        String subFolerName = "FileCache";
         String subFolerPathName = Utils.checkFolder(subFolerName, rootCacheFolder.getAbsolutePath());
         String saveFilePathName = subFolerPathName + File.separator + fileId;
         File file = new File(saveFilePathName);
@@ -35,7 +35,7 @@ public class FileOperationDelegate {
     }
 
     public File fromCacheOrDownloadOrFromLocal(String fileId, File rootCacheFolder, File localDataFolder) {
-        String subFolerName = provider.getCacheSubFolderName();
+        String subFolerName = "FileCache";
         File file = fromCache(fileId, rootCacheFolder);
         if (file.exists()) {
             log.debug("image from cache :{}", subFolerName + "---" + fileId);

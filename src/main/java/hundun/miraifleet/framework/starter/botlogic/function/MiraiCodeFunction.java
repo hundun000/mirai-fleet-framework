@@ -6,11 +6,8 @@ import java.util.List;
 import java.util.Map;
 
 import org.jetbrains.annotations.NotNull;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
-import hundun.miraifleet.framework.core.data.EventInfo;
-import hundun.miraifleet.framework.core.data.SessionId;
+import hundun.miraifleet.framework.core.botlogic.BaseBotLogic;
 import hundun.miraifleet.framework.core.function.BaseFunction;
 import net.mamoe.mirai.console.command.CommandSender;
 import net.mamoe.mirai.console.command.CompositeCommand;
@@ -33,10 +30,12 @@ import net.mamoe.mirai.message.data.MessageChain;
 public class MiraiCodeFunction extends BaseFunction<MiraiCodeFunction.SessionData> {
         
     public MiraiCodeFunction(
+            BaseBotLogic baseBotLogic,
             JvmPlugin plugin,
             String characterName
             ) {
         super(
+            baseBotLogic,
             plugin,
             characterName,
             "MiraiCodeFunction",

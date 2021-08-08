@@ -1,6 +1,6 @@
 
 
-import hundun.miraifleet.framework.starter.plugin.StarterPlugin;
+import hundun.miraifleet.framework.example.StarterPlugin;
 import net.mamoe.mirai.console.plugin.PluginManager;
 import net.mamoe.mirai.console.terminal.MiraiConsoleImplementationTerminal;
 import net.mamoe.mirai.console.terminal.MiraiConsoleTerminalLoader;
@@ -13,7 +13,7 @@ public class StarterPluginTest {
         MiraiConsoleTerminalLoader.INSTANCE.startAsDaemon(new MiraiConsoleImplementationTerminal());
         
         PluginManager.INSTANCE.loadPlugin(StarterPlugin.INSTANCE);
+        
         PluginManager.INSTANCE.enablePlugin(StarterPlugin.INSTANCE);
- 
     }
 }

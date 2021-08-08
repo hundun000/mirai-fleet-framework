@@ -1,8 +1,7 @@
-package hundun.miraifleet.framework.starter.plugin;
+package hundun.miraifleet.framework.example;
 
 import org.jetbrains.annotations.NotNull;
 
-import hundun.miraifleet.framework.starter.botlogic.StarterBotLogic;
 import net.mamoe.mirai.console.command.CommandManager;
 import net.mamoe.mirai.console.extension.PluginComponentStorage;
 import net.mamoe.mirai.console.plugin.jvm.JavaPlugin;
@@ -17,7 +16,7 @@ public class StarterPlugin extends JavaPlugin {
     
     public StarterPlugin() {
         super(new JvmPluginDescriptionBuilder(
-                "hundun.quizgame",
+                "hundun.starter",
                 "0.1.0"
             )
             .build());
@@ -31,7 +30,7 @@ public class StarterPlugin extends JavaPlugin {
     @Override
     public void onEnable() {
         botLogic = new StarterBotLogic(this);
-        botLogic.onEnable();
+        botLogic.onBotLogicEnable();
     }
     
     @Override

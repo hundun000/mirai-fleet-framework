@@ -1,12 +1,12 @@
 package hundun.miraifleet.framework.core.helper;
 
 import java.io.File;
+import java.io.IOException;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import hundun.miraifleet.framework.core.data.configuration.AppPrivateSettings;
-import hundun.miraifleet.framework.core.data.configuration.AppPublicSettings;
-
-
+import hundun.miraifleet.framework.core.data.PluginPrivateConfig;
+import net.mamoe.mirai.utils.MiraiLogger;
 
 
 
@@ -31,19 +31,18 @@ public class Utils {
     }
     
     static ObjectMapper objectMapper = new ObjectMapper();
+
+    public static <T> T parseByObjectMapper(File settingsFile, Class<T> clazz, MiraiLogger miraiLogger) {
+        T result;
+        try {
+            result = objectMapper.readValue(settingsFile, clazz);
+        } catch (IOException e) {
+            miraiLogger.error(e);
+            result = null;
+        }
+        return result;
+    }
     
-    public static AppPrivateSettings parseAppPrivateSettings(File settingsFile) throws Exception {
-        AppPrivateSettings appPrivateSettings;
-        
-        appPrivateSettings = objectMapper.readValue(settingsFile, AppPrivateSettings.class);
 
-        return appPrivateSettings;
-    }
-
-    public static AppPublicSettings parseAppPublicSettings(File settingsFile) throws Exception {
-        AppPublicSettings appPublicSettings;
-        appPublicSettings = objectMapper.readValue(settingsFile, AppPublicSettings.class);
-        return appPublicSettings;
-    }
     
 }
