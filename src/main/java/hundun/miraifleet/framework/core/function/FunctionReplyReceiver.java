@@ -16,18 +16,18 @@ import net.mamoe.mirai.utils.MiraiLogger;
 /**
  * 找不到一个同时代表CommandSender和Contact的类，姑且先用本类来实现
  */
-public class CommandReplyReceiver {
+public class FunctionReplyReceiver {
     MiraiLogger miraiLogger;
     CommandSender commandSender;
     Contact contact;
     
     
-    public CommandReplyReceiver(CommandSender commandSender, MiraiLogger miraiLogger) {
+    public FunctionReplyReceiver(CommandSender commandSender, MiraiLogger miraiLogger) {
         this.commandSender = commandSender;
         this.miraiLogger = miraiLogger;
     }
     
-    public CommandReplyReceiver(Contact contact, MiraiLogger miraiLogger) {
+    public FunctionReplyReceiver(Contact contact, MiraiLogger miraiLogger) {
         this.contact = contact;
         this.miraiLogger = miraiLogger;
     }

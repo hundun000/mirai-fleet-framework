@@ -16,7 +16,7 @@ import java.util.function.Supplier;
 import hundun.miraifleet.framework.core.botlogic.BaseBotLogic;
 import hundun.miraifleet.framework.core.function.AsCommand;
 import hundun.miraifleet.framework.core.function.BaseFunction;
-import hundun.miraifleet.framework.core.function.CommandReplyReceiver;
+import hundun.miraifleet.framework.core.function.FunctionReplyReceiver;
 import hundun.miraifleet.framework.core.helper.repository.PluginConfigRepository;
 import hundun.miraifleet.framework.core.helper.repository.PluginDataRepository;
 import hundun.miraifleet.framework.starter.botlogic.function.reminder.config.HourlyChatConfig;
@@ -69,7 +69,14 @@ public class ReminderFunction extends BaseFunction<Void> {
     }
     
     
-
+    @SubCommand("查询报时")
+    public void listHourlyChatConfig(CommandSender sender) {
+        if (!checkCosPermission(sender)) {
+            return;
+        }
+        HourlyChatConfig config = configRepository.findSingleton();
+        sender.sendMessage(config.toString());
+    }
 
 
     @SubCommand("debugTimerCallReminderItem")

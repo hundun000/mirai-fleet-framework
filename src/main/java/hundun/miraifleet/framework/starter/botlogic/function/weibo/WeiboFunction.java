@@ -15,7 +15,7 @@ import hundun.miraifleet.framework.core.botlogic.BaseBotLogic;
 import hundun.miraifleet.framework.core.function.AsCommand;
 import hundun.miraifleet.framework.core.function.AsListenerHost;
 import hundun.miraifleet.framework.core.function.BaseFunction;
-import hundun.miraifleet.framework.core.function.CommandReplyReceiver;
+import hundun.miraifleet.framework.core.function.FunctionReplyReceiver;
 import hundun.miraifleet.framework.core.helper.feign.FeignClientFactory;
 import hundun.miraifleet.framework.core.helper.repository.PluginConfigRepository;
 import hundun.miraifleet.framework.core.helper.repository.PluginDataRepository;
@@ -35,6 +35,7 @@ import net.mamoe.mirai.console.command.CommandSender;
 import net.mamoe.mirai.console.command.MemberCommandSender;
 import net.mamoe.mirai.console.permission.PermissionService;
 import net.mamoe.mirai.console.plugin.jvm.JvmPlugin;
+import net.mamoe.mirai.contact.Contact;
 import net.mamoe.mirai.contact.Group;
 import net.mamoe.mirai.message.code.MiraiCode;
 import net.mamoe.mirai.message.data.Image;
@@ -87,13 +88,13 @@ public class WeiboFunction extends BaseFunction<WeiboFunction.SessionData> {
         
     }
     
-    @SubCommand("刷新微博用户数据")
+    @SubCommand("刷新微博订阅")
     public void updateAndGetUserInfoCache(CommandSender sender) {
         if (!checkCosPermission(sender)) {
             return;
         }
         Map<String, WeiboViewFormat> listenConfig = getListenConfigOrEmpty();
-        listenConfig.forEach((uid, format) -> weiboService.updateAndGetUserInfoCache(uid, true));
+        listenConfig.forEach((uid, format) -> weiboService.getUserInfoCacheOptionUpdate(uid, true));
         sender.sendMessage("已刷新");
         return;
     }
@@ -108,7 +109,7 @@ public class WeiboFunction extends BaseFunction<WeiboFunction.SessionData> {
 
 
     
-    private void sendBlogToBot(WeiboCardView newCardCacheAndImage, Group group) {
+    private void sendBlogToBot(WeiboCardView newCardCacheAndImage, FunctionReplyReceiver group) {
         
         if (newCardCacheAndImage == null) {
             group.sendMessage("现在还没有饼哦~");
@@ -152,13 +153,68 @@ public class WeiboFunction extends BaseFunction<WeiboFunction.SessionData> {
         weiboService.debugChangeTopCardCreateTime(uid);
     }
     
-    @SubCommand("debugListListen")
-    public void debugListListen(CommandSender sender) {
+    @SubCommand("微博订阅")
+    public void listListen(CommandSender sender) {
         if (!checkCosPermission(sender)) {
             return;
         }
         Map<String, WeiboViewFormat> listenConfig = getListenConfigOrEmpty();
         sender.sendMessage(listenConfig.toString());
+    }
+    
+    @SubCommand("最新微博")
+    public void listTopSummary(CommandSender sender) {
+        if (!checkCosPermission(sender)) {
+            return;
+        }
+        
+        Map<String, WeiboViewFormat> listenConfig = getListenConfigOrEmpty();
+        
+        StringBuilder builder = new StringBuilder();
+        for (Entry<String, WeiboViewFormat> entry : listenConfig.entrySet()) {
+            String uid= entry.getKey();
+            WeiboViewFormat format = entry.getValue();
+
+            File cacheFolder = resolveFunctionCacheFileFolder();
+            WeiboCardView cardCacheAndImage = weiboService.updateAndGetTopBlog(uid, cacheFolder, format);
+            if (cardCacheAndImage != null) {
+                String summary = "来自：" + cardCacheAndImage.getWeiboCardCache().getScreenName() + "，最新的饼的时间是：" + cardCacheAndImage.getWeiboCardCache().getBlogCreatedDateTime().toString();
+                builder.append(summary).append("\n");
+            }
+        }
+        if (builder.length() == 0) {
+            sender.sendMessage("现在还没有饼哦~");
+        } else {
+            sender.sendMessage(builder.toString());
+        }
+        
+    }
+    
+    @SubCommand("最新微博")
+    public void listTopForUid(CommandSender sender, String name) {
+        if (!checkCosPermission(sender)) {
+            return;
+        }
+        
+        Map<String, WeiboViewFormat> listenConfig = getListenConfigOrEmpty();
+        
+        String targetUid = "";
+        for (String uid : listenConfig.keySet()) {
+            WeiboUserInfoCache userInfoCache = weiboService.getUserInfoCacheOptionUpdate(uid, false);
+            if (userInfoCache != null && userInfoCache.getScreenName().equals(name)) {
+                targetUid = userInfoCache.getUid();
+            }
+        }
+        
+        WeiboViewFormat format = listenConfig.get(targetUid);
+        if (format == null) {
+            sender.sendMessage("未订阅：" + name);
+        } else {
+            File cacheFolder = resolveFunctionCacheFileFolder();
+            WeiboCardView cardCacheAndImage = weiboService.updateAndGetTopBlog(targetUid, cacheFolder, format);
+            
+            sendBlogToBot(cardCacheAndImage, new FunctionReplyReceiver(sender, log));
+        }
     }
     
     private Map<String, WeiboViewFormat> getListenConfigOrEmpty() {
@@ -205,7 +261,7 @@ public class WeiboFunction extends BaseFunction<WeiboFunction.SessionData> {
                             boolean isNew = cardCacheAndImage.getWeiboCardCache().getBlogCreatedDateTime().isAfter(sessionData.getTaskLastCheckTime());
                             if (isNew) {
                                 plugin.getLogger().info("uid = " + uid + " has new weibo: " + cardCacheAndImage.getWeiboCardCache().getBlogCreatedDateTime());
-                                sendBlogToBot(cardCacheAndImage, group);
+                                sendBlogToBot(cardCacheAndImage, new FunctionReplyReceiver(group, log));
                             }
                         }
                         

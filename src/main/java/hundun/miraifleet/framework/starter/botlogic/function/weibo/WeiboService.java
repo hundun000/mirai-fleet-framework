@@ -116,7 +116,7 @@ public class WeiboService implements IFileOperationDelegator {
         return detailText;
     }
     
-    public WeiboUserInfoCache updateAndGetUserInfoCache(String uid, boolean forceUpdate) {
+    public WeiboUserInfoCache getUserInfoCacheOptionUpdate(String uid, boolean forceUpdate) {
         
         if (userInfoCacheRepository.existsById(uid) && !forceUpdate) {
             return userInfoCacheRepository.findById(uid);

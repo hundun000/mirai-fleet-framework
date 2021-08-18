@@ -10,7 +10,7 @@ import hundun.miraifleet.framework.core.data.PluginPrivateConfig;
 import hundun.miraifleet.framework.core.function.AsCommand;
 import hundun.miraifleet.framework.core.function.AsListenerHost;
 import hundun.miraifleet.framework.core.function.BaseFunction;
-import hundun.miraifleet.framework.core.function.CommandReplyReceiver;
+import hundun.miraifleet.framework.core.function.FunctionReplyReceiver;
 import hundun.miraifleet.framework.core.helper.repository.PluginConfigRepository;
 import net.mamoe.mirai.console.command.CommandManager;
 import net.mamoe.mirai.console.permission.Permission;
