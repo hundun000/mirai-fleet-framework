@@ -20,6 +20,7 @@ import net.mamoe.mirai.console.permission.Permission;
 import net.mamoe.mirai.console.plugin.jvm.JvmPlugin;
 import net.mamoe.mirai.contact.Group;
 import net.mamoe.mirai.event.ListenerHost;
+import net.mamoe.mirai.event.events.GroupMemberEvent;
 import net.mamoe.mirai.utils.MiraiLogger;
 
 /**
@@ -116,6 +117,8 @@ public abstract class BaseFunction<T> extends CompositeCommand implements Listen
         return PermissionService.testPermission(targetPermission, exactGroup);
     }
     
-    
-    
+    protected boolean checkCosPermission(GroupMemberEvent event) {
+        return checkCosPermission(event.getBot(), event.getGroup());
+    }
+
 }

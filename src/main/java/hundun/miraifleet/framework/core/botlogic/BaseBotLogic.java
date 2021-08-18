@@ -34,13 +34,13 @@ public abstract class BaseBotLogic {
     protected List<BaseFunction<?>> functions = new ArrayList<>();
     //protected PluginPrivateConfig pluginPrivateConfig;
     
-    private final PluginConfigRepository<PluginPrivateConfig> configRepository;
+    //private final PluginConfigRepository<PluginPrivateConfig> configRepository;
     
     public BaseBotLogic(JvmPlugin plugin, String characterName) {
         super();
         this.characterName = characterName;
         this.plugin = plugin;
-        this.configRepository = new PluginConfigRepository<>(plugin, resolveBotLogicConfigFile("BasePluginPrivateConfig.json"), PluginPrivateConfig.class);
+        //this.configRepository = new PluginConfigRepository<>(plugin, resolveBotLogicConfigFile("BasePluginPrivateConfig.json"), PluginPrivateConfig.class);
     }
     
     protected File resolveBotLogicConfigFile(String jsonFileName) {
@@ -69,9 +69,9 @@ public abstract class BaseBotLogic {
         plugin.getLogger().info("has commands: " + commands.toString());
         plugin.getLogger().info("has listenerHosts: " + listenerHosts.toString());
      
-        if (configRepository.findSingleton() == null) {
-            configRepository.saveSingleton(defaultPluginPrivateConfig());
-        }
+//        if (configRepository.findSingleton() == null) {
+//            configRepository.saveSingleton(defaultPluginPrivateConfig());
+//        }
         
         characterCosPermission = registerCosPermission();
     }

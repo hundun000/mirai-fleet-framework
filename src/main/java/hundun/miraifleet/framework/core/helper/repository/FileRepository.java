@@ -57,6 +57,7 @@ public abstract class FileRepository<V> {
         this.objectMapper = new ObjectMapper()
                 .registerModule(javaTimeModule)
                 .enable(SerializationFeature.INDENT_OUTPUT)
+                .disable(SerializationFeature.FAIL_ON_EMPTY_BEANS)
                 ;
         readDataList();
     }

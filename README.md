@@ -22,9 +22,9 @@ Plugin持有一个对应的BotLogic。保持Plugin只处理和mirai对接工作�
 
 详细的业务逻辑包括：
 
-注册Command和ListenHost。对于使用本框架的开发者，实际是向BotLogic注册Function，然后框架会再把Function作为Command和ListenHost注册到mirai。
+- 注册Command和ListenHost。对于使用本框架的开发者，实际是向BotLogic注册Function，然后框架会再把Function作为Command和ListenHost注册到mirai。
 
-一些所有Function共用的方法。
+- 一些供Function共用的方法。
 
 ### 配置化目标
 
@@ -84,34 +84,4 @@ Plugin持有一个对应的BotLogic。保持Plugin只处理和mirai对接工作�
 /permission cancelall hundun.fleet.example.prinzeugen * 
 /permission cancelall hundun.fleet.example.prinzeugen m[testGroupId].*
 /permission cancelall hundun.fleet.example.prinzeugen m[kancolleGroupId].*
-```
-
-
-
-需求：当定时任务触发时，（所有bots中）仅bot_111，（所有groups中）仅在group_222，执行某个方法。
-
-如果选的方案是读一个自定义的配置文件并判断，就不需要涉及Command了；不过上述需求其实是一个简化的版本，对于真实需求，我希望直接复用Permission系统，不使用自定义的配置文件。或者就当是我为了学习mirai，绕绕弯路来实现。
-
-为此，我已经把目标方法注册为指令`/myCommand`，并配置该指令的权限。
-```
-grantedPermissionMap: 
-  'myplugin:myCommand': 
-    - 'g222.111'
-```
-
-下一步需要用group和bot构造出CommandSender，然而看起来没有这样的方法。怎么办？我应该自己拓展出一个CommandSender子类吗？
-```
-class MyTask extend TimerTask {
-  @Override
-  public void run() {
-    for (Bot bot : Bot.getInstances()) {
-      for (Group group : bot.getGroups()) {
-        // 看起来并没有这样的方法
-	CommandSender sender = someMethod(bot, group);
-        // 仅当 bot_111 且 group_222 时能通过权限检查
-        CommandManager.INSTANCE.executeCommand(to,"/myCommand",false);
-      }
-    }
-  }
-}
 ```
