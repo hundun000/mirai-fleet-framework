@@ -34,6 +34,7 @@ import net.mamoe.mirai.console.permission.PermissionService;
 import net.mamoe.mirai.console.permission.AbstractPermitteeId.ExactGroup;
 import net.mamoe.mirai.console.permission.Permission;
 import net.mamoe.mirai.console.plugin.jvm.JvmPlugin;
+import net.mamoe.mirai.contact.Contact;
 import net.mamoe.mirai.contact.Group;
 
 /**
@@ -64,7 +65,7 @@ public class ReminderFunction extends BaseFunction<Void> {
         this.reminderListRepository = new ReminderListRepository(plugin, resolveFunctionRepositoryFile("ReminderListRepository.json"));
         this.configRepository = new PluginConfigRepository<>(plugin, resolveFunctionConfigFile("HourlyChatConfig.json"), HourlyChatConfig.class);
         this.scheduler.scheduleAtFixedRate(new ReminderTimerTask(), 1, 1, TimeUnit.MINUTES);
-        hourlyChatConfigToReminderItems();
+        initHourlyChatConfigToReminderItems();
     }
     
     
@@ -73,16 +74,23 @@ public class ReminderFunction extends BaseFunction<Void> {
 
     @SubCommand("debugTimerCallReminderItem")
     public void debugTimerCallReminderItem(CommandSender sender, int fakeHour) {
+        if (!checkCosPermission(sender)) {
+            return;
+        }
         LocalDateTime fakeNow = LocalDateTime.of(2000, 1, 1, fakeHour, 0);
         for (ReminderItem reminderItem : hourlyChatReminderItems) {
             Bot bot = sender.getBot();
-            for (Group group : bot.getGroups()) {
-                timerCallReminderItem(reminderItem, bot, group, fakeNow);
-            }
+            useReminderItem(reminderItem, bot, sender.getSubject(), fakeNow);
         }
     }
     
-    private void hourlyChatConfigToReminderItems() {
+    
+
+
+
+
+
+    private void initHourlyChatConfigToReminderItems() {
         HourlyChatConfig config = configRepository.findSingleton();
         if (config != null) {
             config.getChatTexts().forEach((hour, text) -> {
@@ -95,15 +103,11 @@ public class ReminderFunction extends BaseFunction<Void> {
     
     
     
-    private void timerCallReminderItem(ReminderItem reminderItem, Bot bot, Group group, LocalDateTime now) {
-        if (!checkCosPermission(bot, group)) {
-            return;
-        }
-        
+    private void useReminderItem(ReminderItem reminderItem, Bot bot, Contact contact, LocalDateTime now) {
         if (!checkTimeConditions(reminderItem, now)) {
             return;
         }
-        group.sendMessage(reminderItem.getText());
+        contact.sendMessage(reminderItem.getText());
         if (reminderItem.getCount() != -1) {
             reminderItem.setCount(reminderItem.getCount() - 1);
         }
@@ -185,12 +189,15 @@ public class ReminderFunction extends BaseFunction<Void> {
         }
         
         private void hourlyChatClockArrive(LocalDateTime now) {
-            log.info("characterClockArrive");
             for (ReminderItem reminderItem : hourlyChatReminderItems) {
                 Collection<Bot> bots = Bot.getInstances();
                 for (Bot bot: bots) {
                     for (Group group : bot.getGroups()) {
-                        timerCallReminderItem(reminderItem, bot, group, now);
+                        if (!checkCosPermission(bot, group)) {
+                            continue;
+                        }
+                        log.info("group" + group.getId() + " hourlyChat match");
+                        useReminderItem(reminderItem, bot, group, now);
                     }
                 }
             }
@@ -206,7 +213,11 @@ public class ReminderFunction extends BaseFunction<Void> {
                 }
                 for (ReminderItem reminderItem : reminderList.getItems()) {
                     Group group = bot.getGroup(reminderItem.getTargetGroup());
-                    timerCallReminderItem(reminderItem, bot, group, now);
+                    if (!checkCosPermission(bot, group)) {
+                        continue;
+                    }
+                    log.info("group" + group.getId() + " customRemider match");
+                    useReminderItem(reminderItem, bot, group, now);
                     if (reminderItem.getCount() == 0) {
                         reminderListRepository.delete(reminderList);
                     } else {

@@ -9,6 +9,7 @@ import hundun.miraifleet.framework.core.botlogic.BaseBotLogic;
 import net.mamoe.mirai.Bot;
 import net.mamoe.mirai.console.command.CommandSender;
 import net.mamoe.mirai.console.command.CompositeCommand;
+import net.mamoe.mirai.console.command.ConsoleCommandSender;
 import net.mamoe.mirai.console.command.MemberCommandSender;
 import net.mamoe.mirai.console.command.descriptor.CommandArgumentContext;
 import net.mamoe.mirai.console.permission.PermissionId;
@@ -20,7 +21,9 @@ import net.mamoe.mirai.console.permission.Permission;
 import net.mamoe.mirai.console.plugin.jvm.JvmPlugin;
 import net.mamoe.mirai.contact.Group;
 import net.mamoe.mirai.event.ListenerHost;
+import net.mamoe.mirai.event.events.GroupEvent;
 import net.mamoe.mirai.event.events.GroupMemberEvent;
+import net.mamoe.mirai.event.events.GroupMessageEvent;
 import net.mamoe.mirai.utils.MiraiLogger;
 
 /**
@@ -117,8 +120,17 @@ public abstract class BaseFunction<T> extends CompositeCommand implements Listen
         return PermissionService.testPermission(targetPermission, exactGroup);
     }
     
-    protected boolean checkCosPermission(GroupMemberEvent event) {
+    protected boolean checkCosPermission(GroupEvent event) {
         return checkCosPermission(event.getBot(), event.getGroup());
+    }
+    
+    protected boolean checkCosPermission(CommandSender sender) {
+        if (sender instanceof ConsoleCommandSender) {
+            return true;
+        } else if (sender instanceof MemberCommandSender) {
+            return checkCosPermission(sender.getBot(), ((MemberCommandSender) sender).getGroup());
+        }
+        return false;
     }
 
 }

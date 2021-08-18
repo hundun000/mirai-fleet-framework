@@ -40,7 +40,7 @@ public class RepeatFunction extends BaseFunction<RepeatFunction.SessionData> {
     
     @EventHandler
     public void onMessage(@NotNull GroupMessageEvent event) throws Exception {
-        if (!checkCosPermission(event.getBot(), event.getGroup())) {
+        if (!checkCosPermission(event)) {
             return; 
         }
         

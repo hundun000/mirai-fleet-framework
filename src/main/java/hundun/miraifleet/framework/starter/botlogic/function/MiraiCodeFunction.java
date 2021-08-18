@@ -43,6 +43,9 @@ public class MiraiCodeFunction extends BaseFunction<MiraiCodeFunction.SessionDat
     
     @SubCommand("解码")
     public void decode(CommandSender sender, String miraiCode) {
+        if (!checkCosPermission(sender)) {
+            return;
+        }
         plugin.getLogger().info("build MessageChain by miraiCode = " + miraiCode);
         MessageChain chain = MiraiCode.deserializeMiraiCode(miraiCode);
         sender.sendMessage(chain);
@@ -53,6 +56,9 @@ public class MiraiCodeFunction extends BaseFunction<MiraiCodeFunction.SessionDat
 
     @SubCommand("编码")
     public void encode(CommandSender sender) {
+        if (!checkCosPermission(sender)) {
+            return;
+        }
         SessionData sessionData = getOrCreateSessionData(sender);
         String miraiCode = sessionData.messageMiraiCode;
         sender.sendMessage(miraiCode);
@@ -61,6 +67,9 @@ public class MiraiCodeFunction extends BaseFunction<MiraiCodeFunction.SessionDat
     
     @EventHandler
     public void onMessage(@NotNull GroupMessageEvent event) throws Exception { 
+        if (!checkCosPermission(event)) {
+            return;
+        }
         SessionData sessionData = getOrCreateSessionData(event.getGroup());
         sessionData.messageMiraiCode = event.getMessage().serializeToMiraiCode();
     }

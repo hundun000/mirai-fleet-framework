@@ -89,7 +89,9 @@ public class WeiboFunction extends BaseFunction<WeiboFunction.SessionData> {
     
     @SubCommand("刷新微博用户数据")
     public void updateAndGetUserInfoCache(CommandSender sender) {
-
+        if (!checkCosPermission(sender)) {
+            return;
+        }
         Map<String, WeiboViewFormat> listenConfig = getListenConfigOrEmpty();
         listenConfig.forEach((uid, format) -> weiboService.updateAndGetUserInfoCache(uid, true));
         sender.sendMessage("已刷新");
@@ -106,7 +108,7 @@ public class WeiboFunction extends BaseFunction<WeiboFunction.SessionData> {
 
 
     
-    private void timerSendBlogToBot(WeiboCardView newCardCacheAndImage, Group group) {
+    private void sendBlogToBot(WeiboCardView newCardCacheAndImage, Group group) {
         
         if (newCardCacheAndImage == null) {
             group.sendMessage("现在还没有饼哦~");
@@ -144,11 +146,17 @@ public class WeiboFunction extends BaseFunction<WeiboFunction.SessionData> {
     
     @SubCommand("debugChangeTopCardCreateTime")
     public void debugChangeTopCardCreateTime(CommandSender sender, String uid) {
+        if (!checkCosPermission(sender)) {
+            return;
+        }
         weiboService.debugChangeTopCardCreateTime(uid);
     }
     
     @SubCommand("debugListListen")
     public void debugListListen(CommandSender sender) {
+        if (!checkCosPermission(sender)) {
+            return;
+        }
         Map<String, WeiboViewFormat> listenConfig = getListenConfigOrEmpty();
         sender.sendMessage(listenConfig.toString());
     }
@@ -197,7 +205,7 @@ public class WeiboFunction extends BaseFunction<WeiboFunction.SessionData> {
                             boolean isNew = cardCacheAndImage.getWeiboCardCache().getBlogCreatedDateTime().isAfter(sessionData.getTaskLastCheckTime());
                             if (isNew) {
                                 plugin.getLogger().info("uid = " + uid + " has new weibo: " + cardCacheAndImage.getWeiboCardCache().getBlogCreatedDateTime());
-                                timerSendBlogToBot(cardCacheAndImage, group);
+                                sendBlogToBot(cardCacheAndImage, group);
                             }
                         }
                         

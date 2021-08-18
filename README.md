@@ -28,60 +28,24 @@ Plugin持有一个对应的BotLogic。保持Plugin只处理和mirai对接工作�
 
 ### 配置化目标
 
-希望支持如下情况：在一个console里放入AmiyaPlugin和PrinzEugenPlugin，登录两个bot，两个bot均加在同一个群111111。配置后，在这同一个群里，AmiyaBot只回应AmiyaPlugin的Command/EventHandler/Timer，且使用AmiyaPlugin的配置；PrinzEugenBot同理。
+希望支持如下情况：在一个console里放入AmiyaPlugin和PrinzEugenPlugin，登录两个bot，两个bot均加在同一个群111111。配置后，在这同一个群里，AmiyaBot222222只回应AmiyaPlugin的Command/EventHandler/Timer，且使用AmiyaPlugin的配置；PrinzEugenBot333333同理。
 
-
-
-
-
-### Function
-
-对所有Function，
-
-1. 业务方法入口执行检查：pluginInstance.check(botId, functionName, contactId)
-
-> amiyaPluginInstance.check(amiyaBotId, weibo, arknightGroup) == true
-> amiyaPluginInstance.check(amiyaBotId, weibo, kancolleGroup) == false 
-> amiyaPluginInstance.check(amiyaBotId, weibo, testGroup) == true
-
-> prinzEugenPluginInstance.check(prinzEugenBotId, weibo, arknightGroup) == false
-> prinzEugenPluginInstance.check(prinzEugenBotId, weibo, kancolleGroup) == true
-> prinzEugenPluginInstance.check(prinzEugenBotId, weibo, testGroup) == true
-
-2. 业务逻辑内的上下文不关心请求的botId，最多关心contactId：sessionId = pluginInstance.function.sessionDataMap.get(contactId)
-
-> sessionData = amiyaPluginInstance.repeatFunction.sessionDataMap.get(arknightGroupId);
-> SessionData.lastMessage == theLastMessageInArknightGroup;
-> // kancolleGroup's request will not into amiyaPluginInstance.repeatFunction's main-business-code-area
-> sessionData = amiyaPluginInstance.repeatFunction.sessionDataMap.get(testGroupId);
-> SessionData.lastMessage == theLastMessageInTestGroup;
-
-> // arknightGroup's request will not into prinzEugenPluginInstance.repeatFunction's main-business-code-area
-> sessionData = prinzEugenPluginInstance.repeatFunction.sessionDataMap.get(kancolleGroupId);
-> sessionData.lastMessage == theLastMessageInKancolleGroup;
-> sessionData = prinzEugenPluginInstance.repeatFunction.sessionDataMap.get(testGroupId);
-> sessionData.lastMessage == theLastMessageInTestGroup;
-
-
-3. 业务逻辑内的配置不关心请求的botId和contactId
-
-> weiboConfig = amiyaPluginInstance.weiboFunction.configRepository.getSingleton();
-> weiboConfig.listen == [明日方舟, 朝陇山, 泰拉漫画]
-> // amiyaPluginInstance.weiboFunction.timer.sendNewWeibo() iterate all groups, but filtered in sendNewWeibo()'s entrance
-
-> weiboConfig = prinzEugenPluginInstance.weiboFunction.configRepository.getSingleton();
-> weiboConfig.listen == [舰C镇守府情报]
-> weiboConfig = prinzEugenPluginInstance.weiboFunction.configRepository.getSingleton();
-> // prinzEugenPluginInstance.weiboFunction.timer.sendNewWeibo() iterate all groups, but filtered in sendNewWeibo()'s entrance
-
-4. 加上权限管理
 ```
-// only adminUser has console permission
-/permission cancelall console * 
-/permission permit console u[adminUserId]
-
-// only testGroup and kancolleGroup has prinzeugenPlugin permission
-/permission cancelall hundun.fleet.example.prinzeugen * 
-/permission cancelall hundun.fleet.example.prinzeugen m[testGroupId].*
-/permission cancelall hundun.fleet.example.prinzeugen m[kancolleGroupId].*
+grantedPermissionMap: 
+  'hundun.fleet.example.prinzeugen:*': 
+    - 'm111111.*' #群111111可使用该插件指令
+  'hundun.fleet.example.prinzeugen.cos:INSTANCE': 
+    - m111111.333333 #Bot333333在群111111扮演该插件角色（欧根）
+  'hundun.fleet.example.amiya:*': 
+    - 'm111111.*' #群111111可使用该插件指令
+  'hundun.fleet.example.amiya.cos:INSTANCE': 
+    - m111111.222222 #Bot222222在群111111扮演该插件角色（阿米娅）
 ```
+
+
+0. 以一条AmiyaCommand为例。
+1. 由于command权限配置，群11111的群员确实有AmiyaCommand的权限。
+2. AmiyaCommand方法将会被调用两次，两次的CommandSender.getBot()分别是两个bot。
+3. 对于bot==PrinzEugen，由于cos权限配置，其跳出了AmiyaCommand方法。
+4. 对于bot==Amiya，由于cos权限配置，其可执行AmiyaCommand方法的后续代码。
+5. AmiyaCommand方法里执行resolveConfig，一定是在AmiyaPlugin的目录下。
