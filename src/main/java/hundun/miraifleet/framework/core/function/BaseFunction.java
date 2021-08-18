@@ -1,17 +1,26 @@
 package hundun.miraifleet.framework.core.function;
 
+import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Supplier;
 
 import hundun.miraifleet.framework.core.botlogic.BaseBotLogic;
+import net.mamoe.mirai.Bot;
 import net.mamoe.mirai.console.command.CommandSender;
 import net.mamoe.mirai.console.command.CompositeCommand;
 import net.mamoe.mirai.console.command.MemberCommandSender;
 import net.mamoe.mirai.console.command.descriptor.CommandArgumentContext;
+import net.mamoe.mirai.console.permission.PermissionId;
+import net.mamoe.mirai.console.permission.PermissionRegistryConflictException;
+import net.mamoe.mirai.console.permission.PermissionService;
+import net.mamoe.mirai.console.permission.AbstractPermitteeId.ExactGroup;
+import net.mamoe.mirai.console.permission.AbstractPermitteeId.ExactMember;
+import net.mamoe.mirai.console.permission.Permission;
 import net.mamoe.mirai.console.plugin.jvm.JvmPlugin;
 import net.mamoe.mirai.contact.Group;
 import net.mamoe.mirai.event.ListenerHost;
+import net.mamoe.mirai.utils.MiraiLogger;
 
 /**
  * @author hundun
@@ -22,28 +31,35 @@ public abstract class BaseFunction<T> extends CompositeCommand implements Listen
     
     private Supplier<T> sessionDataSupplier;
     protected final JvmPlugin plugin;
+    protected final MiraiLogger log;
     protected final BaseBotLogic baseBotLogic;
     protected final String functionName;
-    public final boolean asCompositeCommand;
-    public final boolean asListenerHost;
     
+    Map<String, T> sessionDataMap = new HashMap<>();
     
     public BaseFunction(
             BaseBotLogic baseBotLogic,
             JvmPlugin plugin,
             String characterName, 
             String functionName,
-            boolean asCompositeCommand,
-            boolean asListenerHost,
             Supplier<T> sessionDataSupplier
             ) {
-        super(plugin, functionName, new String[]{characterName}, "我是" + functionName, plugin.getParentPermission(), CommandArgumentContext.EMPTY);
+        super(plugin, characterName + functionName, new String[]{}, "我是" + functionName, plugin.getParentPermission(), CommandArgumentContext.EMPTY);
         this.sessionDataSupplier = sessionDataSupplier;
         this.plugin = plugin;
+        this.log = plugin.getLogger();
         this.baseBotLogic = baseBotLogic;
         this.functionName = functionName;
-        this.asCompositeCommand = asCompositeCommand;
-        this.asListenerHost = asListenerHost;
+    }
+    
+    protected T getOrCreateSessionData() {
+        String sessionId = "SINGLETON";
+        T sessionData = sessionDataMap.get(sessionId);
+        if (sessionData == null) {
+            sessionData = sessionDataSupplier.get();
+            sessionDataMap.put(sessionId, sessionData);
+        }
+        return sessionData;
     }
     
     protected T getOrCreateSessionData(Group group) {
@@ -71,14 +87,35 @@ public abstract class BaseFunction<T> extends CompositeCommand implements Listen
         return sessionData;
     }
 
-    Map<String, T> sessionDataMap = new HashMap<>();
+    
     
     public String getFunctionName() {
         return functionName;
     }
     
-    protected boolean checkEnable(CommandReplyReceiver subject) {
-        return baseBotLogic.isDisabledContact(this, subject.getContactId());
+
+    protected File resolveFunctionConfigFile(String jsonFileName) {
+        return plugin.resolveConfigFile(functionName + File.separator + jsonFileName);
     }
+    
+    protected File resolveFunctionCacheFileFolder() {
+        return plugin.resolveDataFile(functionName + File.separator + "caches");
+    }
+    
+    protected File resolveFunctionRepositoryFile(String jsonFileName) {
+        return plugin.resolveDataFile(functionName + File.separator + "repositories" + File.separator + jsonFileName);
+    }
+    
+    protected boolean checkCosPermission(Bot bot, Group group) {
+        Permission targetPermission = baseBotLogic.getCharacterCosPermission();
+        if (targetPermission == null) {
+            // may register fail
+            return false;
+        }
+        ExactMember exactGroup = new ExactMember(group.getId(), bot.getId());
+        return PermissionService.testPermission(targetPermission, exactGroup);
+    }
+    
+    
     
 }

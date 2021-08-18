@@ -11,5 +11,5 @@ import lombok.Data;
 
 @Data
 public class FunctionPrivateConfig {
-    Set<Long> disabledContactIds = new HashSet<>(0);
+    
 }

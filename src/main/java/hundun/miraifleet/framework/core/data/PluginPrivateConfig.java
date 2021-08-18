@@ -11,5 +11,5 @@ import lombok.Data;
 
 @Data
 public class PluginPrivateConfig {
-    Map<String, FunctionPrivateConfig> functionPrivateConfigs = new HashMap<>(0);
+    Map<String, BotPrivateConfig> botConfigs = new HashMap<>(0);
 }

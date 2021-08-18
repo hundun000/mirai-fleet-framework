@@ -35,15 +35,15 @@ public class FileOperationDelegate {
     }
 
     public File fromCacheOrDownloadOrFromLocal(String fileId, File rootCacheFolder, File localDataFolder) {
-        String subFolerName = "FileCache";
+        //String subFolerName = "FileCache";
         File file = fromCache(fileId, rootCacheFolder);
         if (file.exists()) {
-            log.debug("image from cache :{}", subFolerName + "---" + fileId);
+            log.debug("image from cache :{}", fileId);
         } else {
             InputStream inputStream = provider.downloadOrFromLocal(fileId, localDataFolder);
             
             if (inputStream == null) {
-                log.info("provider not support download, image null for: {}", subFolerName + "---" + fileId);
+                log.info("provider not support download, image null for: {}", fileId);
                 return null;
             }
             
@@ -68,9 +68,9 @@ public class FileOperationDelegate {
             }
 
             if (file != null && file.exists()) {
-                log.info("image from download and success :{}", subFolerName + "---" + fileId);
+                log.info("image from download and success :{}", fileId);
             } else {
-                log.warn("image from download but fail :{}", subFolerName + "---" + fileId);
+                log.warn("image from download but fail :{}", fileId);
             }
         }
         return file;

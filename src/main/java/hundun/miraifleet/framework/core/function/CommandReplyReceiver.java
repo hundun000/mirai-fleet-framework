@@ -3,6 +3,7 @@ package hundun.miraifleet.framework.core.function;
 import java.io.IOException;
 
 import net.mamoe.mirai.console.command.CommandSender;
+import net.mamoe.mirai.console.command.ConsoleCommandSender;
 import net.mamoe.mirai.console.command.MemberCommandSender;
 import net.mamoe.mirai.contact.Contact;
 import net.mamoe.mirai.contact.Group;
@@ -84,13 +85,37 @@ public class CommandReplyReceiver {
     
     public long getContactId() {
         if (commandSender != null) {
-            if (commandSender instanceof MemberCommandSender) {
-                return ((MemberCommandSender)commandSender).getGroup().getId();
-            }
+            return getContactId(commandSender);
         } else if (contact != null) {
             return contact.getId();
         }
         return -1;
+    }
+    
+    public long getBotId() {
+        if (commandSender != null) {
+            return getBotId(commandSender);
+        } else if (contact != null) {
+            return contact.getBot().getId();
+        }
+        return -1;
+    }
+    
+    public final static int CONSOLE_FAKE_CONTACT_ID = 0;
+    public final static int CONSOLE_FAKE_BOT_ID = 0;
+    
+    public static long getContactId(CommandSender commandSender) {
+        if (commandSender instanceof MemberCommandSender) {
+            return ((MemberCommandSender)commandSender).getGroup().getId();
+        }
+        if (commandSender instanceof ConsoleCommandSender) {
+            return CONSOLE_FAKE_CONTACT_ID;
+        }
+        return -1;
+    }
+
+    public static long getBotId(CommandSender sender) {
+        return sender.getBot() != null ? sender.getBot().getId() : CONSOLE_FAKE_BOT_ID;
     }
     
 }

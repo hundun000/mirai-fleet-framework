@@ -3,6 +3,8 @@ package hundun.miraifleet.framework.starter.botlogic.function;
 import org.jetbrains.annotations.NotNull;
 
 import hundun.miraifleet.framework.core.botlogic.BaseBotLogic;
+import hundun.miraifleet.framework.core.function.AsCommand;
+import hundun.miraifleet.framework.core.function.AsListenerHost;
 import hundun.miraifleet.framework.core.function.BaseFunction;
 import net.mamoe.mirai.console.command.CommandSender;
 import net.mamoe.mirai.console.plugin.jvm.JvmPlugin;
@@ -15,6 +17,8 @@ import net.mamoe.mirai.message.data.MessageChain;
  * @author hundun
  * Created on 2021/05/19
  */
+@AsCommand
+@AsListenerHost
 public class MiraiCodeFunction extends BaseFunction<MiraiCodeFunction.SessionData> {
         
     public MiraiCodeFunction(
@@ -27,8 +31,6 @@ public class MiraiCodeFunction extends BaseFunction<MiraiCodeFunction.SessionDat
             plugin,
             characterName,
             "MiraiCodeFunction",
-            true,
-            true,
             (() -> new MiraiCodeFunction.SessionData())
             );
     }
@@ -40,19 +42,21 @@ public class MiraiCodeFunction extends BaseFunction<MiraiCodeFunction.SessionDat
     }
     
     @SubCommand("解码")
-    public boolean decode(CommandSender sender, String miraiCode) {
+    public void decode(CommandSender sender, String miraiCode) {
         plugin.getLogger().info("build MessageChain by miraiCode = " + miraiCode);
         MessageChain chain = MiraiCode.deserializeMiraiCode(miraiCode);
         sender.sendMessage(chain);
-        return true;
+        return;
     }
     
+    
+
     @SubCommand("编码")
-    public boolean encode(CommandSender sender) {
+    public void encode(CommandSender sender) {
         SessionData sessionData = getOrCreateSessionData(sender);
         String miraiCode = sessionData.messageMiraiCode;
         sender.sendMessage(miraiCode);
-        return true;
+        return;
     }
     
     @EventHandler

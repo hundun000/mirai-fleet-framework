@@ -28,7 +28,7 @@ apply plugin: 'java-library'
 
 
 group = 'example'
-version = '0.0.1-SNAPSHOT'
+version = '0.0.2-SNAPSHOT'
 sourceCompatibility = '11'
 
 repositories {
@@ -59,6 +59,8 @@ dependencies {
     implementation 'io.github.openfeign:feign-jackson:11.1'
     implementation 'io.github.openfeign:feign-core:11.1'
     
+    implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.12.4'
+
     compileOnly 'org.projectlombok:lombok:1.18.4'
     annotationProcessor 'org.projectlombok:lombok:1.18.4'
 }

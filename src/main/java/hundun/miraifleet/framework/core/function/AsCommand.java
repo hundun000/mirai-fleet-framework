@@ -1,4 +1,4 @@
-package hundun.miraifleet.framework.core.helper;
+package hundun.miraifleet.framework.core.function;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -7,10 +7,10 @@ import java.lang.annotation.Target;
 
 /**
  * @author hundun
- * Created on 2021/08/11
+ * Created on 2021/08/13
  */
-@Retention(RetentionPolicy.SOURCE)
-@Target(ElementType.METHOD)
-public @interface FunctionEnableCheck {
+@Target(ElementType.TYPE)
+@Retention(RetentionPolicy.RUNTIME)
+public @interface AsCommand {
 
 }
