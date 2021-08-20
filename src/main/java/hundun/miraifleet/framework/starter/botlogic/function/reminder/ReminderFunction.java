@@ -203,7 +203,6 @@ public class ReminderFunction extends BaseFunction<Void> {
                         if (!checkCosPermission(bot, group)) {
                             continue;
                         }
-                        log.info("group" + group.getId() + " hourlyChat match");
                         useReminderItem(reminderItem, bot, group, now);
                     }
                 }
@@ -211,7 +210,6 @@ public class ReminderFunction extends BaseFunction<Void> {
         }
         
         private void customRemiderClockArrive(LocalDateTime now) {
-            log.info("characterClockArrive");
             Collection<Bot> bots = Bot.getInstances();
             for (Bot bot: bots) {
                 ReminderList reminderList = reminderListRepository.findById(Long.toString(bot.getId()));
@@ -223,7 +221,6 @@ public class ReminderFunction extends BaseFunction<Void> {
                     if (!checkCosPermission(bot, group)) {
                         continue;
                     }
-                    log.info("group" + group.getId() + " customRemider match");
                     useReminderItem(reminderItem, bot, group, now);
                     if (reminderItem.getCount() == 0) {
                         reminderListRepository.delete(reminderList);
