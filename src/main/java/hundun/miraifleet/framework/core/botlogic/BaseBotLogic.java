@@ -58,7 +58,7 @@ public abstract class BaseBotLogic {
             Class<?> clazz = function.getClass();
             if (clazz.isAnnotationPresent(AsCommand.class)) {
                 CommandManager.INSTANCE.registerCommand(function, false);
-                commands.append(function.toString()).append(",");
+                commands.append(clazz.getSimpleName()).append(",");
             }
             if (clazz.isAnnotationPresent(AsListenerHost.class)) {
                 eventChannel.registerListenerHost(function);

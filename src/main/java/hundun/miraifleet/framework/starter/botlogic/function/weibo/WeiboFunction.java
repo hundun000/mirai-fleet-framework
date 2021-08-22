@@ -242,33 +242,37 @@ public class WeiboFunction extends BaseFunction<WeiboFunction.SessionData> {
             plugin.getLogger().info("checkNewBlog Scheduled arrival");
             Collection<Bot> bots = Bot.getInstances();
             for (Bot bot: bots) {
-                for (Group group : bot.getGroups()) {
-                    log.info("checkGroupListen called");
-                    try {
-                        
-                        SessionData sessionData = getOrCreateSessionData();
+                
+                //log.info("checkGroupListen called");
+                try {
+                    
+                    SessionData sessionData = getOrCreateSessionData();
 
-                        Map<String, WeiboViewFormat> listenConfig = getListenConfigOrEmpty();
-                        for (Entry<String, WeiboViewFormat> entry : listenConfig.entrySet()) {
-                            String uid= entry.getKey();
-                            WeiboViewFormat format = entry.getValue();
+                    Map<String, WeiboViewFormat> listenConfig = getListenConfigOrEmpty();
+                    for (Entry<String, WeiboViewFormat> entry : listenConfig.entrySet()) {
+                        String uid= entry.getKey();
+                        WeiboViewFormat format = entry.getValue();
 
-                            File cacheFolder = resolveFunctionCacheFileFolder();
-                            WeiboCardView cardCacheAndImage = weiboService.updateAndGetTopBlog(uid, cacheFolder, format);
-                            if (cardCacheAndImage == null) {
-                                continue;
-                            }
-                            boolean isNew = cardCacheAndImage.getWeiboCardCache().getBlogCreatedDateTime().isAfter(sessionData.getTaskLastCheckTime());
-                            if (isNew) {
-                                plugin.getLogger().info("uid = " + uid + " has new weibo: " + cardCacheAndImage.getWeiboCardCache().getBlogCreatedDateTime());
+                        File cacheFolder = resolveFunctionCacheFileFolder();
+                        WeiboCardView cardCacheAndImage = weiboService.updateAndGetTopBlog(uid, cacheFolder, format);
+                        if (cardCacheAndImage == null) {
+                            continue;
+                        }
+                        boolean isNew = cardCacheAndImage.getWeiboCardCache().getBlogCreatedDateTime().isAfter(sessionData.getTaskLastCheckTime());
+                        if (isNew) {
+                            plugin.getLogger().info("uid = " + uid + " has new weibo: " + cardCacheAndImage.getWeiboCardCache().getBlogCreatedDateTime());
+                            for (Group group : bot.getGroups()) {
+                                if (!checkCosPermission(bot, group)) {
+                                    continue;
+                                }
                                 sendBlogToBot(cardCacheAndImage, new FunctionReplyReceiver(group, log));
                             }
                         }
-                        
-                        sessionData.setTaskLastCheckTime(LocalDateTime.now());
-                    } catch (Exception e) {
-                        log.error("checkNewBlog Scheduled error: ", e);
                     }
+                    
+                    sessionData.setTaskLastCheckTime(LocalDateTime.now());
+                } catch (Exception e) {
+                    log.error("checkNewBlog Scheduled error: ", e);
                 }
             }
             SessionData sessionData = getOrCreateSessionData();
