@@ -17,8 +17,8 @@ import hundun.miraifleet.framework.core.botlogic.BaseBotLogic;
 import hundun.miraifleet.framework.core.function.AsCommand;
 import hundun.miraifleet.framework.core.function.BaseFunction;
 import hundun.miraifleet.framework.core.function.FunctionReplyReceiver;
-import hundun.miraifleet.framework.core.helper.repository.PluginConfigRepository;
-import hundun.miraifleet.framework.core.helper.repository.PluginDataRepository;
+import hundun.miraifleet.framework.core.helper.repository.SingletonDocumentRepository;
+import hundun.miraifleet.framework.core.helper.repository.MapDocumentRepository;
 import hundun.miraifleet.framework.starter.botlogic.function.reminder.config.HourlyChatConfig;
 import hundun.miraifleet.framework.starter.botlogic.function.reminder.db.ReminderListRepository;
 import hundun.miraifleet.framework.starter.botlogic.function.reminder.domain.ReminderItem;
@@ -45,7 +45,7 @@ import net.mamoe.mirai.contact.Group;
 public class ReminderFunction extends BaseFunction<Void> {
 
     ReminderListRepository reminderListRepository;
-    private PluginConfigRepository<HourlyChatConfig> configRepository;
+    private SingletonDocumentRepository<HourlyChatConfig> configRepository;
     List<ReminderItem> hourlyChatReminderItems = new ArrayList<>();
     private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
     
@@ -63,7 +63,7 @@ public class ReminderFunction extends BaseFunction<Void> {
             null
             );
         this.reminderListRepository = new ReminderListRepository(plugin, resolveFunctionRepositoryFile("ReminderListRepository.json"));
-        this.configRepository = new PluginConfigRepository<>(plugin, resolveFunctionConfigFile("HourlyChatConfig.json"), HourlyChatConfig.class);
+        this.configRepository = new SingletonDocumentRepository<>(plugin, resolveFunctionConfigFile("HourlyChatConfig.json"), HourlyChatConfig.class);
         this.scheduler.scheduleAtFixedRate(new ReminderTimerTask(), 1, 1, TimeUnit.MINUTES);
         initHourlyChatConfigToReminderItems();
     }

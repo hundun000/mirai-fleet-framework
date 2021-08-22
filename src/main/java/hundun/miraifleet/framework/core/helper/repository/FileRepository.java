@@ -16,7 +16,7 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateTimeDeserializer;
 
-import hundun.miraifleet.framework.core.helper.repository.PluginDataRepository.IdSetter;
+import hundun.miraifleet.framework.core.helper.repository.MapDocumentRepository.IdSetter;
 import net.mamoe.mirai.console.plugin.jvm.JvmPlugin;
 
 /**

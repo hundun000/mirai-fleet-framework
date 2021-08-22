@@ -17,8 +17,8 @@ import hundun.miraifleet.framework.core.function.AsListenerHost;
 import hundun.miraifleet.framework.core.function.BaseFunction;
 import hundun.miraifleet.framework.core.function.FunctionReplyReceiver;
 import hundun.miraifleet.framework.core.helper.feign.FeignClientFactory;
-import hundun.miraifleet.framework.core.helper.repository.PluginConfigRepository;
-import hundun.miraifleet.framework.core.helper.repository.PluginDataRepository;
+import hundun.miraifleet.framework.core.helper.repository.SingletonDocumentRepository;
+import hundun.miraifleet.framework.core.helper.repository.MapDocumentRepository;
 import hundun.miraifleet.framework.starter.botlogic.function.weibo.WeiboService.WeiboCardView;
 import hundun.miraifleet.framework.starter.botlogic.function.weibo.config.WeiboConfig;
 import hundun.miraifleet.framework.starter.botlogic.function.weibo.config.WeiboViewFormat;
@@ -53,7 +53,7 @@ public class WeiboFunction extends BaseFunction<WeiboFunction.SessionData> {
     
     private final WeiboService weiboService;
     
-    private final PluginConfigRepository<WeiboConfig> configRepository;
+    private final SingletonDocumentRepository<WeiboConfig> configRepository;
     
     private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
     
@@ -77,7 +77,7 @@ public class WeiboFunction extends BaseFunction<WeiboFunction.SessionData> {
                 new WeiboUserInfoCacheRepository(plugin, resolveFunctionRepositoryFile("WeiboUserInfoCacheRepository.json")), 
                 new TopCardInfoRepository(plugin, resolveFunctionRepositoryFile("TopCardInfoRepository.json"))
                 );
-        this.configRepository = new PluginConfigRepository<>(plugin, resolveFunctionConfigFile("WeiboConfig.json"), WeiboConfig.class);
+        this.configRepository = new SingletonDocumentRepository<>(plugin, resolveFunctionConfigFile("WeiboConfig.json"), WeiboConfig.class);
         this.scheduler.scheduleAtFixedRate(new WeiboTask(), 1, 5, TimeUnit.MINUTES);
     }
     

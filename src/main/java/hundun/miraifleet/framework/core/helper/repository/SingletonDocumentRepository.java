@@ -25,11 +25,11 @@ import net.mamoe.mirai.console.plugin.jvm.JvmPlugin;
  * @author hundun
  * Created on 2021/08/12
  */
-public class PluginConfigRepository<V> extends FileRepository<V> {
+public class SingletonDocumentRepository<V> extends FileRepository<V> {
  
     private static final String THE_SINGLETON_KEY = "SINGLETON";
     
-    public PluginConfigRepository(
+    public SingletonDocumentRepository(
             JvmPlugin plugin, 
             File file, 
             Class<V> documentClazz

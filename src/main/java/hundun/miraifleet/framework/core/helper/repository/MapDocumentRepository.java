@@ -25,7 +25,7 @@ import net.mamoe.mirai.console.plugin.jvm.JvmPlugin;
  * @author hundun
  * Created on 2021/08/12
  */
-public class PluginDataRepository<V> extends FileRepository<V> {
+public class MapDocumentRepository<V> extends FileRepository<V> {
     
 
     final Function<V, String> idGetter;
@@ -37,7 +37,7 @@ public class PluginDataRepository<V> extends FileRepository<V> {
         void apply(V item, K id);
     }
     
-    public PluginDataRepository(
+    public MapDocumentRepository(
             JvmPlugin plugin, 
             File file, 
             Class<V> documentClazz,
@@ -150,7 +150,8 @@ public class PluginDataRepository<V> extends FileRepository<V> {
                 if (!notReachLimit) {
                     break;
                 }
-                boolean filterMatched = Objects.equals(filterFieldGetter.apply(entry.getValue()), filterValue);
+                boolean notFilter = filterFieldGetter == null || filterValue == null;
+                boolean filterMatched = notFilter || Objects.equals(filterFieldGetter.apply(entry.getValue()), filterValue);
                 if (filterMatched) {
                     result.add(entry.getValue());
                 }

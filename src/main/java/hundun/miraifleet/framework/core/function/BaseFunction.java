@@ -111,6 +111,9 @@ public abstract class BaseFunction<T> extends CompositeCommand implements Listen
         return plugin.resolveDataFile(functionName + File.separator + "repositories" + File.separator + jsonFileName);
     }
     
+    protected File resolveFunctionDataFile(String fileName) {
+        return plugin.resolveDataFile(functionName + File.separator + fileName);
+    }
     
     protected boolean checkCosPermission(NudgeEvent event) {
         if (event.getSubject() instanceof Group) {

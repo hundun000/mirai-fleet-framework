@@ -11,7 +11,7 @@ import hundun.miraifleet.framework.core.function.AsCommand;
 import hundun.miraifleet.framework.core.function.AsListenerHost;
 import hundun.miraifleet.framework.core.function.BaseFunction;
 import hundun.miraifleet.framework.core.function.FunctionReplyReceiver;
-import hundun.miraifleet.framework.core.helper.repository.PluginConfigRepository;
+import hundun.miraifleet.framework.core.helper.repository.SingletonDocumentRepository;
 import net.mamoe.mirai.console.command.CommandManager;
 import net.mamoe.mirai.console.permission.Permission;
 import net.mamoe.mirai.console.permission.PermissionId;
