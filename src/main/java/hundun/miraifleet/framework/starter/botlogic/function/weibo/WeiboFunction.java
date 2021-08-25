@@ -239,15 +239,13 @@ public class WeiboFunction extends BaseFunction<WeiboFunction.SessionData> {
         }
         
         private void timerClockArrive() {
-            plugin.getLogger().info("checkNewBlog Scheduled arrival");
+            SessionData sessionData = getOrCreateSessionData();
+            plugin.getLogger().info("checkNewBlog Scheduled arrival, LastCheckTime = " + sessionData.getTaskLastCheckTime().toString());
             Collection<Bot> bots = Bot.getInstances();
             for (Bot bot: bots) {
                 
                 //log.info("checkGroupListen called");
                 try {
-                    
-                    SessionData sessionData = getOrCreateSessionData();
-
                     Map<String, WeiboViewFormat> listenConfig = getListenConfigOrEmpty();
                     for (Entry<String, WeiboViewFormat> entry : listenConfig.entrySet()) {
                         String uid= entry.getKey();
@@ -269,13 +267,11 @@ public class WeiboFunction extends BaseFunction<WeiboFunction.SessionData> {
                             }
                         }
                     }
-                    
-                    sessionData.setTaskLastCheckTime(LocalDateTime.now());
                 } catch (Exception e) {
                     log.error("checkNewBlog Scheduled error: ", e);
                 }
             }
-            SessionData sessionData = getOrCreateSessionData();
+            
             sessionData.setTaskLastCheckTime(LocalDateTime.now());
 
             

@@ -24,6 +24,7 @@ import net.mamoe.mirai.event.ListenerHost;
 import net.mamoe.mirai.event.events.GroupEvent;
 import net.mamoe.mirai.event.events.GroupMemberEvent;
 import net.mamoe.mirai.event.events.GroupMessageEvent;
+import net.mamoe.mirai.event.events.NudgeEvent;
 import net.mamoe.mirai.utils.MiraiLogger;
 
 /**
@@ -108,6 +109,14 @@ public abstract class BaseFunction<T> extends CompositeCommand implements Listen
     
     protected File resolveFunctionRepositoryFile(String jsonFileName) {
         return plugin.resolveDataFile(functionName + File.separator + "repositories" + File.separator + jsonFileName);
+    }
+    
+    
+    protected boolean checkCosPermission(NudgeEvent event) {
+        if (event.getSubject() instanceof Group) {
+            return checkCosPermission(event.getBot(), (Group)event.getSubject());
+        }
+        return false;
     }
     
     protected boolean checkCosPermission(Bot bot, Group group) {
