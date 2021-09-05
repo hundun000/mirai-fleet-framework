@@ -34,6 +34,8 @@ import net.mamoe.mirai.utils.MiraiLogger;
  */
 public abstract class BaseFunction<T> extends CompositeCommand implements ListenerHost {
     
+    public static final String NOT_SUPPORT_RESOURCE_PLACEHOLDER = "[该终端不支持图片或音频]";
+    
     private Supplier<T> sessionDataSupplier;
     protected final JvmPlugin plugin;
     protected final MiraiLogger log;
@@ -57,33 +59,34 @@ public abstract class BaseFunction<T> extends CompositeCommand implements Listen
         this.functionName = functionName;
     }
     
+    protected String getSessionId(CommandSender sender) {
+        String sessionId;
+        if (sender instanceof MemberCommandSender) {
+            sessionId = String.valueOf(((MemberCommandSender)sender).getGroup().getId());
+        } else {
+            sessionId = "DEFAULT";
+        }
+        return sessionId;
+    }
+    
     protected T getOrCreateSessionData() {
         String sessionId = "SINGLETON";
-        T sessionData = sessionDataMap.get(sessionId);
-        if (sessionData == null) {
-            sessionData = sessionDataSupplier.get();
-            sessionDataMap.put(sessionId, sessionData);
-        }
-        return sessionData;
+        return getOrCreateSessionData(sessionId);
     }
     
     protected T getOrCreateSessionData(Group group) {
         String sessionId = String.valueOf(group.getId());
-        T sessionData = sessionDataMap.get(sessionId);
-        if (sessionData == null) {
-            sessionData = sessionDataSupplier.get();
-            sessionDataMap.put(sessionId, sessionData);
-        }
-        return sessionData;
+        return getOrCreateSessionData(sessionId);
     }
 
     
     protected T getOrCreateSessionData(CommandSender sender) {
-        String sessionId = "default";
-        if (sender instanceof MemberCommandSender) {
-            sessionId = String.valueOf(((MemberCommandSender)sender).getGroup().getId());
-        }
-        
+        String sessionId = getSessionId(sender);
+        return getOrCreateSessionData(sessionId);
+    }
+    
+    private T getOrCreateSessionData(String sessionId) {
+
         T sessionData = sessionDataMap.get(sessionId);
         if (sessionData == null) {
             sessionData = sessionDataSupplier.get();
@@ -98,7 +101,10 @@ public abstract class BaseFunction<T> extends CompositeCommand implements Listen
         return functionName;
     }
     
-
+    protected File resolveFunctionConfigRootFolder() {
+        return plugin.resolveConfigFile(functionName);
+    }
+    
     protected File resolveFunctionConfigFile(String jsonFileName) {
         return plugin.resolveConfigFile(functionName + File.separator + jsonFileName);
     }
@@ -113,6 +119,10 @@ public abstract class BaseFunction<T> extends CompositeCommand implements Listen
     
     protected File resolveFunctionDataFile(String fileName) {
         return plugin.resolveDataFile(functionName + File.separator + fileName);
+    }
+    
+    protected File resolveFunctionDataRootFolder() {
+        return plugin.resolveDataFile(functionName);
     }
     
     protected boolean checkCosPermission(NudgeEvent event) {

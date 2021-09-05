@@ -9,6 +9,7 @@ import java.util.Map;
 
 import lombok.Data;
 
+@Deprecated
 @Data
 public class PluginPrivateConfig {
     Map<String, BotPrivateConfig> botConfigs = new HashMap<>(0);

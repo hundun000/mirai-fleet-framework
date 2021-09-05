@@ -9,6 +9,7 @@ import java.util.Set;
 
 import lombok.Data;
 
+@Deprecated
 @Data
 public class FunctionPrivateConfig {
     

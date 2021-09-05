@@ -9,6 +9,7 @@ import lombok.Data;
  * @author hundun
  * Created on 2021/08/13
  */
+@Deprecated
 @Data
 public class BotPrivateConfig {
     Map<String, FunctionPrivateConfig> functionConfigs = new HashMap<>(1);
