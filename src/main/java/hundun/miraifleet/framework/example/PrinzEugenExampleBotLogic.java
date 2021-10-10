@@ -1,11 +1,8 @@
 package hundun.miraifleet.framework.example;
 
 import hundun.miraifleet.framework.core.botlogic.BaseBotLogic;
-import hundun.miraifleet.framework.starter.botlogic.function.MiraiCodeFunction;
-import hundun.miraifleet.framework.starter.botlogic.function.RepeatFunction;
 import hundun.miraifleet.framework.starter.botlogic.function.reminder.ReminderFunction;
 import hundun.miraifleet.framework.starter.botlogic.function.weibo.WeiboFunction;
-import net.mamoe.mirai.console.command.CommandManager;
 import net.mamoe.mirai.console.plugin.jvm.JvmPlugin;
 
 /**

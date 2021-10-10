@@ -4,14 +4,9 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
-import hundun.miraifleet.framework.core.data.BotPrivateConfig;
-import hundun.miraifleet.framework.core.data.FunctionPrivateConfig;
-import hundun.miraifleet.framework.core.data.PluginPrivateConfig;
 import hundun.miraifleet.framework.core.function.AsCommand;
 import hundun.miraifleet.framework.core.function.AsListenerHost;
 import hundun.miraifleet.framework.core.function.BaseFunction;
-import hundun.miraifleet.framework.core.function.FunctionReplyReceiver;
-import hundun.miraifleet.framework.core.helper.repository.SingletonDocumentRepository;
 import net.mamoe.mirai.console.command.CommandManager;
 import net.mamoe.mirai.console.permission.Permission;
 import net.mamoe.mirai.console.permission.PermissionId;
@@ -77,20 +72,10 @@ public abstract class BaseBotLogic {
     }
     
     
-    private PluginPrivateConfig defaultPluginPrivateConfig() {
-        PluginPrivateConfig pluginPrivateConfig = new PluginPrivateConfig();
-        pluginPrivateConfig.getBotConfigs().put("ALL-BOTS", defaultBotPrivateConfig());
-        return pluginPrivateConfig;
-    }
 
-    private BotPrivateConfig defaultBotPrivateConfig() {
-        BotPrivateConfig botPrivateConfig = new BotPrivateConfig();
-        botPrivateConfig.getFunctionConfigs().put("ALL-FUNCTIONS", new FunctionPrivateConfig());
-        return botPrivateConfig;
-    }
 
     public void onDisable() {
-        // TODO
+        // default do nothing
     }
     
 

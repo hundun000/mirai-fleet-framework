@@ -2,6 +2,7 @@ package hundun.miraifleet.framework.core.function;
 
 import java.io.IOException;
 
+
 import net.mamoe.mirai.console.command.CommandSender;
 import net.mamoe.mirai.console.command.ConsoleCommandSender;
 import net.mamoe.mirai.console.command.MemberCommandSender;
@@ -9,30 +10,49 @@ import net.mamoe.mirai.contact.Contact;
 import net.mamoe.mirai.contact.Group;
 import net.mamoe.mirai.message.data.Image;
 import net.mamoe.mirai.message.data.Message;
-import net.mamoe.mirai.message.data.Voice;
+import net.mamoe.mirai.message.data.OfflineAudio;
 import net.mamoe.mirai.utils.ExternalResource;
 import net.mamoe.mirai.utils.MiraiLogger;
 
 /**
- * 找不到一个同时代表CommandSender和Contact的类，姑且先用本类来实现
+ * 找不到一个同时代表CommandSender和Contact的类，姑且先用本类来实现。作为Function的操作对象（Reply对象），提供uploadImage、uploadVoice、sendMessage等Reply方式。
  */
 public class FunctionReplyReceiver {
+    private static final String CONSOLE_SENDER_DESCRIPTION = "CONSOLE_SENDER";
+    private static final String UNHANDLED_SENDER_DESCRIPTION = "UNHANDLED_SENDER";
     MiraiLogger miraiLogger;
     CommandSender commandSender;
     Contact contact;
-    
+
+    String senderDescription;
     
     public FunctionReplyReceiver(CommandSender commandSender, MiraiLogger miraiLogger) {
         this.commandSender = commandSender;
         this.miraiLogger = miraiLogger;
+        this.senderDescription = initSenderDescription();
     }
     
     public FunctionReplyReceiver(Contact contact, MiraiLogger miraiLogger) {
         this.contact = contact;
         this.miraiLogger = miraiLogger;
+        this.senderDescription = initSenderDescription();
     }
     
+    private String initSenderDescription() {
+        String description;
+        if (commandSender instanceof MemberCommandSender) {
+            description = ((MemberCommandSender)commandSender).getGroup().getId() + "." + ((MemberCommandSender)commandSender).getUser().getId();
+        } else if (commandSender instanceof ConsoleCommandSender) {
+            description = CONSOLE_SENDER_DESCRIPTION;
+        } else {
+            description = UNHANDLED_SENDER_DESCRIPTION;
+        }
+        return description;
+    }
     
+    /**
+     * do nothing null if not supported
+     */
     public void sendMessage(Message message) {
         if (commandSender != null) {
             commandSender.sendMessage(message);
@@ -41,6 +61,9 @@ public class FunctionReplyReceiver {
         }
     }
 
+    /**
+     * do nothing null if not supported
+     */
     public void sendMessage(String message) {
         if (commandSender != null) {
             commandSender.sendMessage(message);
@@ -49,6 +72,9 @@ public class FunctionReplyReceiver {
         }
     }
 
+    /**
+     * do nothing null if not supported
+     */
     public Image uploadImage(ExternalResource externalResource) {
         if (commandSender != null) {
             if (commandSender instanceof MemberCommandSender) {
@@ -60,6 +86,9 @@ public class FunctionReplyReceiver {
         return null;
     }
     
+    /**
+     * @return null if not supported
+     */
     public Image uploadImageAndClose(ExternalResource externalResource) {
         Image image = uploadImage(externalResource);
         try {
@@ -70,19 +99,23 @@ public class FunctionReplyReceiver {
         return image;
     }
     
-    public Voice uploadVoice(ExternalResource externalResource) {
+    /**
+     * @return null if not supported
+     */
+    public OfflineAudio uploadVoice(ExternalResource externalResource) {
         if (commandSender != null) {
             if (commandSender instanceof MemberCommandSender) {
-                return ((MemberCommandSender)commandSender).getGroup().uploadVoice(externalResource);
+                return ((MemberCommandSender)commandSender).getGroup().uploadAudio(externalResource);
             }
         } else if (contact != null) {
             if (contact instanceof Group) {
-                return ((Group)contact).uploadVoice(externalResource);
+                return ((Group)contact).uploadAudio(externalResource);
             }
         }
         return null;
     }
     
+    @Deprecated
     public long getContactId() {
         if (commandSender != null) {
             return getContactId(commandSender);
@@ -92,18 +125,19 @@ public class FunctionReplyReceiver {
         return -1;
     }
     
-    public long getBotId() {
+    public long getBotIdOrConsole() {
         if (commandSender != null) {
-            return getBotId(commandSender);
+            return getBotIdOrConsole(commandSender);
         } else if (contact != null) {
             return contact.getBot().getId();
         }
-        return -1;
+        throw new RuntimeException("bad FunctionReplyReceiver instance");
     }
     
     public final static int CONSOLE_FAKE_CONTACT_ID = 0;
     public final static int CONSOLE_FAKE_BOT_ID = 0;
     
+    @Deprecated
     public static long getContactId(CommandSender commandSender) {
         if (commandSender instanceof MemberCommandSender) {
             return ((MemberCommandSender)commandSender).getGroup().getId();
@@ -114,8 +148,12 @@ public class FunctionReplyReceiver {
         return -1;
     }
 
-    public static long getBotId(CommandSender sender) {
+    public static long getBotIdOrConsole(CommandSender sender) {
         return sender.getBot() != null ? sender.getBot().getId() : CONSOLE_FAKE_BOT_ID;
+    }
+    
+    public String getSenderDescription() {
+        return senderDescription;
     }
     
 }

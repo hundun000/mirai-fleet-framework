@@ -2,9 +2,7 @@ package hundun.miraifleet.framework.starter.botlogic.function.weibo;
 
 import java.io.File;
 import java.io.InputStream;
-import java.time.Instant;
 import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -17,7 +15,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import feign.Response;
-import hundun.miraifleet.framework.core.helper.feign.FeignClientFactory;
 import hundun.miraifleet.framework.core.helper.file.FileOperationDelegate;
 import hundun.miraifleet.framework.core.helper.file.IFileOperationDelegator;
 import hundun.miraifleet.framework.starter.botlogic.function.weibo.config.WeiboViewFormat;
@@ -31,7 +28,6 @@ import hundun.miraifleet.framework.starter.botlogic.function.weibo.feign.WeiboPi
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.ToString;
-import lombok.extern.slf4j.Slf4j;
 import net.mamoe.mirai.utils.MiraiLogger;
 
 /**

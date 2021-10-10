@@ -13,12 +13,9 @@ import java.util.concurrent.TimeUnit;
 
 import hundun.miraifleet.framework.core.botlogic.BaseBotLogic;
 import hundun.miraifleet.framework.core.function.AsCommand;
-import hundun.miraifleet.framework.core.function.AsListenerHost;
 import hundun.miraifleet.framework.core.function.BaseFunction;
 import hundun.miraifleet.framework.core.function.FunctionReplyReceiver;
-import hundun.miraifleet.framework.core.helper.feign.FeignClientFactory;
 import hundun.miraifleet.framework.core.helper.repository.SingletonDocumentRepository;
-import hundun.miraifleet.framework.core.helper.repository.MapDocumentRepository;
 import hundun.miraifleet.framework.starter.botlogic.function.weibo.WeiboService.WeiboCardView;
 import hundun.miraifleet.framework.starter.botlogic.function.weibo.config.WeiboConfig;
 import hundun.miraifleet.framework.starter.botlogic.function.weibo.config.WeiboViewFormat;
@@ -30,14 +27,9 @@ import hundun.miraifleet.framework.starter.botlogic.function.weibo.feign.WeiboAp
 import hundun.miraifleet.framework.starter.botlogic.function.weibo.feign.WeiboPictureApiFeignClient;
 import lombok.Data;
 import net.mamoe.mirai.Bot;
-import net.mamoe.mirai.console.command.CommandManager;
 import net.mamoe.mirai.console.command.CommandSender;
-import net.mamoe.mirai.console.command.MemberCommandSender;
-import net.mamoe.mirai.console.permission.PermissionService;
 import net.mamoe.mirai.console.plugin.jvm.JvmPlugin;
-import net.mamoe.mirai.contact.Contact;
 import net.mamoe.mirai.contact.Group;
-import net.mamoe.mirai.message.code.MiraiCode;
 import net.mamoe.mirai.message.data.Image;
 import net.mamoe.mirai.message.data.MessageChain;
 import net.mamoe.mirai.message.data.MessageUtils;

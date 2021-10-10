@@ -12,18 +12,13 @@ import net.mamoe.mirai.console.command.CompositeCommand;
 import net.mamoe.mirai.console.command.ConsoleCommandSender;
 import net.mamoe.mirai.console.command.MemberCommandSender;
 import net.mamoe.mirai.console.command.descriptor.CommandArgumentContext;
-import net.mamoe.mirai.console.permission.PermissionId;
-import net.mamoe.mirai.console.permission.PermissionRegistryConflictException;
 import net.mamoe.mirai.console.permission.PermissionService;
-import net.mamoe.mirai.console.permission.AbstractPermitteeId.ExactGroup;
 import net.mamoe.mirai.console.permission.AbstractPermitteeId.ExactMember;
 import net.mamoe.mirai.console.permission.Permission;
 import net.mamoe.mirai.console.plugin.jvm.JvmPlugin;
 import net.mamoe.mirai.contact.Group;
 import net.mamoe.mirai.event.ListenerHost;
 import net.mamoe.mirai.event.events.GroupEvent;
-import net.mamoe.mirai.event.events.GroupMemberEvent;
-import net.mamoe.mirai.event.events.GroupMessageEvent;
 import net.mamoe.mirai.event.events.NudgeEvent;
 import net.mamoe.mirai.utils.MiraiLogger;
 
