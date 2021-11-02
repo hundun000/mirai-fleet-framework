@@ -95,6 +95,7 @@ public class WeiboService implements IFileOperationDelegator {
             } catch (Exception e) {
                 log.error("updateBlogDetail error: ", e);
                 log.error("updateBlogDetail error cardCache = " + cardCache);
+                cardCache.setBlogTextDetail("（查询全文失败）\n" + cardCache.getBlogTextDetail());
             }
         }
 
@@ -284,12 +285,13 @@ public class WeiboService implements IFileOperationDelegator {
                     cardCache.setBlogId(mblog_id);
                     cardCache.setScreenName(userInfoCacahe.getScreenName());
                     cardCache.setPicsLargeUrls(picsLargeUrls);
-                    updateBlogDetail(cardCache);
+                    
                         
                     //WeiboCardCacheAndImage cardCacheAndImage = handleImageFormat(cardCache, cacheFolder, format);
 
                     boolean isNew = topCardInfo.getCardCache() == null || topCardInfo.getCardCache().getBlogCreatedDateTime().isBefore(cardCache.getBlogCreatedDateTime()) ;
                     if (isNew) {
+                        updateBlogDetail(cardCache);
                         topCardInfo.setCardCache(cardCache);
                         log.info("topCardInfo of " + uid + " updateTo card with CreatedDateTime = " + cardCache.getBlogCreatedDateTime().toString());
                     }
