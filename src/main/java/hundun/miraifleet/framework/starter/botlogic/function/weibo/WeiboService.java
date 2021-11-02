@@ -94,6 +94,7 @@ public class WeiboService implements IFileOperationDelegator {
                 log.debug("updateBlogDetail success: " + detailText.substring(0, Math.min(20, detailText.length())));
             } catch (Exception e) {
                 log.error("updateBlogDetail error: ", e);
+                log.error("updateBlogDetail error cardCache = " + cardCache);
             }
         }
 
@@ -160,6 +161,7 @@ public class WeiboService implements IFileOperationDelegator {
             
         } catch (Exception e) {
             log.error("updateContainerid :", e);
+            log.error("updateContainerid error uid = " + uid);
         }
         return null;
     }
@@ -299,6 +301,7 @@ public class WeiboService implements IFileOperationDelegator {
             }
         } catch (Exception e) {
             log.error("updateBlog: ", e);
+            log.error("updateBlog error uid = " + uid);
         }
         WeiboCardView cardCacheAndImage = handleImageFormat(topCardInfo.getCardCache(), cacheFolder, format);
         topCardInfoRepository.save(topCardInfo);
