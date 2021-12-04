@@ -6,8 +6,10 @@ import hundun.miraifleet.framework.core.botlogic.BaseBotLogic;
 import hundun.miraifleet.framework.core.function.AsListenerHost;
 import hundun.miraifleet.framework.core.function.BaseFunction;
 import net.mamoe.mirai.console.plugin.jvm.JvmPlugin;
+import net.mamoe.mirai.contact.Group;
 import net.mamoe.mirai.event.EventHandler;
 import net.mamoe.mirai.event.events.GroupMessageEvent;
+import net.mamoe.mirai.event.events.GroupMessagePostSendEvent;
 import net.mamoe.mirai.message.code.MiraiCode;
 
 /**
@@ -35,6 +37,19 @@ public class RepeatFunction extends BaseFunction<RepeatFunction.SessionData> {
             (() -> new RepeatFunction.SessionData())
             );
     }
+
+    @EventHandler
+    public void onMessage(@NotNull GroupMessagePostSendEvent event) throws Exception {
+        Group group = event.getTarget();
+        if (!checkCosPermission(event.getBot(), group)) {
+            return; 
+        }
+        
+        SessionData sessionData = getOrCreateSessionData(group);
+        sessionData.count = -1;
+        sessionData.messageMiraiCode = "";
+    }
+    
     
     @EventHandler
     public void onMessage(@NotNull GroupMessageEvent event) throws Exception {
@@ -52,10 +67,11 @@ public class RepeatFunction extends BaseFunction<RepeatFunction.SessionData> {
             sessionData.messageMiraiCode = newMessageMiraiCode;
         }
 
-        
         if (sessionData.count == 3) {
             event.getGroup().sendMessage(MiraiCode.deserializeMiraiCode(sessionData.messageMiraiCode));
         }
+
+        
     }
 
 }
