@@ -62,9 +62,8 @@ public abstract class FileRepository<V> {
                 file.getParentFile().mkdirs();
                 file.createNewFile();
             }
-            String jsonString = objectMapper.writeValueAsString(data);
+            byte[] strToBytes = objectMapper.writeValueAsBytes(data);
             FileOutputStream outputStream = new FileOutputStream(file);
-            byte[] strToBytes = jsonString.getBytes();
             outputStream.write(strToBytes);
             outputStream.close();
         } catch (Exception e) {
