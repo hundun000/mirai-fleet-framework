@@ -19,9 +19,18 @@ import net.mamoe.mirai.message.code.MiraiCode;
 @AsListenerHost
 public class RepeatFunction extends BaseFunction<RepeatFunction.SessionData> {
 
+    final static int COUNT_LIMIT = 3;
+    
     public static class SessionData {
+        public RepeatState state = RepeatState.CURRENT_MESSAGE_HANDLED;
         public String messageMiraiCode = "";
-        public int count = 0;
+        public int count = -1;
+    }
+    
+    public static enum RepeatState {
+        CURRENT_MESSAGE_HANDLED,
+        CURRENT_MESSAGE_COUNTING,
+        ;
     }
     
     public RepeatFunction(
@@ -46,8 +55,13 @@ public class RepeatFunction extends BaseFunction<RepeatFunction.SessionData> {
         }
         
         SessionData sessionData = getOrCreateSessionData(group);
-        sessionData.count = -1;
-        sessionData.messageMiraiCode = "";
+
+        
+        if (sessionData.state == RepeatState.CURRENT_MESSAGE_COUNTING) {
+            sessionData.state = RepeatState.CURRENT_MESSAGE_HANDLED;
+            sessionData.count = -1;
+            // keep same sessionData.messageMiraiCode
+        }
     }
     
     
@@ -60,16 +74,32 @@ public class RepeatFunction extends BaseFunction<RepeatFunction.SessionData> {
         SessionData sessionData = getOrCreateSessionData(event.getGroup());
         String newMessageMiraiCode = event.getMessage().serializeToMiraiCode();
         
-        if (sessionData.messageMiraiCode.equals(newMessageMiraiCode)) {
-            sessionData.count++;
-        } else {
-            sessionData.count = 1;
-            sessionData.messageMiraiCode = newMessageMiraiCode;
+        switch (sessionData.state) {
+            case CURRENT_MESSAGE_HANDLED:
+                if (!sessionData.messageMiraiCode.equals(newMessageMiraiCode)) {
+                    sessionData.state = RepeatState.CURRENT_MESSAGE_COUNTING;
+                    sessionData.messageMiraiCode = newMessageMiraiCode;
+                    sessionData.count = 1;
+                }
+                break;
+            case CURRENT_MESSAGE_COUNTING:
+                if (sessionData.messageMiraiCode.equals(newMessageMiraiCode)) {
+                    sessionData.count++;
+                    if (sessionData.count >= COUNT_LIMIT) {
+                        event.getGroup().sendMessage(MiraiCode.deserializeMiraiCode(sessionData.messageMiraiCode));
+                        sessionData.state = RepeatState.CURRENT_MESSAGE_HANDLED;
+                        sessionData.count = -1;
+                    }
+                } else {
+                    sessionData.messageMiraiCode = newMessageMiraiCode;
+                    sessionData.count = 1;
+                }
+                break;
+            default:
+                break;
         }
 
-        if (sessionData.count == 3) {
-            event.getGroup().sendMessage(MiraiCode.deserializeMiraiCode(sessionData.messageMiraiCode));
-        }
+
 
         
     }
