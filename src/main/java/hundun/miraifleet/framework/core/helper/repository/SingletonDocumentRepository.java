@@ -38,5 +38,15 @@ public class SingletonDocumentRepository<V> extends FileRepository<V> {
             writeLock.unlock();
         }
     }
+    
+    public void deleteSingleton() {
+        writeLock.lock();
+        try {
+            data.remove(THE_SINGLETON_KEY);
+            writeFile();
+        } finally {
+            writeLock.unlock();
+        }
+    }
 
 }

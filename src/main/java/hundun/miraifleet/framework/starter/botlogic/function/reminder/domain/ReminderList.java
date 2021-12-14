@@ -10,6 +10,5 @@ import lombok.Data;
  */
 @Data
 public class ReminderList {
-    String botId;
     List<ReminderItem> items;
 }

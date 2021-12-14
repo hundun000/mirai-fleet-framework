@@ -9,13 +9,13 @@ import net.mamoe.mirai.console.plugin.jvm.JvmPlugin;
  * @author hundun
  * Created on 2021/08/06
  */
-public class AmiyaExampleBotLogic extends BaseBotLogic {
+public class ExampleBotLogic extends BaseBotLogic {
 
     WeiboFunction weiboFunction;
     ReminderFunction reminderFunction;
     
-    public AmiyaExampleBotLogic(JvmPlugin plugin) {
-        super(plugin, "阿米娅");
+    public ExampleBotLogic(JvmPlugin plugin) {
+        super(plugin, "framework样例");
         
         weiboFunction = new WeiboFunction(this, plugin, characterName);
         functions.add(weiboFunction);

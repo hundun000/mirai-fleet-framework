@@ -8,13 +8,8 @@ import lombok.Data;
  */
 @Data
 public class ReminderItem {
-    String id;
-    int count;
-    long targetGroup;
+
+    Integer count;
     String text;
-    int monthCondition;
-    int dayOfMonthCondition;
-    int dayOfWeekCondition;
-    int hourCondition;
-    int minuteCondition;
+    String cron;
 }

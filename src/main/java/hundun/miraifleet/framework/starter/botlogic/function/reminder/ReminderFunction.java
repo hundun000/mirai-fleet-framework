@@ -1,19 +1,29 @@
 package hundun.miraifleet.framework.starter.botlogic.function.reminder;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collection;
+import java.util.Date;
+import java.util.GregorianCalendar;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.TimerTask;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+
+import org.quartz.CronExpression;
+
 import hundun.miraifleet.framework.core.botlogic.BaseBotLogic;
 import hundun.miraifleet.framework.core.function.AsCommand;
 import hundun.miraifleet.framework.core.function.BaseFunction;
 import hundun.miraifleet.framework.core.helper.repository.SingletonDocumentRepository;
 import hundun.miraifleet.framework.starter.botlogic.function.reminder.config.HourlyChatConfig;
-import hundun.miraifleet.framework.starter.botlogic.function.reminder.db.ReminderListRepository;
 import hundun.miraifleet.framework.starter.botlogic.function.reminder.domain.ReminderItem;
 import hundun.miraifleet.framework.starter.botlogic.function.reminder.domain.ReminderList;
 import net.mamoe.mirai.Bot;
@@ -29,11 +39,11 @@ import net.mamoe.mirai.contact.Group;
 @AsCommand
 public class ReminderFunction extends BaseFunction<Void> {
 
-    ReminderListRepository reminderListRepository;
+    SingletonDocumentRepository<ReminderList> reminderListRepository;
     private SingletonDocumentRepository<HourlyChatConfig> configRepository;
     List<ReminderItem> hourlyChatReminderItems = new ArrayList<>();
     private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
-    
+    private Map<String, CronExpression> cronExpressionCaches = new HashMap<>();
     
     public ReminderFunction(
             BaseBotLogic baseBotLogic,
@@ -47,7 +57,7 @@ public class ReminderFunction extends BaseFunction<Void> {
             "ReminderFunction",
             null
             );
-        this.reminderListRepository = new ReminderListRepository(plugin, resolveFunctionRepositoryFile("ReminderListRepository.json"));
+        this.reminderListRepository = new SingletonDocumentRepository<>(plugin, resolveFunctionRepositoryFile("ReminderListRepository.json"), ReminderList.class);
         this.configRepository = new SingletonDocumentRepository<>(plugin, resolveFunctionConfigFile("HourlyChatConfig.json"), HourlyChatConfig.class);
         this.scheduler.scheduleAtFixedRate(new ReminderTimerTask(), 1, 1, TimeUnit.MINUTES);
         initHourlyChatConfigToReminderItems();
@@ -59,26 +69,103 @@ public class ReminderFunction extends BaseFunction<Void> {
         if (!checkCosPermission(sender)) {
             return;
         }
-        HourlyChatConfig config = configRepository.findSingleton();
-        sender.sendMessage(config.toString());
+        sender.sendMessage(itemsToText(hourlyChatReminderItems));
+    }
+    
+    @SubCommand("查询提醒")
+    public void listReminderListChatConfig(CommandSender sender) {
+        if (!checkCosPermission(sender)) {
+            return;
+        }
+        ReminderList reminderList  = reminderListRepository.findSingleton();
+        sender.sendMessage(itemsToText(reminderList.getItems()));
+    }
+    
+    @SubCommand("删除提醒")
+    public void deleteReminderListChatConfig(CommandSender sender, int id) {
+        if (!checkCosPermission(sender)) {
+            return;
+        }
+        ReminderList reminderList  = reminderListRepository.findSingleton();
+        reminderList.getItems().remove(id);
+        sender.sendMessage("OK");
+    }
+    
+    @SubCommand("创建提醒")
+    public void insertReminderListChatConfig(CommandSender sender, 
+            String cornRawFomat,
+            String countRawFomat,
+            String text
+            ) {
+        if (!checkCosPermission(sender)) {
+            return;
+        }
+        Integer count;
+        if (countRawFomat.contains("无限")) {
+            count = null;
+        } else {
+            try {
+                countRawFomat = countRawFomat.replace("次", "");
+                count = Integer.valueOf(countRawFomat);
+            } catch (Exception e) {
+                sender.sendMessage("参数格式不正确：" + countRawFomat);
+                return;
+            }
+        }
+        ReminderList reminderList  = reminderListRepository.findSingleton();
+        reminderList.getItems().add(createByCommand(cornRawFomat, text, count));
+        reminderListRepository.saveSingleton(reminderList);
+        sender.sendMessage("OK");
+    }
+    
+    
+    private String itemsToText(List<ReminderItem> items) {
+        StringBuilder builder = new StringBuilder();
+        builder.append("items:\n");
+        for (int i = 0; i < items.size(); i++) {
+            ReminderItem item = items.get(i);
+            builder.append("id:").append(i).append("\t");
+            builder.append(item.toString()).append("\n");
+        }
+        return builder.toString();
     }
 
 
     @SubCommand("debugTimerCallReminderItem")
-    public void debugTimerCallReminderItem(CommandSender sender, int fakeHour) {
+    public void debugTimerCallReminderItem(CommandSender sender, String timeString) {
         if (!checkCosPermission(sender)) {
             return;
         }
-        LocalDateTime fakeNow = LocalDateTime.of(2000, 1, 1, fakeHour, 0);
-        for (ReminderItem reminderItem : hourlyChatReminderItems) {
-            Bot bot = sender.getBot();
-            useReminderItem(reminderItem, bot, sender.getSubject(), fakeNow);
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy年M月d日H时m分");
+        Date date;
+        try {
+            date = dateFormat.parse(timeString);
+        } catch (ParseException e) {
+            e.printStackTrace();
+            return;
         }
+        Calendar calendar = GregorianCalendar.getInstance();
+        calendar.setTime(date);
+        
+        logHourlyHeatBeat(calendar);
+        hourlyChatClockArrive(calendar);
+        customRemiderClockArrive(calendar);
     }
     
     
 
-
+    private CronExpression getCronExpression(String cronText) {
+        if (!cronExpressionCaches.containsKey(cronText)) {
+            try {
+                CronExpression cronExpression = new CronExpression(cronText);
+                cronExpressionCaches.put(cronText, cronExpression);
+            } catch (ParseException e) {
+                log.error(e);
+            }
+            
+        }
+        return cronExpressionCaches.get(cronText);
+    }
 
 
 
@@ -87,70 +174,68 @@ public class ReminderFunction extends BaseFunction<Void> {
         if (config != null) {
             config.getChatTexts().forEach((hour, text) -> {
                 int hourCondition = Integer.valueOf(hour);
-                ReminderItem item = createReminderItem(-1, -1, -1, hourCondition, 0, -1, text, -1, -1);
+                ReminderItem item = createByHourlyChatCron(hourCondition, text);
                 hourlyChatReminderItems.add(item);
             });
         }
     }
     
-    
-    
-    private void useReminderItem(ReminderItem reminderItem, Bot bot, Contact contact, LocalDateTime now) {
-        if (!checkTimeConditions(reminderItem, now)) {
-            return;
+    private boolean useReminderList(List<ReminderItem> items, Collection<Bot> bots, Calendar now) {
+        Iterator<ReminderItem> iterator = items.iterator();
+        boolean modified = false;
+        while (iterator.hasNext()) {
+            ReminderItem reminderItem = iterator.next();
+            if (!checkTimeConditions(reminderItem, now)) {
+                continue;
+            }
+            if (reminderItem.getCount() != null && reminderItem.getCount() == 0) {
+                continue;
+            } 
+            for (Bot bot: bots) {
+                useReminderItem(reminderItem, bot, now);
+            }
+            if (reminderItem.getCount() != null && reminderItem.getCount() > 0) {
+                reminderItem.setCount(reminderItem.getCount() - 1);
+                log.info("reminderItem(text=" + reminderItem.getText() + ") count cahnge to " + reminderItem.getCount());
+                modified = true;
+                if (reminderItem.getCount() == 0) {
+                    iterator.remove();
+                }
+            }
         }
-        contact.sendMessage(reminderItem.getText());
-        if (reminderItem.getCount() != -1) {
-            reminderItem.setCount(reminderItem.getCount() - 1);
-        }
+        return modified;
     }
     
-    private boolean checkTimeConditions(ReminderItem task, LocalDateTime now) {
-        
-        if (task.getMonthCondition() != -1 && task.getMonthCondition() != now.getMonth().getValue()) {
-            return false;
+    private void useReminderItem(ReminderItem reminderItem, Bot bot, Calendar now) {
+
+        for (Group group : bot.getGroups()) {
+            if (!checkCosPermission(bot, group)) {
+                continue;
+            }
+            group.sendMessage(reminderItem.getText());
         }
-        if (task.getDayOfMonthCondition() != -1 && task.getDayOfMonthCondition() != now.getDayOfMonth()) {
-            return false;
-        }
-        if (task.getDayOfWeekCondition() != -1 && task.getDayOfWeekCondition() != now.getDayOfWeek().getValue()) {
-            return false;
-        }
-        if (task.getHourCondition() != -1 && task.getHourCondition() != now.getHour()) {
-            return false;
-        }
-        if (task.getMinuteCondition() != -1 && task.getMinuteCondition() != now.getMinute()) {
-            return false;
-        }
-        return true;
+
+    }
+    
+    private boolean checkTimeConditions(ReminderItem task, Calendar now) {
+        Date date = now.getTime();
+        CronExpression cronExpression = getCronExpression(task.getCron());
+        return cronExpression != null && cronExpression.isSatisfiedBy(date);
     }
     
     
     
-    
-    
-    
-    private ReminderItem createReminderItem(
-            int monthCondition,
-            int dayOfMonthCondition,
-            int dayOfWeekCondition,
-            int hourCondition,
-            int minuteCondition,
-            int count,
+    private ReminderItem createByCommand(
+            String cornRawFomat,
             String text,
-            long targetGroup,
-            long botId
+            Integer count
             ) {
         ReminderItem task = new ReminderItem();
         try {
-            task.setMonthCondition(monthCondition);
-            task.setDayOfMonthCondition(dayOfMonthCondition);
-            task.setDayOfWeekCondition(dayOfWeekCondition);
-            task.setHourCondition(hourCondition);
-            task.setMinuteCondition(minuteCondition);
+            String cron = cornRawFomat.replace("~", " ");
+            task.setCron(cron);
             task.setCount(count);
             task.setText(text);
-            task.setTargetGroup(targetGroup);
         } catch (Exception e) {
             log.error("createReminderItem error:", e);
             return null;
@@ -159,13 +244,56 @@ public class ReminderFunction extends BaseFunction<Void> {
         return task;
     }
     
+    
+    private ReminderItem createByHourlyChatCron(
+            int hourCondition,
+            String text
+            ) {
+        ReminderItem task = new ReminderItem();
+        try {
+            String cron = "* 0 " + hourCondition + " * * ?";
+            task.setCron(cron);
+            task.setCount(null);
+            task.setText(text);
+        } catch (Exception e) {
+            log.error("createReminderItem error:", e);
+            return null;
+        }
+        
+        return task;
+    }
+    
+    private void logHourlyHeatBeat(Calendar now) {
+        if (now.get(Calendar.MINUTE) == 0) {
+            log.info("HourlyHeatBeat");
+        }
+    }
+    
+    private void hourlyChatClockArrive(Calendar now) {
+        Collection<Bot> bots = Bot.getInstances();
+        useReminderList(hourlyChatReminderItems, bots, now);
+    }
+    
+    private void customRemiderClockArrive(Calendar now) {
+        ReminderList reminderList = reminderListRepository.findSingleton();
+        if (reminderList == null) {
+            return;
+        }
+        Collection<Bot> bots = Bot.getInstances();
+        boolean modidied = useReminderList(reminderList.getItems(), bots, now);
+        if (modidied) {
+            reminderListRepository.saveSingleton(reminderList);
+        }
+        
+    }
+    
     private class ReminderTimerTask extends TimerTask {
 
         
         @Override
         public void run() {
             try {
-                LocalDateTime now = LocalDateTime.now();
+                Calendar now = GregorianCalendar.getInstance();
                 logHourlyHeatBeat(now);
                 hourlyChatClockArrive(now);
                 customRemiderClockArrive(now);
@@ -174,47 +302,7 @@ public class ReminderFunction extends BaseFunction<Void> {
             }
         }
         
-        private void logHourlyHeatBeat(LocalDateTime now) {
-            if (now.getMinute() == 0) {
-                log.info("HourlyHeatBeat");
-            }
-        }
         
-        private void hourlyChatClockArrive(LocalDateTime now) {
-            for (ReminderItem reminderItem : hourlyChatReminderItems) {
-                Collection<Bot> bots = Bot.getInstances();
-                for (Bot bot: bots) {
-                    for (Group group : bot.getGroups()) {
-                        if (!checkCosPermission(bot, group)) {
-                            continue;
-                        }
-                        useReminderItem(reminderItem, bot, group, now);
-                    }
-                }
-            }
-        }
-        
-        private void customRemiderClockArrive(LocalDateTime now) {
-            Collection<Bot> bots = Bot.getInstances();
-            for (Bot bot: bots) {
-                ReminderList reminderList = reminderListRepository.findById(Long.toString(bot.getId()));
-                if (reminderList == null) {
-                    continue;
-                }
-                for (ReminderItem reminderItem : reminderList.getItems()) {
-                    Group group = bot.getGroup(reminderItem.getTargetGroup());
-                    if (!checkCosPermission(bot, group)) {
-                        continue;
-                    }
-                    useReminderItem(reminderItem, bot, group, now);
-                    if (reminderItem.getCount() == 0) {
-                        reminderListRepository.delete(reminderList);
-                    } else {
-                        reminderListRepository.save(reminderList);
-                    }
-                }
-            }
-        }
         
     }
 

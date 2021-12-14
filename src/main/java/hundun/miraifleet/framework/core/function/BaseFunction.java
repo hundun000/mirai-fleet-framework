@@ -3,6 +3,7 @@ package hundun.miraifleet.framework.core.function;
 import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Supplier;
 
 import hundun.miraifleet.framework.core.botlogic.BaseBotLogic;
@@ -30,6 +31,14 @@ import net.mamoe.mirai.utils.MiraiLogger;
 public abstract class BaseFunction<T> extends CompositeCommand implements ListenerHost {
     
     public static final String NOT_SUPPORT_RESOURCE_PLACEHOLDER = "[该终端不支持图片或音频]";
+    /**
+     * 设计上该Function只使用唯一SESSIONID时，即使用该值。
+     */
+    public static final String SINGLETON_SESSIONID = "SINGLETON";
+    /**
+     * 调用者为console时对应的SESSIONID
+     */
+    public static final String CONSOLE_SESSIONID = "CONSOLE";
     
     private Supplier<T> sessionDataSupplier;
     protected final JvmPlugin plugin;
@@ -37,7 +46,7 @@ public abstract class BaseFunction<T> extends CompositeCommand implements Listen
     protected final BaseBotLogic baseBotLogic;
     protected final String functionName;
     
-    Map<String, T> sessionDataMap = new HashMap<>();
+    Map<String, T> sessionDataMap = new ConcurrentHashMap<>();
     
     public BaseFunction(
             BaseBotLogic baseBotLogic,
@@ -58,14 +67,16 @@ public abstract class BaseFunction<T> extends CompositeCommand implements Listen
         String sessionId;
         if (sender instanceof MemberCommandSender) {
             sessionId = String.valueOf(((MemberCommandSender)sender).getGroup().getId());
+        } if (sender instanceof ConsoleCommandSender) {
+            sessionId = CONSOLE_SESSIONID;
         } else {
-            sessionId = "DEFAULT";
+            sessionId = String.valueOf(sender.getUser().getId());
         }
         return sessionId;
     }
     
     protected T getOrCreateSessionData() {
-        String sessionId = "SINGLETON";
+        String sessionId = SINGLETON_SESSIONID;
         return getOrCreateSessionData(sessionId);
     }
     
@@ -130,7 +141,7 @@ public abstract class BaseFunction<T> extends CompositeCommand implements Listen
     protected boolean checkCosPermission(Bot bot, Group group) {
         Permission targetPermission = baseBotLogic.getCharacterCosPermission();
         if (targetPermission == null) {
-            // may register fail
+            log.warning("checkCosPermission false because Permission is null, maybe Permission register failed");
             return false;
         }
         ExactMember exactGroup = new ExactMember(group.getId(), bot.getId());

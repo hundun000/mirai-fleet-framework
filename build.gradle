@@ -28,8 +28,13 @@ apply plugin: 'maven'
 
 
 group = 'example'
-version = '0.0.2-SNAPSHOT'
+version = '0.0.1-SNAPSHOT'
 sourceCompatibility = '11'
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_11
+    targetCompatibility = JavaVersion.VERSION_11
+}
 
 repositories {
     //removeIf { it is MavenArtifactRepository && it.url.host == "dl.bintray.com" }
@@ -60,6 +65,8 @@ dependencies {
     implementation 'io.github.openfeign:feign-core:11.1'
     
     implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.12.4'
+    implementation group: 'org.quartz-scheduler', name: 'quartz', version: '2.3.2'
+    
 
     compileOnly 'org.projectlombok:lombok:1.18.4'
     annotationProcessor 'org.projectlombok:lombok:1.18.4'

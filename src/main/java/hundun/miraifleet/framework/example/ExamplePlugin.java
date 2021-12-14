@@ -6,15 +6,15 @@ import net.mamoe.mirai.console.extension.PluginComponentStorage;
 import net.mamoe.mirai.console.plugin.jvm.JavaPlugin;
 import net.mamoe.mirai.console.plugin.jvm.JvmPluginDescriptionBuilder;
 
-public class AmiyaExamplePlugin extends JavaPlugin {
+public class ExamplePlugin extends JavaPlugin {
 
-    public static final AmiyaExamplePlugin INSTANCE = new AmiyaExamplePlugin(); 
+    public static final ExamplePlugin INSTANCE = new ExamplePlugin(); 
     
-    AmiyaExampleBotLogic botLogic;
+    ExampleBotLogic botLogic;
     
-    public AmiyaExamplePlugin() {
+    public ExamplePlugin() {
         super(new JvmPluginDescriptionBuilder(
-                "hundun.fleet.example.amiya",
+                "hundun.fleet.framework-example",
                 "0.1.0"
             )
             .build());
@@ -27,7 +27,7 @@ public class AmiyaExamplePlugin extends JavaPlugin {
     
     @Override
     public void onEnable() {
-        botLogic = new AmiyaExampleBotLogic(this);
+        botLogic = new ExampleBotLogic(this);
         botLogic.onBotLogicEnable();
     }
     
