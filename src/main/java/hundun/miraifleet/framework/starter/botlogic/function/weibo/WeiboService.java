@@ -275,6 +275,7 @@ public class WeiboService implements IFileOperationDelegator {
                             picsLargeUrls.add(largUrl);
                         }
                     }
+                    boolean hasRetweet = mblog.has("retweeted_status");
                     
                     WeiboCardCache cardCache;
                     cardCache = new WeiboCardCache(); 
@@ -285,7 +286,7 @@ public class WeiboService implements IFileOperationDelegator {
                     cardCache.setBlogId(mblog_id);
                     cardCache.setScreenName(userInfoCacahe.getScreenName());
                     cardCache.setPicsLargeUrls(picsLargeUrls);
-                    
+                    cardCache.setRetweeted(hasRetweet);
                         
                     //WeiboCardCacheAndImage cardCacheAndImage = handleImageFormat(cardCache, cacheFolder, format);
 

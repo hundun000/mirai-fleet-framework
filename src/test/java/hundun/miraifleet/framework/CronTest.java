@@ -1,3 +1,4 @@
+package hundun.miraifleet.framework;
 import static org.junit.Assert.assertEquals;
 
 import java.text.ParseException;
@@ -9,7 +10,6 @@ import java.util.GregorianCalendar;
 import org.junit.Test;
 import org.quartz.CronExpression;
 
-import lombok.Data;
 
 /**
  * @author hundun

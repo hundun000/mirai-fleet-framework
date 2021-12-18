@@ -4,6 +4,7 @@ import java.io.File;
 import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.TimerTask;
 import java.util.Map.Entry;
@@ -18,6 +19,7 @@ import hundun.miraifleet.framework.core.function.FunctionReplyReceiver;
 import hundun.miraifleet.framework.core.helper.repository.SingletonDocumentRepository;
 import hundun.miraifleet.framework.starter.botlogic.function.weibo.WeiboService.WeiboCardView;
 import hundun.miraifleet.framework.starter.botlogic.function.weibo.config.WeiboConfig;
+import hundun.miraifleet.framework.starter.botlogic.function.weibo.config.WeiboPushFilterFlag;
 import hundun.miraifleet.framework.starter.botlogic.function.weibo.config.WeiboViewFormat;
 import hundun.miraifleet.framework.starter.botlogic.function.weibo.db.TopCardInfoRepository;
 import hundun.miraifleet.framework.starter.botlogic.function.weibo.db.WeiboUserInfoCacheRepository;
@@ -218,7 +220,14 @@ public class WeiboFunction extends BaseFunction<WeiboFunction.SessionData> {
         return weiboConfig.getListenConfig();
     }
     
-
+    private Map<String, List<WeiboPushFilterFlag>> getPushFilterFlagsOrEmpty() {
+        WeiboConfig weiboConfig = configRepository.findSingleton();
+        if (weiboConfig == null) {
+            plugin.getLogger().warning("weiboConfig is null");
+            return new HashMap<>(0);
+        }
+        return weiboConfig.getPushFilterFlags();
+    }
     
     
     
@@ -248,8 +257,10 @@ public class WeiboFunction extends BaseFunction<WeiboFunction.SessionData> {
                         if (cardCacheAndImage == null) {
                             continue;
                         }
+                        
+                        boolean filtered = checkPushFilter(cardCacheAndImage);
                         boolean isNew = cardCacheAndImage.getWeiboCardCache().getBlogCreatedDateTime().isAfter(sessionData.getTaskLastCheckTime());
-                        if (isNew) {
+                        if (isNew && !filtered) {
                             plugin.getLogger().info("uid = " + uid + " has new weibo: " + cardCacheAndImage.getWeiboCardCache().getBlogCreatedDateTime());
                             for (Group group : bot.getGroups()) {
                                 if (!checkCosPermission(bot, group)) {
@@ -270,5 +281,19 @@ public class WeiboFunction extends BaseFunction<WeiboFunction.SessionData> {
             
         }
 
+    }
+
+    public boolean checkPushFilter(WeiboCardView cardCacheAndImage) {
+        Map<String, List<WeiboPushFilterFlag>> pushFilter = getPushFilterFlagsOrEmpty();
+        List<WeiboPushFilterFlag> filterFlags = pushFilter.get(cardCacheAndImage.getWeiboCardCache().getUid());
+        if (filterFlags == null) {
+            return false;
+        }
+        if (filterFlags.contains(WeiboPushFilterFlag.RETWEET)) {
+            if (cardCacheAndImage.getWeiboCardCache().isRetweeted()) {
+                return true;
+            }
+        }
+        return false;
     }
 }

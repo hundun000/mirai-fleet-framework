@@ -3,6 +3,8 @@ package hundun.miraifleet.framework.starter.botlogic.function.weibo.domain;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import com.fasterxml.jackson.databind.JsonNode;
+
 import lombok.Data;
 
 /**
@@ -22,7 +24,7 @@ public class WeiboCardCache {
     LocalDateTime blogCreatedDateTime;
     String blogText;
     String blogTextDetail;
-    
+    boolean retweeted;
     
     List<String> picsLargeUrls;
     
