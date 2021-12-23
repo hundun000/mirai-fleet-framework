@@ -11,6 +11,9 @@ import java.util.Map.Entry;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Supplier;
+
+import org.jetbrains.annotations.Nullable;
 
 import hundun.miraifleet.framework.core.botlogic.BaseBotLogic;
 import hundun.miraifleet.framework.core.function.AsCommand;
@@ -51,10 +54,20 @@ public class WeiboFunction extends BaseFunction<WeiboFunction.SessionData> {
     
     private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
     
+    @Deprecated
     public WeiboFunction(
             BaseBotLogic baseBotLogic,
             JvmPlugin plugin,
             String characterName
+            ) {
+        this(baseBotLogic, plugin, characterName, null);
+    }
+    
+    public WeiboFunction(
+            BaseBotLogic baseBotLogic,
+            JvmPlugin plugin,
+            String characterName,
+            @Nullable Supplier<Map<String, WeiboConfig>> weiboConfigDefaultDataSupplier
             ) {
         super(
             baseBotLogic,
@@ -71,7 +84,12 @@ public class WeiboFunction extends BaseFunction<WeiboFunction.SessionData> {
                 new WeiboUserInfoCacheRepository(plugin, resolveFunctionRepositoryFile("WeiboUserInfoCacheRepository.json")), 
                 new TopCardInfoRepository(plugin, resolveFunctionRepositoryFile("TopCardInfoRepository.json"))
                 );
-        this.configRepository = new SingletonDocumentRepository<>(plugin, resolveFunctionConfigFile("WeiboConfig.json"), WeiboConfig.class);
+        this.configRepository = new SingletonDocumentRepository<>(
+                plugin, 
+                resolveFunctionConfigFile("WeiboConfig.json"), 
+                WeiboConfig.class,
+                weiboConfigDefaultDataSupplier
+                );
         this.scheduler.scheduleAtFixedRate(new WeiboTask(), 1, 5, TimeUnit.MINUTES);
     }
     

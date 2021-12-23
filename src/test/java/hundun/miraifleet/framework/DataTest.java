@@ -19,8 +19,9 @@ import net.mamoe.mirai.console.terminal.MiraiConsoleTerminalLoader;
  * Created on 2021/12/18
  */
 public class DataTest {
+
     
-    public static class MyData extends JAutoSavePluginData {
+/*    public static class MyData extends JAutoSavePluginData {
         public static final MyData INSTANCE = new MyData();
         public MyData() { super("testSaveName"); }
         public final Value<String> strMember = value("str");
@@ -45,6 +46,6 @@ public class DataTest {
         MockPlugin.INSTANCE.reloadPluginData(MyData.INSTANCE);
         assertEquals("str", MyData.INSTANCE.strMember.get());
         assertEquals(Integer.valueOf(1), MyData.INSTANCE.intMember.get());
-    }
+    }*/
 
 }

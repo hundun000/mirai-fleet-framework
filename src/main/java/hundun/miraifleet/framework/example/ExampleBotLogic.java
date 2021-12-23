@@ -17,10 +17,13 @@ public class ExampleBotLogic extends BaseBotLogic {
     public ExampleBotLogic(JvmPlugin plugin) {
         super(plugin, "framework样例");
         
-        weiboFunction = new WeiboFunction(this, plugin, characterName);
+        weiboFunction = new WeiboFunction(this, plugin, characterName, 
+                ExampleDefaultConfigAndData.weiboConfigDefaultDataSupplier());
         functions.add(weiboFunction);
         
-        reminderFunction = new ReminderFunction(this, plugin, characterName);
+        reminderFunction = new ReminderFunction(this, plugin, characterName, 
+                null, 
+                ExampleDefaultConfigAndData.hourlyChatConfigDefaultDataSupplier());
         functions.add(reminderFunction);
     }
     

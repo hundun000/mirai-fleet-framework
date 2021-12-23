@@ -4,7 +4,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 
 
@@ -12,6 +14,8 @@ import lombok.Data;
  * @author hundun
  * Created on 2021/08/12
  */
+@NoArgsConstructor
+@AllArgsConstructor
 @Data
 public class WeiboConfig {
     Map<String, WeiboViewFormat> listenConfig = new HashMap<>(0);

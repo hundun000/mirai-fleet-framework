@@ -3,10 +3,15 @@ package hundun.miraifleet.framework.core.helper.repository;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
+import java.util.function.Supplier;
+
+import org.jetbrains.annotations.Nullable;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
@@ -29,6 +34,8 @@ public abstract class FileRepository<V> {
     protected ConcurrentHashMap<String, V> data;
     private final Class<V> documentClazz;
 
+    @Nullable
+    final Supplier<Map<String, V>> defaultDataSupplier;
     
     @FunctionalInterface
     public interface IdSetter<V, K> {
@@ -38,12 +45,14 @@ public abstract class FileRepository<V> {
     public FileRepository(
             JvmPlugin plugin, 
             File file, 
-            Class<V> documentClazz
+            Class<V> documentClazz,
+            @Nullable Supplier<Map<String, V>> defaultDataSupplier
             ) {
         this.file = file;
         this.data = new ConcurrentHashMap<>();
         this.plugin = plugin;
         this.documentClazz = documentClazz;
+        this.defaultDataSupplier = defaultDataSupplier;
         JavaTimeModule javaTimeModule = new JavaTimeModule();
         // not work
         //javaTimeModule.addDeserializer(LocalDateTime.class, new LocalDateTimeDeserializer(DateTimeFormatter.ISO_DATE_TIME));
@@ -52,8 +61,9 @@ public abstract class FileRepository<V> {
                 .enable(SerializationFeature.INDENT_OUTPUT)
                 .disable(SerializationFeature.FAIL_ON_EMPTY_BEANS)
                 ;
-        readDataList();
+        readFile();
     }
+
     
     protected void writeFile() {
         try {
@@ -72,10 +82,14 @@ public abstract class FileRepository<V> {
     }
     
 
-    protected void readDataList() {
+    protected void readFile() {
         try {
             if (!file.exists()) {
                 plugin.getLogger().info("file of " + documentClazz.getSimpleName() + " not exists, will create empty.");
+                data.clear();
+                if (defaultDataSupplier != null) {
+                    data.putAll(defaultDataSupplier.get());
+                }
                 writeFile();
             }
             data = objectMapper.readValue(file, objectMapper.getTypeFactory().constructMapType(ConcurrentHashMap.class, String.class, documentClazz));

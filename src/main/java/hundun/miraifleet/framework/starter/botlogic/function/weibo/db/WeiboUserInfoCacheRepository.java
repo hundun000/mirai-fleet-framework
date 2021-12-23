@@ -22,7 +22,8 @@ public class WeiboUserInfoCacheRepository extends MapDocumentRepository<WeiboUse
                 file,
                 WeiboUserInfoCache.class, 
                 (item -> item.getUid()), 
-                ((item, id) -> item.setUid(id))
+                ((item, id) -> item.setUid(id)),
+                null
                 );
     }
 

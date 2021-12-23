@@ -23,7 +23,8 @@ public class TopCardInfoRepository extends MapDocumentRepository<TopCardInfo> {
                 file,
                 TopCardInfo.class, 
                 (item -> item.getUid()), 
-                ((item, id) -> item.setUid(id))
+                ((item, id) -> item.setUid(id)),
+                null
                 );
     }
 

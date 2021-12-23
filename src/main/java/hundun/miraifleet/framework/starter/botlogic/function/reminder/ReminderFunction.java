@@ -16,7 +16,9 @@ import java.util.TimerTask;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Supplier;
 
+import org.jetbrains.annotations.Nullable;
 import org.quartz.CronExpression;
 
 import hundun.miraifleet.framework.core.botlogic.BaseBotLogic;
@@ -26,6 +28,7 @@ import hundun.miraifleet.framework.core.helper.repository.SingletonDocumentRepos
 import hundun.miraifleet.framework.starter.botlogic.function.reminder.config.HourlyChatConfig;
 import hundun.miraifleet.framework.starter.botlogic.function.reminder.domain.ReminderItem;
 import hundun.miraifleet.framework.starter.botlogic.function.reminder.domain.ReminderList;
+import hundun.miraifleet.framework.starter.botlogic.function.weibo.config.WeiboConfig;
 import net.mamoe.mirai.Bot;
 import net.mamoe.mirai.console.command.CommandSender;
 import net.mamoe.mirai.console.plugin.jvm.JvmPlugin;
@@ -45,10 +48,21 @@ public class ReminderFunction extends BaseFunction<Void> {
     private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
     private Map<String, CronExpression> cronExpressionCaches = new HashMap<>();
     
+    @Deprecated
     public ReminderFunction(
             BaseBotLogic baseBotLogic,
             JvmPlugin plugin,
             String characterName
+            ) {
+        this(baseBotLogic, plugin, characterName, null, null);
+    }
+    
+    public ReminderFunction(
+            BaseBotLogic baseBotLogic,
+            JvmPlugin plugin,
+            String characterName,
+            @Nullable Supplier<Map<String, ReminderList>> reminderListDefaultDataSupplier,
+            @Nullable Supplier<Map<String, HourlyChatConfig>> hourlyChatConfigDefaultDataSupplier 
             ) {
         super(
             baseBotLogic,
@@ -57,8 +71,8 @@ public class ReminderFunction extends BaseFunction<Void> {
             "ReminderFunction",
             null
             );
-        this.reminderListRepository = new SingletonDocumentRepository<>(plugin, resolveFunctionRepositoryFile("ReminderListRepository.json"), ReminderList.class);
-        this.configRepository = new SingletonDocumentRepository<>(plugin, resolveFunctionConfigFile("HourlyChatConfig.json"), HourlyChatConfig.class);
+        this.reminderListRepository = new SingletonDocumentRepository<>(plugin, resolveFunctionRepositoryFile("ReminderListRepository.json"), ReminderList.class, reminderListDefaultDataSupplier);
+        this.configRepository = new SingletonDocumentRepository<>(plugin, resolveFunctionConfigFile("HourlyChatConfig.json"), HourlyChatConfig.class, hourlyChatConfigDefaultDataSupplier);
         this.scheduler.scheduleAtFixedRate(new ReminderTimerTask(), 1, 1, TimeUnit.MINUTES);
         initHourlyChatConfigToReminderItems();
     }

@@ -3,10 +3,17 @@ package hundun.miraifleet.framework.core.helper.repository;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
 import java.util.Map.Entry;
+import java.util.function.BiConsumer;
+import java.util.function.BiFunction;
 import java.util.function.Function;
+import java.util.function.Supplier;
+
+import org.jetbrains.annotations.Nullable;
+
 import net.mamoe.mirai.console.plugin.jvm.JvmPlugin;
 
 /**
@@ -17,12 +24,16 @@ public class MapDocumentRepository<V> extends FileRepository<V> {
     
 
     final Function<V, String> idGetter;
-    final IdSetter<V, String> idSetter;
-    //final Function<String, V> createFunction;
+    final BiConsumer<V, String> idSetter;
     
-    @FunctionalInterface
-    public interface IdSetter<V, K> {
-        void apply(V item, K id);
+    public MapDocumentRepository(
+            JvmPlugin plugin, 
+            File file, 
+            Class<V> documentClazz,
+            Function<V, String> idGetter,
+            BiConsumer<V, String> idSetter
+            ) {
+        this(plugin, file, documentClazz, idGetter, idSetter, null);
     }
     
     public MapDocumentRepository(
@@ -30,12 +41,12 @@ public class MapDocumentRepository<V> extends FileRepository<V> {
             File file, 
             Class<V> documentClazz,
             Function<V, String> idGetter,
-            IdSetter<V, String> idSetter
+            BiConsumer<V, String> idSetter,
+            @Nullable Supplier<Map<String, V>> defaultDataSupplier
             ) {
-        super(plugin, file, documentClazz);
+        super(plugin, file, documentClazz, defaultDataSupplier);
         this.idGetter = idGetter;
         this.idSetter = idSetter;
-
     }
 
     
@@ -87,7 +98,7 @@ public class MapDocumentRepository<V> extends FileRepository<V> {
         String id = idGetter.apply(item);
         if (id == null) {
             id = "AUTO_" + UUID.randomUUID().toString();
-            idSetter.apply(item, id);
+            idSetter.accept(item, id);
         }
         data.put(id, item);
         if (writeFile) {

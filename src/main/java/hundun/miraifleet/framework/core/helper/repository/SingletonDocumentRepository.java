@@ -1,6 +1,11 @@
 package hundun.miraifleet.framework.core.helper.repository;
 
 import java.io.File;
+import java.util.Map;
+import java.util.function.Supplier;
+
+import org.jetbrains.annotations.Nullable;
+
 import net.mamoe.mirai.console.plugin.jvm.JvmPlugin;
 
 /**
@@ -9,14 +14,23 @@ import net.mamoe.mirai.console.plugin.jvm.JvmPlugin;
  */
 public class SingletonDocumentRepository<V> extends FileRepository<V> {
  
-    private static final String THE_SINGLETON_KEY = "SINGLETON";
+    public static final String THE_SINGLETON_KEY = "SINGLETON";
     
     public SingletonDocumentRepository(
             JvmPlugin plugin, 
             File file, 
             Class<V> documentClazz
             ) {
-        super(plugin, file, documentClazz);
+        this(plugin, file, documentClazz, null);
+    }
+    
+    public SingletonDocumentRepository(
+            JvmPlugin plugin, 
+            File file, 
+            Class<V> documentClazz,
+            @Nullable Supplier<Map<String, V>> defaultDataSupplier
+            ) {
+        super(plugin, file, documentClazz, defaultDataSupplier);
     }
     
 
