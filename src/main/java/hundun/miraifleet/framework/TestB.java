@@ -1,5 +1,5 @@
 package hundun.miraifleet.framework;
 
-public class TestA {
+public class TestB {
 
 }
