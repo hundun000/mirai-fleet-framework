@@ -1,6 +1,7 @@
 package hundun.miraifleet.framework.starter.botlogic.function.weibo;
 
 import java.io.File;
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.HashMap;
@@ -140,6 +141,11 @@ public class WeiboFunction extends BaseFunction<WeiboFunction.SessionData> {
         for (File imageFile : newCardCacheAndImage.getImages()) {
             ExternalResource externalResource = ExternalResource.create(imageFile);
             Image image = group.uploadImage(externalResource);
+            try {
+                externalResource.close();
+            } catch (IOException e) {
+                log.error(e);
+            }
             if (image != null) {
                 chain = chain.plus(image);
             }

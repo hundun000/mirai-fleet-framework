@@ -20,7 +20,6 @@ import net.mamoe.mirai.console.terminal.MiraiConsoleTerminalLoader;
  */
 public class DataTest {
 
-    
 /*    public static class MyData extends JAutoSavePluginData {
         public static final MyData INSTANCE = new MyData();
         public MyData() { super("testSaveName"); }
@@ -35,12 +34,22 @@ public class DataTest {
         }
     }
 
+    MiraiConsoleImplementationTerminal consoleInstance;
+
     @Before
     public void beforeTest() {
-        MiraiConsoleTerminalLoader.INSTANCE.startAsDaemon(new MiraiConsoleImplementationTerminal());
+        consoleInstance = new MiraiConsoleImplementationTerminal();
+        MiraiConsoleTerminalLoader.INSTANCE.startAsDaemon(consoleInstance);
         PluginManager.INSTANCE.loadPlugin(MockPlugin.INSTANCE);
+        PluginManager.INSTANCE.enablePlugin(MockPlugin.INSTANCE);
     }
-    
+
+    @After
+    public void afterTest() {
+        // something likes MiraiConsole.cancel in java e.g.:
+        // consoleInstance.cancel
+    }
+
     @Test
     public void testData() {
         MockPlugin.INSTANCE.reloadPluginData(MyData.INSTANCE);
