@@ -16,6 +16,8 @@ import net.mamoe.mirai.console.plugin.jvm.JvmPlugin;
 import net.mamoe.mirai.event.Event;
 import net.mamoe.mirai.event.EventChannel;
 import net.mamoe.mirai.event.GlobalEventChannel;
+import net.mamoe.mirai.event.events.BotEvent;
+import net.mamoe.mirai.event.events.BotOnlineEvent;
 
 /**
  * @author hundun
@@ -44,7 +46,7 @@ public abstract class BaseBotLogic {
 
     public void onBotLogicEnable() {
         
-        EventChannel<Event> eventChannel = GlobalEventChannel.INSTANCE.parentScope(plugin);
+        //EventChannel<Event> eventChannel = GlobalEventChannel.INSTANCE.parentScope(plugin);
         
         StringBuilder commands = new StringBuilder();
         StringBuilder listenerHosts = new StringBuilder();
@@ -55,14 +57,23 @@ public abstract class BaseBotLogic {
                 CommandManager.INSTANCE.registerCommand(function, false);
                 commands.append(clazz.getSimpleName()).append(",");
             }
-            if (clazz.isAnnotationPresent(AsListenerHost.class)) {
-                eventChannel.registerListenerHost(function);
-                listenerHosts.append(clazz.getSimpleName()).append(",");
-            }
         }
-        
         plugin.getLogger().info("has commands: " + commands.toString());
-        plugin.getLogger().info("has listenerHosts: " + listenerHosts.toString());
+
+        GlobalEventChannel.INSTANCE.parentScope(plugin).subscribeAlways(BotOnlineEvent.class, event -> {
+            EventChannel<BotEvent> botChannel = event.getBot().getEventChannel();
+            for (BaseFunction<?> function : functions) {
+                Class<?> clazz = function.getClass();
+                if (clazz.isAnnotationPresent(AsListenerHost.class)) {
+                    botChannel.registerListenerHost(function);
+                    listenerHosts.append(clazz.getSimpleName()).append(",");
+                }
+            }
+            plugin.getLogger().info("bot: " + event.getBot().getId() + "online and gains listenerHosts: " + listenerHosts.toString());
+        });
+        
+
+
      
 //        if (configRepository.findSingleton() == null) {
 //            configRepository.saveSingleton(defaultPluginPrivateConfig());

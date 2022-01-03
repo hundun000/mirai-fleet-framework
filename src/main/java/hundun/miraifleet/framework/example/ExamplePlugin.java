@@ -33,6 +33,7 @@ public class ExamplePlugin extends JavaPlugin {
     
     @Override
     public void onDisable() {
+        
         botLogic.onDisable();
         // 由GC回收即可
         botLogic = null;
