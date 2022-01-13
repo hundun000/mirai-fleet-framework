@@ -29,6 +29,7 @@ import hundun.miraifleet.framework.starter.botlogic.function.reminder.config.Hou
 import hundun.miraifleet.framework.starter.botlogic.function.reminder.domain.ReminderItem;
 import hundun.miraifleet.framework.starter.botlogic.function.reminder.domain.ReminderList;
 import hundun.miraifleet.framework.starter.botlogic.function.weibo.config.WeiboConfig;
+import lombok.Setter;
 import net.mamoe.mirai.Bot;
 import net.mamoe.mirai.console.command.CommandSender;
 import net.mamoe.mirai.console.plugin.jvm.JvmPlugin;
@@ -47,6 +48,8 @@ public class ReminderFunction extends BaseFunction<Void> {
     List<ReminderItem> hourlyChatReminderItems = new ArrayList<>();
     private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
     private Map<String, CronExpression> cronExpressionCaches = new HashMap<>();
+    @Setter
+    private boolean logMinuteClockArrival = false;
     
     @Deprecated
     public ReminderFunction(
@@ -302,11 +305,12 @@ public class ReminderFunction extends BaseFunction<Void> {
     }
     
     private class ReminderTimerTask extends TimerTask {
-
-        
         @Override
         public void run() {
             try {
+                if (logMinuteClockArrival) {
+                    log.info("MinuteClockArrival, this = " + this.toString());
+                }
                 Calendar now = GregorianCalendar.getInstance();
                 logHourlyHeatBeat(now);
                 hourlyChatClockArrive(now);

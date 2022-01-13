@@ -49,7 +49,7 @@ public abstract class BaseBotLogic {
         //EventChannel<Event> eventChannel = GlobalEventChannel.INSTANCE.parentScope(plugin);
         
         StringBuilder commands = new StringBuilder();
-        StringBuilder listenerHosts = new StringBuilder();
+        
         
         for (BaseFunction<?> function : functions) {
             Class<?> clazz = function.getClass();
@@ -62,6 +62,7 @@ public abstract class BaseBotLogic {
 
         GlobalEventChannel.INSTANCE.parentScope(plugin).subscribeAlways(BotOnlineEvent.class, event -> {
             EventChannel<BotEvent> botChannel = event.getBot().getEventChannel();
+            StringBuilder listenerHosts = new StringBuilder();
             for (BaseFunction<?> function : functions) {
                 Class<?> clazz = function.getClass();
                 if (clazz.isAnnotationPresent(AsListenerHost.class)) {
@@ -69,9 +70,8 @@ public abstract class BaseBotLogic {
                     listenerHosts.append(clazz.getSimpleName()).append(",");
                 }
             }
-            plugin.getLogger().info("bot: " + event.getBot().getId() + "online and gains listenerHosts: " + listenerHosts.toString());
+            plugin.getLogger().info("bot: " + event.getBot().getId() + " online, EventChannel.hashCode = " + botChannel.hashCode() + ", and gains listenerHosts: " + listenerHosts.toString());
         });
-        
 
 
      
