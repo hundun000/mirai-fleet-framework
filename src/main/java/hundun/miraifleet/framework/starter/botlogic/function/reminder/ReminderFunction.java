@@ -309,7 +309,7 @@ public class ReminderFunction extends BaseFunction<Void> {
         public void run() {
             try {
                 if (logMinuteClockArrival) {
-                    log.info("MinuteClockArrival, this = " + this.toString());
+                    log.info("MinuteClockArrival, this = " + Integer.toHexString(hashCode()));
                 }
                 Calendar now = GregorianCalendar.getInstance();
                 logHourlyHeatBeat(now);

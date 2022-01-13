@@ -46,9 +46,10 @@ public abstract class BaseBotLogic {
 
     public void onBotLogicEnable() {
         
-        //EventChannel<Event> eventChannel = GlobalEventChannel.INSTANCE.parentScope(plugin);
+        EventChannel<Event> eventChannel = GlobalEventChannel.INSTANCE.parentScope(plugin);
         
         StringBuilder commands = new StringBuilder();
+        StringBuilder listenerHosts = new StringBuilder();
         
         
         for (BaseFunction<?> function : functions) {
@@ -57,22 +58,14 @@ public abstract class BaseBotLogic {
                 CommandManager.INSTANCE.registerCommand(function, false);
                 commands.append(clazz.getSimpleName()).append(",");
             }
-        }
-        plugin.getLogger().info("has commands: " + commands.toString());
-
-        GlobalEventChannel.INSTANCE.parentScope(plugin).subscribeAlways(BotOnlineEvent.class, event -> {
-            EventChannel<BotEvent> botChannel = event.getBot().getEventChannel();
-            StringBuilder listenerHosts = new StringBuilder();
-            for (BaseFunction<?> function : functions) {
-                Class<?> clazz = function.getClass();
-                if (clazz.isAnnotationPresent(AsListenerHost.class)) {
-                    botChannel.registerListenerHost(function);
-                    listenerHosts.append(clazz.getSimpleName()).append(",");
-                }
+            if (clazz.isAnnotationPresent(AsListenerHost.class)) {
+                eventChannel.registerListenerHost(function);
+                listenerHosts.append(clazz.getSimpleName()).append(",");
             }
-            plugin.getLogger().info("bot: " + event.getBot().getId() + " online, EventChannel.hashCode = " + botChannel.hashCode() + ", and gains listenerHosts: " + listenerHosts.toString());
-        });
+        }
 
+        plugin.getLogger().info("has commands: " + commands.toString());
+        plugin.getLogger().info("has listenerHosts: " + listenerHosts.toString());
 
      
 //        if (configRepository.findSingleton() == null) {
