@@ -12,12 +12,16 @@ import net.mamoe.mirai.console.command.CommandSender;
 import net.mamoe.mirai.console.command.CompositeCommand;
 import net.mamoe.mirai.console.command.ConsoleCommandSender;
 import net.mamoe.mirai.console.command.MemberCommandSender;
+import net.mamoe.mirai.console.command.UserCommandSender;
 import net.mamoe.mirai.console.command.descriptor.CommandArgumentContext;
 import net.mamoe.mirai.console.permission.PermissionService;
 import net.mamoe.mirai.console.permission.AbstractPermitteeId.ExactMember;
+import net.mamoe.mirai.console.permission.AbstractPermitteeId.ExactUser;
 import net.mamoe.mirai.console.permission.Permission;
 import net.mamoe.mirai.console.plugin.jvm.JvmPlugin;
+import net.mamoe.mirai.contact.Contact;
 import net.mamoe.mirai.contact.Group;
+import net.mamoe.mirai.contact.User;
 import net.mamoe.mirai.event.ListenerHost;
 import net.mamoe.mirai.event.events.GroupEvent;
 import net.mamoe.mirai.event.events.NudgeEvent;
@@ -148,6 +152,16 @@ public abstract class BaseFunction<T> extends CompositeCommand implements Listen
         return PermissionService.testPermission(targetPermission, exactGroup);
     }
     
+    protected boolean checkCosPermission(Bot bot, User user) {
+        Permission targetPermission = baseBotLogic.getCharacterCosPermission();
+        if (targetPermission == null) {
+            log.warning("checkCosPermission false because Permission is null, maybe Permission register failed");
+            return false;
+        }
+        ExactUser exact = new ExactUser(user.getId());
+        return PermissionService.testPermission(targetPermission, exact);
+    }
+    
     protected boolean checkCosPermission(GroupEvent event) {
         return checkCosPermission(event.getBot(), event.getGroup());
     }
@@ -157,6 +171,8 @@ public abstract class BaseFunction<T> extends CompositeCommand implements Listen
             return true;
         } else if (sender instanceof MemberCommandSender) {
             return checkCosPermission(sender.getBot(), ((MemberCommandSender) sender).getGroup());
+        } else if (sender instanceof UserCommandSender) {
+            return checkCosPermission(sender.getBot(), ((UserCommandSender) sender).getUser());
         }
         return false;
     }
