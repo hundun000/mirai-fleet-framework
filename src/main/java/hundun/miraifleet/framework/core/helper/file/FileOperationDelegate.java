@@ -14,23 +14,23 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Slf4j
 public class FileOperationDelegate {
-    
-    
+
+
 
     IFileOperationDelegator provider;
-    
+
     public FileOperationDelegate(IFileOperationDelegator kcwikiService) {
         this.provider = kcwikiService;
     }
 
 
-    
+
     private File fromCache(String fileId, File rootCacheFolder) {
         String subFolerName = "FileCache";
         String subFolerPathName = Utils.checkFolder(subFolerName, rootCacheFolder.getAbsolutePath());
         String saveFilePathName = subFolerPathName + File.separator + fileId;
         File file = new File(saveFilePathName);
-        
+
         return file;
     }
 
@@ -41,12 +41,12 @@ public class FileOperationDelegate {
             log.debug("image from cache :{}", fileId);
         } else {
             InputStream inputStream = provider.downloadOrFromLocal(fileId, localDataFolder);
-            
+
             if (inputStream == null) {
                 log.info("provider not support download, image null for: {}", fileId);
                 return null;
             }
-            
+
             try {
                 ByteArrayOutputStream out = new ByteArrayOutputStream();
                 byte[] buf = new byte[1024];
@@ -77,8 +77,8 @@ public class FileOperationDelegate {
     }
 
 
-    
-    
-    
-    
+
+
+
+
 }

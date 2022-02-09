@@ -18,20 +18,20 @@ import hundun.miraifleet.framework.starter.botlogic.function.weibo.config.WeiboV
  * Created on 2021/12/20
  */
 public class ExampleDefaultConfigAndData {
-    
+
     static <K, V> Map<K, V> mapOf(K k1, V v1) {
         Map<K, V> map = new HashMap<>(1);
         map.put(k1, v1);
         return map;
     }
-    
+
     static <K, V> Map<K, V> mapOf(K k1, V v1, K k2, V v2) {
         Map<K, V> map = new HashMap<>(2);
         map.put(k1, v1);
         map.put(k2, v2);
         return map;
     }
-    
+
     /**
      * 样例内容：<br>
      * 订阅：明日方舟Arknights（uid:6279793937），
@@ -42,13 +42,13 @@ public class ExampleDefaultConfigAndData {
     public static Supplier<Map<String, WeiboConfig>> weiboConfigDefaultDataSupplier() {
         return () -> {
             WeiboConfig weiboConfig = new WeiboConfig(
-                    mapOf("6279793937", WeiboViewFormat.ALL_IMAGE), 
+                    mapOf("6279793937", WeiboViewFormat.ALL_IMAGE),
                     mapOf("6279793937", Arrays.asList(WeiboPushFilterFlag.RETWEET)));
             Map<String, WeiboConfig> defaultData = mapOf(SingletonDocumentRepository.THE_SINGLETON_KEY, weiboConfig);
             return defaultData;
         };
     }
-    
+
     public static Supplier<Map<String, ReminderList>> reminderListDefaultDataSupplier() {
         return () -> {
             ReminderList reminderList = new ReminderList();
@@ -57,7 +57,7 @@ public class ExampleDefaultConfigAndData {
             return defaultData;
         };
     }
-    
+
     public static Supplier<Map<String, HourlyChatConfig>> hourlyChatConfigDefaultDataSupplier() {
         return () -> {
             HourlyChatConfig hourlyChatConfig = new HourlyChatConfig();

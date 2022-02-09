@@ -3,6 +3,7 @@ package hundun.miraifleet.framework.starter.botlogic.function.weibo.db;
 
 
 import java.io.File;
+
 import hundun.miraifleet.framework.core.helper.repository.MapDocumentRepository;
 import hundun.miraifleet.framework.starter.botlogic.function.weibo.domain.TopCardInfo;
 import net.mamoe.mirai.console.plugin.jvm.JvmPlugin;
@@ -19,10 +20,10 @@ public class TopCardInfoRepository extends MapDocumentRepository<TopCardInfo> {
             File file
             ) {
         super(
-                plugin, 
+                plugin,
                 file,
-                TopCardInfo.class, 
-                (item -> item.getUid()), 
+                TopCardInfo.class,
+                (item -> item.getUid()),
                 ((item, id) -> item.setUid(id)),
                 null
                 );

@@ -3,8 +3,6 @@ package hundun.miraifleet.framework.starter.botlogic.function.weibo.domain;
 import java.time.LocalDateTime;
 import java.util.List;
 
-import com.fasterxml.jackson.databind.JsonNode;
-
 import lombok.Data;
 
 /**
@@ -15,18 +13,18 @@ import lombok.Data;
 public class WeiboCardCache {
 
     String itemid;
-    
+
     String uid;
     String screenName;
-    
+
     String blogId;
 
     LocalDateTime blogCreatedDateTime;
     String blogText;
     String blogTextDetail;
     boolean retweeted;
-    
+
     List<String> picsLargeUrls;
-    
+
     //File singlePicture;
 }

@@ -5,6 +5,7 @@ import org.jetbrains.annotations.NotNull;
 import hundun.miraifleet.framework.core.botlogic.BaseBotLogic;
 import hundun.miraifleet.framework.core.function.AsListenerHost;
 import hundun.miraifleet.framework.core.function.BaseFunction;
+import net.mamoe.mirai.console.command.AbstractCommand;
 import net.mamoe.mirai.console.plugin.jvm.JvmPlugin;
 import net.mamoe.mirai.contact.Group;
 import net.mamoe.mirai.event.EventHandler;
@@ -20,19 +21,19 @@ import net.mamoe.mirai.message.code.MiraiCode;
 public class RepeatFunction extends BaseFunction<RepeatFunction.SessionData> {
 
     final static int COUNT_LIMIT = 3;
-    
+
     public static class SessionData {
         public RepeatState state = RepeatState.CURRENT_MESSAGE_HANDLED;
         public String messageMiraiCode = "";
         public int count = -1;
     }
-    
+
     public static enum RepeatState {
         CURRENT_MESSAGE_HANDLED,
         CURRENT_MESSAGE_COUNTING,
         ;
     }
-    
+
     public RepeatFunction(
             BaseBotLogic baseBotLogic,
             JvmPlugin plugin,
@@ -40,9 +41,10 @@ public class RepeatFunction extends BaseFunction<RepeatFunction.SessionData> {
             ) {
         super(
             baseBotLogic,
-            plugin, 
+            plugin,
             characterName,
             "RepeatFunction",
+            false,
             (() -> new RepeatFunction.SessionData())
             );
     }
@@ -51,29 +53,29 @@ public class RepeatFunction extends BaseFunction<RepeatFunction.SessionData> {
     public void onMessage(@NotNull GroupMessagePostSendEvent event) throws Exception {
         Group group = event.getTarget();
         if (!checkCosPermission(event.getBot(), group)) {
-            return; 
+            return;
         }
-        
+
         SessionData sessionData = getOrCreateSessionData(group);
 
-        
+
         if (sessionData.state == RepeatState.CURRENT_MESSAGE_COUNTING) {
             sessionData.state = RepeatState.CURRENT_MESSAGE_HANDLED;
             sessionData.count = -1;
             // keep same sessionData.messageMiraiCode
         }
     }
-    
-    
+
+
     @EventHandler
     public void onMessage(@NotNull GroupMessageEvent event) throws Exception {
         if (!checkCosPermission(event)) {
-            return; 
+            return;
         }
-        
+
         SessionData sessionData = getOrCreateSessionData(event.getGroup());
         String newMessageMiraiCode = event.getMessage().serializeToMiraiCode();
-        
+
         switch (sessionData.state) {
             case CURRENT_MESSAGE_HANDLED:
                 if (!sessionData.messageMiraiCode.equals(newMessageMiraiCode)) {
@@ -101,7 +103,12 @@ public class RepeatFunction extends BaseFunction<RepeatFunction.SessionData> {
 
 
 
-        
+
+    }
+
+    @Override
+    public AbstractCommand provideCommand() {
+        return null;
     }
 
 }

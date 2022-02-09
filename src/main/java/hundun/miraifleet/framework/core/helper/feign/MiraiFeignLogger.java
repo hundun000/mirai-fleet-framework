@@ -20,7 +20,7 @@ public class MiraiFeignLogger extends Logger {
         this.level = level;
         this.miraiLogger = miraiLogger;
     }
-    
+
     @Override
     protected void log(String configKey, String format, Object... args) {
         String message = "[" + tagName + "] " + String.format(methodTag(configKey) + format, args);
@@ -33,7 +33,7 @@ public class MiraiFeignLogger extends Logger {
                 miraiLogger.debug(message);
                 break;
             }
-        
+
     }
 
     @Override

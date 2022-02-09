@@ -8,8 +8,8 @@ import java.io.InputStream;
  * Created on 2021/05/06
  */
 public interface IFileOperationDelegator {
-    
+
     InputStream downloadOrFromLocal(String fileId, File localDataFolder);
-    
+
     File fromCacheOrDownloadOrFromLocal(String fileId, File rootCacheFolder, File localDataFolder);
 }

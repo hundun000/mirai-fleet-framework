@@ -14,12 +14,12 @@ import net.mamoe.mirai.utils.MiraiLogger;
  * Created on 2021/07/01
  */
 public class FeignClientFactory {
-    
+
     static Level feignLogLevel = Level.BASIC;
     static Encoder feignEncoder = new JacksonEncoder();
     static Decoder feignDecoder= new JacksonDecoder();
-    
-    
+
+
     public static <T> T get(Class<T> clazz, String url, MiraiLogger miraiLogger) {
         return Feign.builder()
                 .encoder(feignEncoder)

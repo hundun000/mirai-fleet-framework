@@ -4,11 +4,10 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.UUID;
-import java.util.Map.Entry;
 import java.util.function.BiConsumer;
-import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -21,24 +20,24 @@ import net.mamoe.mirai.console.plugin.jvm.JvmPlugin;
  * Created on 2021/08/12
  */
 public class MapDocumentRepository<V> extends FileRepository<V> {
-    
+
 
     final Function<V, String> idGetter;
     final BiConsumer<V, String> idSetter;
-    
+
     public MapDocumentRepository(
-            JvmPlugin plugin, 
-            File file, 
+            JvmPlugin plugin,
+            File file,
             Class<V> documentClazz,
             Function<V, String> idGetter,
             BiConsumer<V, String> idSetter
             ) {
         this(plugin, file, documentClazz, idGetter, idSetter, null);
     }
-    
+
     public MapDocumentRepository(
-            JvmPlugin plugin, 
-            File file, 
+            JvmPlugin plugin,
+            File file,
             Class<V> documentClazz,
             Function<V, String> idGetter,
             BiConsumer<V, String> idSetter,
@@ -49,7 +48,7 @@ public class MapDocumentRepository<V> extends FileRepository<V> {
         this.idSetter = idSetter;
     }
 
-    
+
     public void deleteAll() {
         writeLock.lock();
         try {
@@ -59,9 +58,9 @@ public class MapDocumentRepository<V> extends FileRepository<V> {
             writeLock.unlock();
         }
     }
-    
-    
-    
+
+
+
 
     public void delete(V item) {
         writeLock.lock();
@@ -74,7 +73,7 @@ public class MapDocumentRepository<V> extends FileRepository<V> {
             writeLock.unlock();
         }
     }
-    
+
     public void deleteById(String id) {
         writeLock.lock();
         try {
@@ -93,7 +92,7 @@ public class MapDocumentRepository<V> extends FileRepository<V> {
             writeLock.unlock();
         }
     }
-    
+
     protected void saveAndWriteFile(V item, boolean writeFile) {
         String id = idGetter.apply(item);
         if (id == null) {
@@ -104,10 +103,10 @@ public class MapDocumentRepository<V> extends FileRepository<V> {
         if (writeFile) {
             writeFile();
         }
-        
+
     }
 
-    
+
     public void saveAll(List<V> items) {
         writeLock.lock();
         try {
@@ -120,8 +119,8 @@ public class MapDocumentRepository<V> extends FileRepository<V> {
         }
     }
 
-    
-    
+
+
     public V findById(String id) {
         readLock.lock();
         try {
@@ -130,7 +129,7 @@ public class MapDocumentRepository<V> extends FileRepository<V> {
             readLock.unlock();
         }
     }
-    
+
     public List<V> findAll() {
         readLock.lock();
         try {
@@ -160,7 +159,7 @@ public class MapDocumentRepository<V> extends FileRepository<V> {
             readLock.unlock();
         }
     }
-    
+
     public <T_FIELD> V findOneByFilter(Function<V, T_FIELD> filterFieldGetter, T_FIELD filterValue) {
         readLock.lock();
         try {
@@ -168,9 +167,9 @@ public class MapDocumentRepository<V> extends FileRepository<V> {
             return result.isEmpty() ? null : result.get(0);
         } finally {
             readLock.unlock();
-        }    
+        }
     }
-    
+
     public boolean existsById(String id) {
         readLock.lock();
         try {

@@ -19,16 +19,16 @@ public class Utils {
         if (! directory.exists()){
             directory.mkdir();
         }
-        
+
         String subFolerPathName = parentFoler + File.separator + subFolerName;
         File subFoler = new File(subFolerPathName);
         if (!subFoler.exists()){
             subFoler.mkdir();
         }
-        
+
         return subFolerPathName;
     }
-    
+
     static ObjectMapper objectMapper = new ObjectMapper();
 
     public static <T> T parseByObjectMapper(File settingsFile, Class<T> clazz, MiraiLogger miraiLogger) {
@@ -41,7 +41,7 @@ public class Utils {
         }
         return result;
     }
-    
 
-    
+
+
 }

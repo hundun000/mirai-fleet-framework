@@ -8,10 +8,10 @@ import net.mamoe.mirai.console.plugin.jvm.JvmPluginDescriptionBuilder;
 
 public class ExamplePlugin extends JavaPlugin {
 
-    public static final ExamplePlugin INSTANCE = new ExamplePlugin(); 
-    
+    public static final ExamplePlugin INSTANCE = new ExamplePlugin();
+
     ExampleBotLogic botLogic;
-    
+
     public ExamplePlugin() {
         super(new JvmPluginDescriptionBuilder(
                 "hundun.fleet.framework-example",
@@ -19,21 +19,21 @@ public class ExamplePlugin extends JavaPlugin {
             )
             .build());
     }
-    
+
     @Override
     public void onLoad(@NotNull PluginComponentStorage $this$onLoad) {
-        
+
     }
-    
+
     @Override
     public void onEnable() {
         botLogic = new ExampleBotLogic(this);
         botLogic.onBotLogicEnable();
     }
-    
+
     @Override
     public void onDisable() {
-        
+
         botLogic.onDisable();
         // 由GC回收即可
         botLogic = null;

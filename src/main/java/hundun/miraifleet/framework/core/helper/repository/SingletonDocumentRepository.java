@@ -13,26 +13,26 @@ import net.mamoe.mirai.console.plugin.jvm.JvmPlugin;
  * Created on 2021/08/12
  */
 public class SingletonDocumentRepository<V> extends FileRepository<V> {
- 
+
     public static final String THE_SINGLETON_KEY = "SINGLETON";
-    
+
     public SingletonDocumentRepository(
-            JvmPlugin plugin, 
-            File file, 
+            JvmPlugin plugin,
+            File file,
             Class<V> documentClazz
             ) {
         this(plugin, file, documentClazz, null);
     }
-    
+
     public SingletonDocumentRepository(
-            JvmPlugin plugin, 
-            File file, 
+            JvmPlugin plugin,
+            File file,
             Class<V> documentClazz,
             @Nullable Supplier<Map<String, V>> defaultDataSupplier
             ) {
         super(plugin, file, documentClazz, defaultDataSupplier);
     }
-    
+
 
     public V findSingleton() {
         readLock.lock();
@@ -42,7 +42,7 @@ public class SingletonDocumentRepository<V> extends FileRepository<V> {
             readLock.unlock();
         }
     }
-    
+
     public void saveSingleton(V item) {
         writeLock.lock();
         try {
@@ -52,7 +52,7 @@ public class SingletonDocumentRepository<V> extends FileRepository<V> {
             writeLock.unlock();
         }
     }
-    
+
     public void deleteSingleton() {
         writeLock.lock();
         try {

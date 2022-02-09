@@ -9,6 +9,6 @@ import lombok.Data;
 @Data
 public class TopCardInfo {
     String uid;
-    
+
     WeiboCardCache cardCache;
 }

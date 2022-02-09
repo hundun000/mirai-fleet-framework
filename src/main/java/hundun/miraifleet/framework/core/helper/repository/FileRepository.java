@@ -15,10 +15,11 @@ import org.jetbrains.annotations.Nullable;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+
 import net.mamoe.mirai.console.plugin.jvm.JvmPlugin;
 
 /**
- * 
+ *
  * @author hundun
  * Created on 2021/08/12
  */
@@ -27,24 +28,24 @@ public abstract class FileRepository<V> {
     protected final Lock readLock = rwlock.readLock();
     protected final Lock writeLock = rwlock.writeLock();
     private final ObjectMapper objectMapper;
-    
+
     private File file;
     protected final JvmPlugin plugin;
-    
+
     protected ConcurrentHashMap<String, V> data;
     private final Class<V> documentClazz;
 
     @Nullable
     final Supplier<Map<String, V>> defaultDataSupplier;
-    
+
     @FunctionalInterface
     public interface IdSetter<V, K> {
         void apply(V item, K id);
     }
-    
+
     public FileRepository(
-            JvmPlugin plugin, 
-            File file, 
+            JvmPlugin plugin,
+            File file,
             Class<V> documentClazz,
             @Nullable Supplier<Map<String, V>> defaultDataSupplier
             ) {
@@ -64,7 +65,7 @@ public abstract class FileRepository<V> {
         readFile();
     }
 
-    
+
     protected void writeFile() {
         try {
             if (!file.exists()) {
@@ -80,7 +81,7 @@ public abstract class FileRepository<V> {
             plugin.getLogger().error(e);
         }
     }
-    
+
 
     protected void readFile() {
         try {
