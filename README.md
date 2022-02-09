@@ -43,9 +43,16 @@ grantedPermissionMap:
 ```
 
 
-0. 以一条AmiyaCommand为例。
+0. 以群11111发出一条AmiyaCommand为例。
 1. 由于command权限配置，群11111的群员确实有AmiyaCommand的权限。
 2. AmiyaCommand方法将会被调用两次，两次的CommandSender.getBot()分别是两个bot。
 3. 对于bot==PrinzEugen，由于cos权限配置，其跳出了AmiyaCommand方法。
 4. 对于bot==Amiya，由于cos权限配置，其可执行AmiyaCommand方法的后续代码。
 5. AmiyaCommand方法里执行resolveConfig，一定是在AmiyaPlugin的目录下。
+
+
+0. 以Console发出一条AmiyaCommand为例。
+1. 由于command权限配置，console确实有AmiyaCommand的权限。
+2. AmiyaCommand方法将会被调用1次，其中CommandSender instanceOf ConsoleCommandSender。
+3. 对于ConsoleCommandSender，由于cos权限配置，其可执行AmiyaCommand方法的后续代码。
+4. AmiyaCommand方法里执行resolveConfig，一定是在AmiyaPlugin的目录下。

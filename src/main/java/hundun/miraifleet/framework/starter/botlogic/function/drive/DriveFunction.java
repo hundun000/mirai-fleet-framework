@@ -42,13 +42,22 @@ public class DriveFunction extends BaseFunction<Void>{
     long currentGroupId;
     long currentBotId;
     
-    @SubCommand("设置驾驶目标")
+    @SubCommand("设置驾驶状态")
     public void setTargetGroup(CommandSender sender, Long botId, Long groupId) {
         if (!checkCosPermission(sender)) {
             return;
         }
         currentGroupId = groupId;
         currentBotId = botId;
+        sender.sendMessage("OK");
+    }
+    
+    @SubCommand("查看驾驶状态")
+    public void listTargetGroup(CommandSender sender) {
+        if (!checkCosPermission(sender)) {
+            return;
+        }
+        sender.sendMessage("当前驾驶状态 BotId = " + currentBotId + ", GroupId = " + currentGroupId);
     }
     
     @SubCommand("驾驶")
@@ -56,7 +65,9 @@ public class DriveFunction extends BaseFunction<Void>{
         if (!checkCosPermission(sender)) {
             return;
         }
-        Bot.findInstance(currentBotId).getGroupOrFail(currentGroupId).sendMessage(MiraiCode.deserializeMiraiCode(messageCode));
+        if (sender.getBot().getId() == currentBotId) {
+            sender.getBot().getGroupOrFail(currentGroupId).sendMessage(MiraiCode.deserializeMiraiCode(messageCode));
+        }
     }
 
 }

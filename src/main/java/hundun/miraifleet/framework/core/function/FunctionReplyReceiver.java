@@ -2,7 +2,10 @@ package hundun.miraifleet.framework.core.function;
 
 import java.io.IOException;
 
+import org.jetbrains.annotations.NotNull;
 
+import lombok.Getter;
+import net.mamoe.mirai.console.command.AbstractUserCommandSender;
 import net.mamoe.mirai.console.command.CommandSender;
 import net.mamoe.mirai.console.command.ConsoleCommandSender;
 import net.mamoe.mirai.console.command.MemberCommandSender;
@@ -11,6 +14,8 @@ import net.mamoe.mirai.contact.Group;
 import net.mamoe.mirai.message.data.Image;
 import net.mamoe.mirai.message.data.Message;
 import net.mamoe.mirai.message.data.OfflineAudio;
+import net.mamoe.mirai.message.data.PlainText;
+import net.mamoe.mirai.message.data.SimpleServiceMessage;
 import net.mamoe.mirai.utils.ExternalResource;
 import net.mamoe.mirai.utils.MiraiLogger;
 
@@ -20,10 +25,15 @@ import net.mamoe.mirai.utils.MiraiLogger;
 public class FunctionReplyReceiver {
     private static final String CONSOLE_SENDER_DESCRIPTION = "CONSOLE_SENDER";
     private static final String UNHANDLED_SENDER_DESCRIPTION = "UNHANDLED_SENDER";
+    public static final String NOT_SUPPORT_RESOURCE_PLACEHOLDER = "[该接收者暂不支持图片或音频]";
+    public final static int CONSOLE_FAKE_CONTACT_ID = 0;
+    public final static int CONSOLE_FAKE_BOT_ID = 0;
+    
     MiraiLogger miraiLogger;
     CommandSender commandSender;
     Contact contact;
 
+    @Getter
     String senderDescription;
     
     public FunctionReplyReceiver(CommandSender commandSender, MiraiLogger miraiLogger) {
@@ -51,7 +61,7 @@ public class FunctionReplyReceiver {
     }
     
     /**
-     * do nothing null if not supported
+     * do nothing if not supported
      */
     public void sendMessage(Message message) {
         if (commandSender != null) {
@@ -62,7 +72,7 @@ public class FunctionReplyReceiver {
     }
 
     /**
-     * do nothing null if not supported
+     * do nothing if not supported
      */
     public void sendMessage(String message) {
         if (commandSender != null) {
@@ -73,7 +83,7 @@ public class FunctionReplyReceiver {
     }
 
     /**
-     * do nothing null if not supported
+     * do nothing and return null if not supported
      */
     public Image uploadImage(ExternalResource externalResource) {
         if (commandSender != null) {
@@ -86,9 +96,17 @@ public class FunctionReplyReceiver {
         return null;
     }
     
+    @NotNull
+    public Message uploadImageOrNotSupportPlaceholder(ExternalResource externalResource) {
+        Image image = uploadImage(externalResource);
+        return image != null ? image : new PlainText(NOT_SUPPORT_RESOURCE_PLACEHOLDER);
+    }
+    
     /**
+     * @Deprecated use ExternalResource.autoClose
      * @return null if not supported
      */
+    @Deprecated
     public Image uploadImageAndClose(ExternalResource externalResource) {
         Image image = uploadImage(externalResource);
         try {
@@ -115,45 +133,56 @@ public class FunctionReplyReceiver {
         return null;
     }
     
-    @Deprecated
-    public long getContactId() {
+    @NotNull
+    public Message uploadVoiceOrNotSupportPlaceholder(ExternalResource externalResource) {
+        OfflineAudio audio = uploadVoice(externalResource);
+        return audio != null ? audio : new PlainText(NOT_SUPPORT_RESOURCE_PLACEHOLDER);
+    }
+    
+    /**
+     * return from commandSender, or from contact, or fail.
+     */
+    public long getUserContactId() {
         if (commandSender != null) {
-            return getContactId(commandSender);
+            return getUserContactId(commandSender);
         } else if (contact != null) {
             return contact.getId();
         }
-        return -1;
+        throw new RuntimeException("bad FunctionReplyReceiver instance getUserContactId");
     }
     
+    /**
+     * return from commandSender, or from contact, or fail.
+     */
     public long getBotIdOrConsole() {
         if (commandSender != null) {
             return getBotIdOrConsole(commandSender);
         } else if (contact != null) {
             return contact.getBot().getId();
         }
-        throw new RuntimeException("bad FunctionReplyReceiver instance");
+        throw new RuntimeException("bad FunctionReplyReceiver instance getBotIdOrConsole");
     }
     
-    public final static int CONSOLE_FAKE_CONTACT_ID = 0;
-    public final static int CONSOLE_FAKE_BOT_ID = 0;
+
     
-    @Deprecated
-    public static long getContactId(CommandSender commandSender) {
-        if (commandSender instanceof MemberCommandSender) {
-            return ((MemberCommandSender)commandSender).getGroup().getId();
-        }
-        if (commandSender instanceof ConsoleCommandSender) {
+
+    /**
+     * from commandSender.getUser().getId() or CONSOLE_FAKE_ID; 
+     */
+    public static long getUserContactId(CommandSender commandSender) {
+        if (commandSender.getUser() != null) {
+            return commandSender.getUser().getId();
+        } else {
             return CONSOLE_FAKE_CONTACT_ID;
         }
-        return -1;
     }
 
+    /**
+     * from commandSender.getBot().getId() or CONSOLE_FAKE_ID; 
+     */
     public static long getBotIdOrConsole(CommandSender sender) {
         return sender.getBot() != null ? sender.getBot().getId() : CONSOLE_FAKE_BOT_ID;
     }
     
-    public String getSenderDescription() {
-        return senderDescription;
-    }
     
 }
