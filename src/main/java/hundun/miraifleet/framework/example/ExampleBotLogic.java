@@ -1,6 +1,7 @@
 package hundun.miraifleet.framework.example;
 
 import hundun.miraifleet.framework.core.botlogic.BaseBotLogic;
+import hundun.miraifleet.framework.starter.botlogic.function.CharacterHelpFunction;
 import hundun.miraifleet.framework.starter.botlogic.function.RepeatFunction;
 import hundun.miraifleet.framework.starter.botlogic.function.reminder.ReminderFunction;
 import hundun.miraifleet.framework.starter.botlogic.function.weibo.WeiboFunction;
@@ -15,6 +16,7 @@ public class ExampleBotLogic extends BaseBotLogic {
     WeiboFunction weiboFunction;
     ReminderFunction reminderFunction;
     RepeatFunction repeatFunction;
+    CharacterHelpFunction characterHelpFunction;
     
     public ExampleBotLogic(JvmPlugin plugin) {
         super(plugin, "framework样例");
@@ -32,6 +34,9 @@ public class ExampleBotLogic extends BaseBotLogic {
 
         repeatFunction = new RepeatFunction(this, plugin, characterName);
         functions.add(repeatFunction);
+        
+        characterHelpFunction = new CharacterHelpFunction(this, plugin, characterName);
+        functions.add(characterHelpFunction);
         
         allCompositeCommandProxy = new ExamleAllCompositeCommandProxy(this, plugin, characterName);
     }
