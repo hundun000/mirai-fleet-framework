@@ -25,6 +25,8 @@ import net.mamoe.mirai.contact.Group;
 import net.mamoe.mirai.contact.User;
 import net.mamoe.mirai.event.ListenerHost;
 import net.mamoe.mirai.event.events.GroupEvent;
+import net.mamoe.mirai.event.events.GroupMessageEvent;
+import net.mamoe.mirai.event.events.MessageEvent;
 import net.mamoe.mirai.event.events.NudgeEvent;
 import net.mamoe.mirai.utils.MiraiLogger;
 
@@ -182,6 +184,8 @@ public abstract class BaseFunction<T> implements ListenerHost {
     protected boolean checkCosPermission(NudgeEvent event) {
         if (event.getSubject() instanceof Group) {
             return checkCosPermission(event.getBot(), (Group)event.getSubject());
+        } else if (event.getSubject() instanceof User) {
+            return checkCosPermission(event.getBot(), (User)event.getSubject());
         }
         return false;
     }
@@ -205,9 +209,14 @@ public abstract class BaseFunction<T> implements ListenerHost {
         ExactUser exact = new ExactUser(user.getId());
         return PermissionService.testPermission(targetPermission, exact);
     }
-
-    protected boolean checkCosPermission(GroupEvent event) {
-        return checkCosPermission(event.getBot(), event.getGroup());
+  
+    protected boolean checkCosPermission(MessageEvent event) {
+        if (event.getSubject() instanceof Group) {
+            return checkCosPermission(event.getBot(), (Group)event.getSubject());
+        } else if (event.getSubject() instanceof User) {
+            return checkCosPermission(event.getBot(), (User)event.getSubject());
+        }
+        return false;
     }
 
     protected boolean checkCosPermission(CommandSender sender) {

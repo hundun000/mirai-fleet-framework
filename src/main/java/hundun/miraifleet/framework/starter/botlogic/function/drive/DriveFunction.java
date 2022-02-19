@@ -3,6 +3,7 @@ package hundun.miraifleet.framework.starter.botlogic.function.drive;
 import hundun.miraifleet.framework.core.botlogic.BaseBotLogic;
 import hundun.miraifleet.framework.core.function.BaseFunction;
 import lombok.Getter;
+import net.mamoe.mirai.Bot;
 import net.mamoe.mirai.console.command.AbstractCommand;
 import net.mamoe.mirai.console.command.CommandSender;
 import net.mamoe.mirai.console.plugin.jvm.JvmPlugin;
@@ -71,9 +72,7 @@ public class DriveFunction extends BaseFunction<Void>{
             if (!checkCosPermission(sender)) {
                 return;
             }
-            if (sender.getBot().getId() == currentBotId) {
-                sender.getBot().getGroupOrFail(currentGroupId).sendMessage(MiraiCode.deserializeMiraiCode(messageCode));
-            }
+            Bot.findInstance(currentBotId).getGroupOrFail(currentGroupId).sendMessage(MiraiCode.deserializeMiraiCode(messageCode));
         }
 
     }
