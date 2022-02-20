@@ -36,7 +36,7 @@ public class CharacterHelpFunction extends BaseFunction<Void> {
             plugin,
             characterName,
             "CharacterHelpFunction",
-            false,
+            true,
             null
             );
         this.commandComponent = new CompositeCommandFunctionComponent(plugin, characterName, functionName);

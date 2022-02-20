@@ -27,7 +27,7 @@ public class ExamleAllCompositeCommandProxy extends AbstractAllCompositeCommandP
     }
 
 
-    @SubCommand("微博订阅")
+    @SubCommand("查询微博订阅")
     public void listListen(CommandSender sender) {
         botLogic.weiboFunction.getCommandComponent().listListen(sender);
     }

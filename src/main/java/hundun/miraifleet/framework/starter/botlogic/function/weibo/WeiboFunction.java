@@ -138,7 +138,7 @@ public class WeiboFunction extends BaseFunction<WeiboFunction.SessionData> {
             weiboService.debugChangeTopCardCreateTime(uid);
         }
 
-        @SubCommand("微博订阅")
+        @SubCommand("查询微博订阅")
         public void listListen(CommandSender sender) {
             if (!checkCosPermission(sender)) {
                 return;
