@@ -65,7 +65,7 @@ public class ReminderFunction extends BaseFunction<Void> {
             );
         this.reminderListRepository = new SingletonDocumentRepository<>(plugin, resolveFunctionRepositoryFile("ReminderListRepository.json"), ReminderList.class, reminderListDefaultDataSupplier);
         this.configRepository = new SingletonDocumentRepository<>(plugin, resolveFunctionConfigFile("HourlyChatConfig.json"), HourlyChatConfig.class, hourlyChatConfigDefaultDataSupplier);
-        plugin.getScheduler().repeating(1 * 1000, new ReminderTimerTask());
+        plugin.getScheduler().repeating(60 * 1000, new ReminderTimerTask());
         this.commandComponent = new CompositeCommandFunctionComponent(plugin, characterName, functionName);
         initHourlyChatConfigToReminderItems();
     }
