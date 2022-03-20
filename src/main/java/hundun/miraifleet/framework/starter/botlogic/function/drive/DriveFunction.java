@@ -7,6 +7,9 @@ import net.mamoe.mirai.Bot;
 import net.mamoe.mirai.console.command.AbstractCommand;
 import net.mamoe.mirai.console.command.CommandSender;
 import net.mamoe.mirai.console.plugin.jvm.JvmPlugin;
+import net.mamoe.mirai.contact.Group;
+import net.mamoe.mirai.contact.Member;
+import net.mamoe.mirai.contact.User;
 import net.mamoe.mirai.message.code.MiraiCode;
 
 /**
@@ -36,8 +39,6 @@ public class DriveFunction extends BaseFunction<Void>{
         this.commandComponent = new CompositeCommandFunctionComponent(plugin, characterName, functionName);
     }
 
-    long currentGroupId;
-    long currentBotId;
 
     @Override
     public AbstractCommand provideCommand() {
@@ -49,30 +50,21 @@ public class DriveFunction extends BaseFunction<Void>{
             super(plugin, characterName, functionName);
         }
 
-        @SubCommand("设置驾驶状态")
-        public void setTargetGroup(CommandSender sender, Long botId, Long groupId) {
-            if (!checkCosPermission(sender)) {
-                return;
-            }
-            currentGroupId = groupId;
-            currentBotId = botId;
-            sender.sendMessage("OK");
-        }
 
-        @SubCommand("查看驾驶状态")
-        public void listTargetGroup(CommandSender sender) {
+        @SubCommand("立刻私聊")
+        public void chat(CommandSender sender, User target, String messageCode) {
             if (!checkCosPermission(sender)) {
                 return;
             }
-            sender.sendMessage("当前驾驶状态 BotId = " + currentBotId + ", GroupId = " + currentGroupId);
+            target.sendMessage(MiraiCode.deserializeMiraiCode(messageCode));
         }
-
-        @SubCommand("驾驶")
-        public void chat(CommandSender sender, String messageCode) {
+        
+        @SubCommand("立刻群聊")
+        public void chat(CommandSender sender, Group target, String messageCode) {
             if (!checkCosPermission(sender)) {
                 return;
             }
-            Bot.findInstance(currentBotId).getGroupOrFail(currentGroupId).sendMessage(MiraiCode.deserializeMiraiCode(messageCode));
+            target.sendMessage(MiraiCode.deserializeMiraiCode(messageCode));
         }
 
     }
