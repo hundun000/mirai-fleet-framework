@@ -44,7 +44,6 @@ public class RepeatFunction extends BaseFunction<RepeatFunction.SessionData> {
             plugin,
             characterName,
             "RepeatFunction",
-            false,
             (() -> new RepeatFunction.SessionData())
             );
     }
@@ -56,7 +55,7 @@ public class RepeatFunction extends BaseFunction<RepeatFunction.SessionData> {
             return;
         }
 
-        SessionData sessionData = getOrCreateSessionData(group);
+        SessionData sessionData = getOrCreateSessionData(event);
 
 
         if (sessionData.state == RepeatState.CURRENT_MESSAGE_COUNTING) {
@@ -73,7 +72,7 @@ public class RepeatFunction extends BaseFunction<RepeatFunction.SessionData> {
             return;
         }
 
-        SessionData sessionData = getOrCreateSessionData(event.getGroup());
+        SessionData sessionData = getOrCreateSessionData(event);
         String newMessageMiraiCode = event.getMessage().serializeToMiraiCode();
 
         switch (sessionData.state) {

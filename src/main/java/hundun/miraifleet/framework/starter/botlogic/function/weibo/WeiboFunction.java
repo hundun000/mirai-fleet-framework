@@ -54,21 +54,10 @@ public class WeiboFunction extends BaseFunction<WeiboFunction.SessionData> {
     @Getter
     private final CompositeCommandFunctionComponent commandComponent;
 
-    @Deprecated
     public WeiboFunction(
             BaseBotLogic baseBotLogic,
             JavaPlugin plugin,
             String characterName,
-            boolean skipRegisterCommand
-            ) {
-        this(baseBotLogic, plugin, characterName, skipRegisterCommand, null);
-    }
-
-    public WeiboFunction(
-            BaseBotLogic baseBotLogic,
-            JavaPlugin plugin,
-            String characterName,
-            boolean skipRegisterCommand,
             @Nullable Supplier<Map<String, WeiboConfig>> weiboConfigDefaultDataSupplier
             ) {
         super(
@@ -76,7 +65,6 @@ public class WeiboFunction extends BaseFunction<WeiboFunction.SessionData> {
             plugin,
             characterName,
             "WeiboFunction",
-            skipRegisterCommand,
             (() -> new WeiboFunction.SessionData())
             );
 

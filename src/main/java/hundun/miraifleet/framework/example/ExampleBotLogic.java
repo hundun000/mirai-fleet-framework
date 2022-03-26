@@ -25,12 +25,10 @@ public class ExampleBotLogic extends BaseBotLogic {
         super(plugin, "framework样例");
 
         weiboFunction = new WeiboFunction(this, plugin, characterName, 
-                false,
                 ExampleDefaultConfigAndData.weiboConfigDefaultDataSupplier());
         functions.add(weiboFunction);
 
         reminderFunction = new ReminderFunction(this, plugin, characterName, 
-                true,
                 null,
                 ExampleDefaultConfigAndData.hourlyChatConfigDefaultDataSupplier());
         functions.add(reminderFunction);
@@ -41,7 +39,7 @@ public class ExampleBotLogic extends BaseBotLogic {
         characterHelpFunction = new CharacterHelpFunction(this, plugin, characterName);
         functions.add(characterHelpFunction);
         
-        driveFunction = new DriveFunction(this, plugin, characterName, false);
+        driveFunction = new DriveFunction(this, plugin, characterName);
         functions.add(driveFunction);
         
         allCompositeCommandProxy = new ExamleAllCompositeCommandProxy(this, plugin, characterName);

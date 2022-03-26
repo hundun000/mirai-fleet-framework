@@ -51,7 +51,6 @@ public class ReminderFunction extends BaseFunction<Void> {
             BaseBotLogic baseBotLogic,
             JavaPlugin plugin,
             String characterName,
-            boolean skipRegisterCommand,
             @Nullable Supplier<Map<String, ReminderList>> reminderListDefaultDataSupplier,
             @Nullable Supplier<Map<String, HourlyChatConfig>> hourlyChatConfigDefaultDataSupplier
             ) {
@@ -60,7 +59,6 @@ public class ReminderFunction extends BaseFunction<Void> {
             plugin,
             characterName,
             "ReminderFunction",
-            skipRegisterCommand,
             null
             );
         this.reminderListRepository = new SingletonDocumentRepository<>(plugin, resolveFunctionRepositoryFile("ReminderListRepository.json"), ReminderList.class, reminderListDefaultDataSupplier);

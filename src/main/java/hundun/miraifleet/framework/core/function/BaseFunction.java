@@ -7,6 +7,7 @@ import java.util.function.Supplier;
 
 import hundun.miraifleet.framework.core.botlogic.BaseBotLogic;
 import lombok.Getter;
+import lombok.Setter;
 import net.mamoe.mirai.Bot;
 import net.mamoe.mirai.console.command.AbstractCommand;
 import net.mamoe.mirai.console.command.CommandSender;
@@ -21,13 +22,18 @@ import net.mamoe.mirai.console.permission.AbstractPermitteeId.ExactUser;
 import net.mamoe.mirai.console.permission.Permission;
 import net.mamoe.mirai.console.permission.PermissionService;
 import net.mamoe.mirai.console.plugin.jvm.JvmPlugin;
+import net.mamoe.mirai.contact.Contact;
 import net.mamoe.mirai.contact.Group;
 import net.mamoe.mirai.contact.User;
 import net.mamoe.mirai.event.ListenerHost;
+import net.mamoe.mirai.event.events.AbstractMessageEvent;
 import net.mamoe.mirai.event.events.GroupEvent;
 import net.mamoe.mirai.event.events.GroupMessageEvent;
+import net.mamoe.mirai.event.events.GroupMessagePostSendEvent;
 import net.mamoe.mirai.event.events.MessageEvent;
+import net.mamoe.mirai.event.events.MessagePostSendEvent;
 import net.mamoe.mirai.event.events.NudgeEvent;
+import net.mamoe.mirai.event.events.UserMessageEvent;
 import net.mamoe.mirai.utils.MiraiLogger;
 
 /**
@@ -37,6 +43,11 @@ import net.mamoe.mirai.utils.MiraiLogger;
  */
 public abstract class BaseFunction<T> implements ListenerHost {
 
+    public static enum GroupMessageToSessionIdType {
+        USE_GROUP_ID,
+        USE_GROUP_AND_MENBER_ID
+    }
+    
     public static abstract class AbstractSimpleCommandFunctionComponent extends SimpleCommand {
         public AbstractSimpleCommandFunctionComponent(
                 JvmPlugin plugin,
@@ -95,7 +106,9 @@ public abstract class BaseFunction<T> implements ListenerHost {
     protected final String functionName;
     protected final String characterName;
     @Getter
-    private final boolean skipRegisterCommand;
+    @Setter
+    private boolean skipRegisterCommand;
+    protected GroupMessageToSessionIdType groupMessageToSessionIdType;
     
     Map<String, T> sessionDataMap = new ConcurrentHashMap<>();
 
@@ -104,7 +117,6 @@ public abstract class BaseFunction<T> implements ListenerHost {
             JvmPlugin plugin,
             String characterName,
             String functionName,
-            boolean skipRegisterCommand,
             Supplier<T> sessionDataSupplier
             ) {
         this.sessionDataSupplier = sessionDataSupplier;
@@ -113,7 +125,9 @@ public abstract class BaseFunction<T> implements ListenerHost {
         this.baseBotLogic = baseBotLogic;
         this.functionName = functionName;
         this.characterName = characterName;
-        this.skipRegisterCommand = skipRegisterCommand;
+        // default values
+        this.skipRegisterCommand = true;
+        this.groupMessageToSessionIdType = GroupMessageToSessionIdType.USE_GROUP_ID;
     }
 
     public abstract AbstractCommand provideCommand();
@@ -121,11 +135,43 @@ public abstract class BaseFunction<T> implements ListenerHost {
     protected String getSessionId(CommandSender sender) {
         String sessionId;
         if (sender instanceof MemberCommandSender) {
-            sessionId = String.valueOf(((MemberCommandSender)sender).getGroup().getId());
+            MemberCommandSender memberCommandSender = (MemberCommandSender)sender;
+            sessionId = memberToSessionId(memberCommandSender.getGroup().getId(), memberCommandSender.getUser().getId());
         } if (sender instanceof ConsoleCommandSender) {
             sessionId = CONSOLE_SESSIONID;
         } else {
             sessionId = String.valueOf(sender.getUser().getId());
+        }
+        return sessionId;
+    }
+    
+    private String memberToSessionId(long groupId, long memberId) {
+        if (groupMessageToSessionIdType == GroupMessageToSessionIdType.USE_GROUP_ID) {
+            return String.valueOf(groupId);
+        } else {
+            return String.valueOf(groupId)
+                    + "." + String.valueOf(memberId);
+        }
+    }
+    
+    protected String calculateSessionId(MessageEvent event) {
+        String sessionId;
+        if (event instanceof GroupMessageEvent) {
+            GroupMessageEvent groupMessageEvent = (GroupMessageEvent)event;
+            sessionId = memberToSessionId(groupMessageEvent.getGroup().getId(), groupMessageEvent.getSender().getId());
+        } else {
+            sessionId = String.valueOf(event.getSender().getId());
+        }
+        return sessionId;
+    }
+    
+    protected String calculateSessionId(MessagePostSendEvent<? extends Contact> event) {
+        String sessionId;
+        if (event instanceof GroupMessagePostSendEvent) {
+            GroupMessagePostSendEvent groupMessageEvent = (GroupMessagePostSendEvent)event;
+            sessionId = memberToSessionId(groupMessageEvent.getTarget().getId(), groupMessageEvent.getBot().getId());
+        } else {
+            sessionId = String.valueOf(event.getBot().getId());
         }
         return sessionId;
     }
@@ -135,18 +181,28 @@ public abstract class BaseFunction<T> implements ListenerHost {
         return getOrCreateSessionData(sessionId);
     }
 
+    @Deprecated
     protected T getOrCreateSessionData(Group group) {
         String sessionId = String.valueOf(group.getId());
         return getOrCreateSessionData(sessionId);
     }
 
+    protected T getOrCreateSessionData(MessageEvent event) {
+        String sessionId = calculateSessionId(event);
+        return getOrCreateSessionData(sessionId);
+    }
+    
+    protected T getOrCreateSessionData(MessagePostSendEvent<? extends Contact> event) {
+        String sessionId = calculateSessionId(event);
+        return getOrCreateSessionData(sessionId);
+    }
 
     protected T getOrCreateSessionData(CommandSender sender) {
         String sessionId = getSessionId(sender);
         return getOrCreateSessionData(sessionId);
     }
 
-    private T getOrCreateSessionData(String sessionId) {
+    protected T getOrCreateSessionData(String sessionId) {
 
         T sessionData = sessionDataMap.get(sessionId);
         if (sessionData == null) {

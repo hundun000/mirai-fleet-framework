@@ -25,15 +25,13 @@ public class DriveFunction extends BaseFunction<Void>{
     public DriveFunction(
             BaseBotLogic baseBotLogic,
             JvmPlugin plugin,
-            String characterName,
-            boolean skipRegisterCommand
+            String characterName
             ) {
         super(
             baseBotLogic,
             plugin,
             characterName,
             "DriveFunction",
-            skipRegisterCommand,
             null
             );
         this.commandComponent = new CompositeCommandFunctionComponent(plugin, characterName, functionName);
