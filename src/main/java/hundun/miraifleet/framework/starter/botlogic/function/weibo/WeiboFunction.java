@@ -9,9 +9,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.TimerTask;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 
 import org.jetbrains.annotations.Nullable;
@@ -35,6 +32,7 @@ import lombok.Getter;
 import net.mamoe.mirai.Bot;
 import net.mamoe.mirai.console.command.AbstractCommand;
 import net.mamoe.mirai.console.command.CommandSender;
+import net.mamoe.mirai.console.plugin.jvm.JavaPlugin;
 import net.mamoe.mirai.console.plugin.jvm.JvmPlugin;
 import net.mamoe.mirai.contact.Group;
 import net.mamoe.mirai.message.data.Image;
@@ -53,14 +51,13 @@ public class WeiboFunction extends BaseFunction<WeiboFunction.SessionData> {
 
     private final SingletonDocumentRepository<WeiboConfig> configRepository;
 
-    private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
     @Getter
     private final CompositeCommandFunctionComponent commandComponent;
 
     @Deprecated
     public WeiboFunction(
             BaseBotLogic baseBotLogic,
-            JvmPlugin plugin,
+            JavaPlugin plugin,
             String characterName,
             boolean skipRegisterCommand
             ) {
@@ -69,7 +66,7 @@ public class WeiboFunction extends BaseFunction<WeiboFunction.SessionData> {
 
     public WeiboFunction(
             BaseBotLogic baseBotLogic,
-            JvmPlugin plugin,
+            JavaPlugin plugin,
             String characterName,
             boolean skipRegisterCommand,
             @Nullable Supplier<Map<String, WeiboConfig>> weiboConfigDefaultDataSupplier
@@ -96,7 +93,7 @@ public class WeiboFunction extends BaseFunction<WeiboFunction.SessionData> {
                 WeiboConfig.class,
                 weiboConfigDefaultDataSupplier
                 );
-        this.scheduler.scheduleAtFixedRate(new WeiboTask(), 1, 5, TimeUnit.MINUTES);
+        plugin.getScheduler().repeating(5 * 60 * 1000, new WeiboTask());
         this.commandComponent = new CompositeCommandFunctionComponent(plugin, characterName, functionName);
     }
 
