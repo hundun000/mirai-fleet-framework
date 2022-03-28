@@ -5,6 +5,7 @@ import hundun.miraifleet.framework.starter.botlogic.function.CharacterHelpFuncti
 import hundun.miraifleet.framework.starter.botlogic.function.RepeatFunction;
 import hundun.miraifleet.framework.starter.botlogic.function.reminder.ReminderFunction;
 import hundun.miraifleet.framework.starter.botlogic.function.weibo.WeiboFunction;
+import net.mamoe.mirai.console.plugin.jvm.JavaPlugin;
 import net.mamoe.mirai.console.plugin.jvm.JvmPlugin;
 
 /**
@@ -18,7 +19,7 @@ public class ExampleBotLogic extends BaseBotLogic {
     RepeatFunction repeatFunction;
     CharacterHelpFunction characterHelpFunction;
     
-    public ExampleBotLogic(JvmPlugin plugin) {
+    public ExampleBotLogic(JavaPlugin plugin) {
         super(plugin, "framework样例");
 
         weiboFunction = new WeiboFunction(this, plugin, characterName, 

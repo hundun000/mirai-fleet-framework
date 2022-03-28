@@ -11,9 +11,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.TimerTask;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 
 import org.jetbrains.annotations.Nullable;
@@ -30,6 +27,7 @@ import lombok.Setter;
 import net.mamoe.mirai.Bot;
 import net.mamoe.mirai.console.command.AbstractCommand;
 import net.mamoe.mirai.console.command.CommandSender;
+import net.mamoe.mirai.console.plugin.jvm.JavaPlugin;
 import net.mamoe.mirai.console.plugin.jvm.JvmPlugin;
 import net.mamoe.mirai.contact.Group;
 
@@ -42,25 +40,16 @@ public class ReminderFunction extends BaseFunction<Void> {
     SingletonDocumentRepository<ReminderList> reminderListRepository;
     private SingletonDocumentRepository<HourlyChatConfig> configRepository;
     List<ReminderItem> hourlyChatReminderItems = new ArrayList<>();
-    private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
+    
     private Map<String, CronExpression> cronExpressionCaches = new HashMap<>();
     @Setter
     private boolean logMinuteClockArrival = false;
     @Getter
     private final CompositeCommandFunctionComponent commandComponent;
-    @Deprecated
-    public ReminderFunction(
-            BaseBotLogic baseBotLogic,
-            JvmPlugin plugin,
-            String characterName,
-            boolean skipRegisterCommand
-            ) {
-        this(baseBotLogic, plugin, characterName, skipRegisterCommand, null, null);
-    }
 
     public ReminderFunction(
             BaseBotLogic baseBotLogic,
-            JvmPlugin plugin,
+            JavaPlugin plugin,
             String characterName,
             boolean skipRegisterCommand,
             @Nullable Supplier<Map<String, ReminderList>> reminderListDefaultDataSupplier,
@@ -76,7 +65,7 @@ public class ReminderFunction extends BaseFunction<Void> {
             );
         this.reminderListRepository = new SingletonDocumentRepository<>(plugin, resolveFunctionRepositoryFile("ReminderListRepository.json"), ReminderList.class, reminderListDefaultDataSupplier);
         this.configRepository = new SingletonDocumentRepository<>(plugin, resolveFunctionConfigFile("HourlyChatConfig.json"), HourlyChatConfig.class, hourlyChatConfigDefaultDataSupplier);
-        this.scheduler.scheduleAtFixedRate(new ReminderTimerTask(), 1, 1, TimeUnit.MINUTES);
+        plugin.getScheduler().repeating(1 * 1000, new ReminderTimerTask());
         this.commandComponent = new CompositeCommandFunctionComponent(plugin, characterName, functionName);
         initHourlyChatConfigToReminderItems();
     }
