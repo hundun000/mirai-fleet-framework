@@ -5,7 +5,7 @@ import feign.Headers;
 import feign.Param;
 import feign.RequestLine;
 import feign.Response;
-import hundun.miraifleet.framework.core.helper.feign.FeignClientFactory;
+import hundun.miraifleet.framework.starter.helper.feign.FeignClientFactory;
 import net.mamoe.mirai.utils.MiraiLogger;
 
 

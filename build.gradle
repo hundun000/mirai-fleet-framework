@@ -19,85 +19,137 @@ plugins {
     id 'net.mamoe.mirai-console' version "${MIRAI_VERSION}"
 }
 
-apply plugin: 'java'
-apply plugin: 'eclipse'
-apply plugin: 'java-library'
-apply plugin: 'maven-publish'
+allprojects {
+    
+    apply plugin: 'eclipse'
 
+    repositories {
+        mavenCentral()
+        jcenter()
+        maven { url 'https://jitpack.io' }
+    }
+    
+    java {
+        sourceCompatibility = JavaVersion.VERSION_1_8
+        targetCompatibility = JavaVersion.VERSION_1_8
+    }
 
-group = GROUP
-version = VERSION
-
-
-java {
-    sourceCompatibility = JavaVersion.VERSION_1_8
-    targetCompatibility = JavaVersion.VERSION_1_8
 }
 
-repositories {
-    //removeIf { it is MavenArtifactRepository && it.url.host == "dl.bintray.com" }
-    mavenCentral()
-    jcenter()
-    maven { url 'https://jitpack.io' }
-}
-configurations {
-    compileOnly {
-        extendsFrom annotationProcessor
+subprojects {
+    apply plugin: 'java'
+    apply plugin: 'java-library'
+    
+    apply plugin: 'org.jetbrains.kotlin.jvm'
+    apply plugin: 'org.jetbrains.kotlin.plugin.serialization'
+    apply plugin: 'net.mamoe.mirai-console'
+    
+    configurations {
+        compileOnly {
+            extendsFrom annotationProcessor
+        }
+    }
+    
+    tasks.withType(JavaCompile) {
+        options.encoding = "UTF-8"
+    }
+    //test {
+    //    useJUnitPlatform()
+    //}
+    
+    task sourcesJar(type: Jar, dependsOn: classes) {
+        classifier = 'sources'
+        from sourceSets.main.allSource
+    }
+    
+    artifacts {
+        archives sourcesJar
     }
 }
-tasks.withType(JavaCompile) {
-    options.encoding = "UTF-8"
-}
-//test {
-//    useJUnitPlatform()
-//}
 
-task sourcesJar(type: Jar, dependsOn: classes) {
-    classifier = 'sources'
-    from sourceSets.main.allSource
-}
 
-artifacts {
-    archives sourcesJar
-}
 
-publishing {
-    publications {
-        // This mavenJava can be filled in randomly, it's just a task name
-        // MavenPublication must have, this is the task class to call
-        mavenJava(MavenPublication) {
-            // The header here is the artifacts configuration information, do not fill in the default
-            groupId = GROUP
-            artifactId = ARTIFACT_ID
-            version = VERSION
 
-            from components.java
+project(":framework-core") {
+    apply plugin: 'maven-publish'
+    
+    eclipse.project.name = rootProject.name + "-core"
+
+    dependencies {
+
+    
+        api 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.12.4'
+    
+        compileOnly 'org.projectlombok:lombok:1.18.4'
+        annotationProcessor 'org.projectlombok:lombok:1.18.4'
+    }
+    
+    publishing {
+        publications {
+            // This mavenJava can be filled in randomly, it's just a task name
+            // MavenPublication must have, this is the task class to call
+            mavenJava(MavenPublication) {
+                // The header here is the artifacts configuration information, do not fill in the default
+                groupId = GROUP
+                artifactId = ARTIFACT_ID + "-core"
+                version = VERSION
+    
+                from components.java
+            }
         }
     }
 }
 
 
-dependencies {
+project(":framework-starter") {
+    apply plugin: 'maven-publish'
 
-    implementation 'io.github.openfeign:feign-jackson:11.1'
-    implementation 'io.github.openfeign:feign-core:11.1'
-    
-    implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.12.4'
-    implementation group: 'org.quartz-scheduler', name: 'quartz', version: '2.3.2'
-    
+    eclipse.project.name = rootProject.name + "-starter"
 
-    compileOnly 'org.projectlombok:lombok:1.18.4'
-    annotationProcessor 'org.projectlombok:lombok:1.18.4'
+    dependencies {
+        implementation project(":framework-core")
     
-    testImplementation "junit:junit:4.11"
+        api 'io.github.openfeign:feign-jackson:11.1'
+        api 'io.github.openfeign:feign-core:11.1'
+        
+        api 'org.quartz-scheduler:quartz:2.3.2'
+    
+        compileOnly 'org.projectlombok:lombok:1.18.4'
+        annotationProcessor 'org.projectlombok:lombok:1.18.4'
+    }
+    
+    publishing {
+        publications {
+            // This mavenJava can be filled in randomly, it's just a task name
+            // MavenPublication must have, this is the task class to call
+            mavenJava(MavenPublication) {
+                // The header here is the artifacts configuration information, do not fill in the default
+                groupId = GROUP
+                artifactId = ARTIFACT_ID + "-starter"
+                version = VERSION
+    
+                from components.java
+            }
+        }
+    }
 }
 
+project(":framework-example") {
+    group = GROUP
+    version = VERSION
+    
+    eclipse.project.name = rootProject.name + "-example"    
 
-
-
-
-
-
+    dependencies {
+        implementation project(":framework-core")
+        implementation project(":framework-starter")
+        
+        compileOnly 'org.projectlombok:lombok:1.18.4'
+        annotationProcessor 'org.projectlombok:lombok:1.18.4'
+        
+        testImplementation "junit:junit:4.11"
+    }
+}
 
 
 

@@ -1,4 +1,4 @@
-package hundun.miraifleet.framework.core.helper.feign;
+package hundun.miraifleet.framework.starter.helper.feign;
 
 
 import feign.Feign;
