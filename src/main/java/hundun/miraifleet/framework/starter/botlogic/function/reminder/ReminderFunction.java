@@ -49,7 +49,7 @@ public class ReminderFunction extends BaseFunction<Void> {
 
     public ReminderFunction(
             BaseBotLogic baseBotLogic,
-            JavaPlugin plugin,
+            JvmPlugin plugin,
             String characterName,
             @Nullable Supplier<Map<String, ReminderList>> reminderListDefaultDataSupplier,
             @Nullable Supplier<Map<String, HourlyChatConfig>> hourlyChatConfigDefaultDataSupplier
@@ -63,7 +63,7 @@ public class ReminderFunction extends BaseFunction<Void> {
             );
         this.reminderListRepository = new SingletonDocumentRepository<>(plugin, resolveFunctionRepositoryFile("ReminderListRepository.json"), ReminderList.class, reminderListDefaultDataSupplier);
         this.configRepository = new SingletonDocumentRepository<>(plugin, resolveFunctionConfigFile("HourlyChatConfig.json"), HourlyChatConfig.class, hourlyChatConfigDefaultDataSupplier);
-        plugin.getScheduler().repeating(60 * 1000, new ReminderTimerTask());
+        botLogic.getPluginScheduler().repeating(60 * 1000, new ReminderTimerTask());
         this.commandComponent = new CompositeCommandFunctionComponent(plugin, characterName, functionName);
         initHourlyChatConfigToReminderItems();
     }

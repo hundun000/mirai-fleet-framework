@@ -13,6 +13,7 @@ import net.mamoe.mirai.console.permission.Permission;
 import net.mamoe.mirai.console.permission.PermissionId;
 import net.mamoe.mirai.console.permission.PermissionRegistryConflictException;
 import net.mamoe.mirai.console.permission.PermissionService;
+import net.mamoe.mirai.console.plugin.jvm.JavaPluginScheduler;
 import net.mamoe.mirai.console.plugin.jvm.JvmPlugin;
 import net.mamoe.mirai.event.Event;
 import net.mamoe.mirai.event.EventChannel;
@@ -91,7 +92,7 @@ public abstract class BaseBotLogic {
         // default do nothing
     }
 
-
+    public abstract JavaPluginScheduler getPluginScheduler();
 
     public Permission getCharacterCosPermission() {
         return characterCosPermission;

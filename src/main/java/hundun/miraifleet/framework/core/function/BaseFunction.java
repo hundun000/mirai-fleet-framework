@@ -21,7 +21,9 @@ import net.mamoe.mirai.console.permission.AbstractPermitteeId.ExactMember;
 import net.mamoe.mirai.console.permission.AbstractPermitteeId.ExactUser;
 import net.mamoe.mirai.console.permission.Permission;
 import net.mamoe.mirai.console.permission.PermissionService;
+import net.mamoe.mirai.console.plugin.jvm.JavaPlugin;
 import net.mamoe.mirai.console.plugin.jvm.JvmPlugin;
+import net.mamoe.mirai.console.plugin.jvm.KotlinPlugin;
 import net.mamoe.mirai.contact.Contact;
 import net.mamoe.mirai.contact.Group;
 import net.mamoe.mirai.contact.User;
@@ -102,14 +104,22 @@ public abstract class BaseFunction<T> implements ListenerHost {
     private Supplier<T> sessionDataSupplier;
     protected final JvmPlugin plugin;
     protected final MiraiLogger log;
-    protected final BaseBotLogic baseBotLogic;
+    protected final BaseBotLogic botLogic;
     protected final String functionName;
     protected final String characterName;
     @Getter
-    @Setter
+    //@Setter
     private boolean skipRegisterCommand;
     protected GroupMessageToSessionIdType groupMessageToSessionIdType;
-    
+
+    public void setSkipRegisterCommand(boolean skipRegisterCommand) {
+        this.skipRegisterCommand = skipRegisterCommand;
+    }
+
+    public void mySetSkipRegisterCommand(boolean skipRegisterCommand) {
+        this.skipRegisterCommand = skipRegisterCommand;
+    }
+
     Map<String, T> sessionDataMap = new ConcurrentHashMap<>();
 
     public BaseFunction(
@@ -122,7 +132,7 @@ public abstract class BaseFunction<T> implements ListenerHost {
         this.sessionDataSupplier = sessionDataSupplier;
         this.plugin = plugin;
         this.log = plugin.getLogger();
-        this.baseBotLogic = baseBotLogic;
+        this.botLogic = baseBotLogic;
         this.functionName = functionName;
         this.characterName = characterName;
         // default values
@@ -131,7 +141,7 @@ public abstract class BaseFunction<T> implements ListenerHost {
     }
 
     public abstract AbstractCommand provideCommand();
-
+    
     protected String getSessionId(CommandSender sender) {
         String sessionId;
         if (sender instanceof MemberCommandSender) {
@@ -247,7 +257,7 @@ public abstract class BaseFunction<T> implements ListenerHost {
     }
 
     protected boolean checkCosPermission(Bot bot, Group group) {
-        Permission targetPermission = baseBotLogic.getCharacterCosPermission();
+        Permission targetPermission = botLogic.getCharacterCosPermission();
         if (targetPermission == null) {
             log.warning("checkCosPermission false because Permission is null, maybe Permission register failed");
             return false;
@@ -257,7 +267,7 @@ public abstract class BaseFunction<T> implements ListenerHost {
     }
 
     protected boolean checkCosPermission(Bot bot, User user) {
-        Permission targetPermission = baseBotLogic.getCharacterCosPermission();
+        Permission targetPermission = botLogic.getCharacterCosPermission();
         if (targetPermission == null) {
             log.warning("checkCosPermission false because Permission is null, maybe Permission register failed");
             return false;
