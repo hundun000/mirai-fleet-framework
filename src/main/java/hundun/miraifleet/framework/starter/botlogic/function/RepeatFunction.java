@@ -6,6 +6,7 @@ import hundun.miraifleet.framework.core.botlogic.BaseBotLogic;
 import hundun.miraifleet.framework.core.function.AsListenerHost;
 import hundun.miraifleet.framework.core.function.BaseFunction;
 import net.mamoe.mirai.console.command.AbstractCommand;
+import net.mamoe.mirai.console.command.CommandManager;
 import net.mamoe.mirai.console.plugin.jvm.JvmPlugin;
 import net.mamoe.mirai.contact.Group;
 import net.mamoe.mirai.event.EventHandler;
@@ -72,8 +73,13 @@ public class RepeatFunction extends BaseFunction<RepeatFunction.SessionData> {
             return;
         }
 
-        SessionData sessionData = getOrCreateSessionData(event);
         String newMessageMiraiCode = event.getMessage().serializeToMiraiCode();
+        String commandPrefix = CommandManager.INSTANCE.getCommandPrefix();
+        if (newMessageMiraiCode.startsWith(commandPrefix)) {
+            return;
+        }
+        
+        SessionData sessionData = getOrCreateSessionData(event);
 
         switch (sessionData.state) {
             case CURRENT_MESSAGE_HANDLED:

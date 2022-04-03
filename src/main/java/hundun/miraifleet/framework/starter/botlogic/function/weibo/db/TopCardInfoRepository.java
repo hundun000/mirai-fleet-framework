@@ -3,6 +3,7 @@ package hundun.miraifleet.framework.starter.botlogic.function.weibo.db;
 
 
 import java.io.File;
+import java.util.HashMap;
 
 import hundun.miraifleet.framework.core.helper.repository.MapDocumentRepository;
 import hundun.miraifleet.framework.starter.botlogic.function.weibo.domain.TopCardInfo;
@@ -25,7 +26,7 @@ public class TopCardInfoRepository extends MapDocumentRepository<TopCardInfo> {
                 TopCardInfo.class,
                 (item -> item.getUid()),
                 ((item, id) -> item.setUid(id)),
-                null
+                () -> new HashMap<>()
                 );
     }
 
