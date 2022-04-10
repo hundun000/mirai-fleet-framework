@@ -8,11 +8,13 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.function.Function;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import feign.Response;
+import hundun.miraifleet.framework.core.helper.file.CacheableFileHelper;
 import hundun.miraifleet.framework.core.helper.file.FileOperationDelegate;
 import hundun.miraifleet.framework.core.helper.file.IFileOperationDelegator;
 import hundun.miraifleet.framework.starter.botlogic.function.weibo.config.WeiboViewFormat;
@@ -32,13 +34,12 @@ import net.mamoe.mirai.utils.MiraiLogger;
  * @author hundun
  * Created on 2021/04/23
  */
-public class WeiboService implements IFileOperationDelegator {
+public class WeiboService {
 
     ObjectMapper mapper = new ObjectMapper();
 
-
-    FileOperationDelegate fileOperationDelegate;
-
+    CacheableFileHelper cacheableFileHelper;
+    
     WeiboApiFeignClient weiboApiFeignClient;
 
     WeiboPictureApiFeignClient weiboPictureApiFeignClient;
@@ -54,20 +55,24 @@ public class WeiboService implements IFileOperationDelegator {
 
     String API_TYPE_PARAM = "uid";
 
+    private final Function<String, InputStream> uncachedWeiboImageProvider;
+
     public WeiboService(
             MiraiLogger miraiLogger,
             WeiboApiFeignClient weiboApiFeignClient,
             WeiboPictureApiFeignClient weiboPictureApiFeignClient,
             WeiboUserInfoCacheRepository userInfoCacheRepository,
-            TopCardInfoRepository topCardInfoRepository
+            TopCardInfoRepository topCardInfoRepository, 
+            File rootCacheFolder
             ) {
         this.weiboApiFeignClient = weiboApiFeignClient;
         this.weiboPictureApiFeignClient = weiboPictureApiFeignClient;
         this.userInfoCacheRepository = userInfoCacheRepository;
         this.topCardInfoRepository = topCardInfoRepository;
 
-        this.fileOperationDelegate = new FileOperationDelegate(this);
+        this.cacheableFileHelper = new CacheableFileHelper(rootCacheFolder);
         this.log = miraiLogger;
+        this.uncachedWeiboImageProvider = fileId -> downloadUncachedWeiboImage(fileId);
     }
 
 
@@ -165,29 +170,6 @@ public class WeiboService implements IFileOperationDelegator {
         return null;
     }
 
-//    public String getUidByUserName(String userName) {
-//        WeiboUserInfoCache userInfoCacahe = userInfoCacheRepository.findOneByScreenName(userName);
-//        if (userInfoCacahe == null) {
-//            return null;
-//        }
-//        return userInfoCacahe.getUid();
-//    }
-
-//    public WeiboCardView getCardByUid(String userName, File cacheFolder, WeiboViewFormat format) {
-//        WeiboUserInfoCache userInfoCacahe = userInfoCacheRepository.findOneByScreenName(userName);
-//        if (userInfoCacahe == null) {
-//            return null;
-//        }
-//        TopCardInfo topCardInfo = topCardInfoRepository.findOneByScreenName(userName);
-//        if (topCardInfo != null) {
-//            WeiboCardCache cardCache = topCardInfo.getCardCache();
-//            WeiboCardView cardCacheAndImage = handleImageFormat(cardCache, cacheFolder, format);
-//            return cardCacheAndImage;
-//        }
-//
-//        return null;
-//    }
-
     public TopCardInfo getTopInfo(String uid) {
 //        WeiboUserInfoCache userInfoCacahe = userInfoCacheRepository.findById(uid);
 //        if (userInfoCacahe == null) {
@@ -233,7 +215,7 @@ public class WeiboService implements IFileOperationDelegator {
         }
     }
 
-    public WeiboCardView updateAndGetTopBlog(String uid, File cacheFolder, WeiboViewFormat format) {
+    public WeiboCardView updateAndGetTopBlog(String uid, WeiboViewFormat format) {
         WeiboUserInfoCache userInfoCacahe = userInfoCacheRepository.findById(uid);
         if (userInfoCacahe == null) {
             log.warning("updateAndGetTopBlog but no userInfoCacahe: " + uid);
@@ -304,14 +286,14 @@ public class WeiboService implements IFileOperationDelegator {
             log.error("updateBlog: ", e);
             log.error("updateBlog error uid = " + uid);
         }
-        WeiboCardView cardCacheAndImage = handleImageFormat(topCardInfo.getCardCache(), cacheFolder, format);
+        WeiboCardView cardCacheAndImage = handleImageFormat(topCardInfo.getCardCache(), format);
         topCardInfoRepository.save(topCardInfo);
         return cardCacheAndImage;
     }
 
 
 
-    private WeiboCardView handleImageFormat(WeiboCardCache cardCache, File cacheFolder, WeiboViewFormat format) {
+    private WeiboCardView handleImageFormat(WeiboCardCache cardCache, WeiboViewFormat format) {
 
         List<File> files = new ArrayList<>();
         List<String> urls = new ArrayList<>();
@@ -321,13 +303,13 @@ public class WeiboService implements IFileOperationDelegator {
 
         switch (format) {
             case FIRST_IMAGE:
-                File imageFile = removeUrlToImage(urls, cacheFolder, 0);
+                File imageFile = removeUrlToImage(urls, 0);
                 if (imageFile != null) {
                     files.add(imageFile);
                 }
                 break;
             case ALL_IMAGE:
-                files = removeUrlsToImages(urls, cacheFolder);
+                files = removeUrlsToImages(urls);
                 break;
             case NO_IMAGE:
             default:
@@ -338,22 +320,22 @@ public class WeiboService implements IFileOperationDelegator {
         return new WeiboCardView(cardCache, files, urls);
     }
 
-    private List<File> removeUrlsToImages(List<String> urls, File cacheFolder) {
+    private List<File> removeUrlsToImages(List<String> urls) {
         List<File> files = new ArrayList<>(urls.size());
 
         while (!urls.isEmpty()) {
-            File file = removeUrlToImage(urls, cacheFolder, 0);
+            File file = removeUrlToImage(urls, 0);
             files.add(file);
         }
 
         return files;
     }
 
-    private File removeUrlToImage(List<String> urls, File cacheFolder, int index) {
+    private File removeUrlToImage(List<String> urls, int index) {
         if (urls.size() > index) {
             int lastSlash = urls.get(index).lastIndexOf("/");
             String id = urls.get(index).substring(lastSlash + 1);
-            File file = this.fromCacheOrDownloadOrFromLocal(id, cacheFolder, null);
+            File file = cacheableFileHelper.fromCacheOrProvider(id, uncachedWeiboImageProvider);
             urls.remove(index);
             return file;
         } else {
@@ -363,8 +345,8 @@ public class WeiboService implements IFileOperationDelegator {
 
 
 
-    @Override
-    public InputStream downloadOrFromLocal(String fileId, File localDataFolder) {
+    
+    public InputStream downloadUncachedWeiboImage(String fileId) {
         try {
             final Response response = weiboPictureApiFeignClient.pictures(fileId);
             final Response.Body body = response.body();
@@ -376,11 +358,5 @@ public class WeiboService implements IFileOperationDelegator {
         }
     }
 
-
-
-    @Override
-    public File fromCacheOrDownloadOrFromLocal(String fileId, File cacheFolder, File rawDataFolder) {
-        return fileOperationDelegate.fromCacheOrDownloadOrFromLocal(fileId, cacheFolder, rawDataFolder);
-    }
 
 }

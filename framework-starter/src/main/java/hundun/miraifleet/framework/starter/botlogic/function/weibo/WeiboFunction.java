@@ -73,7 +73,8 @@ public class WeiboFunction extends BaseFunction<WeiboFunction.SessionData> {
                 WeiboApiFeignClient.instance(plugin.getLogger()),
                 WeiboPictureApiFeignClient.instance(plugin.getLogger()),
                 new WeiboUserInfoCacheRepository(plugin, resolveFunctionRepositoryFile("WeiboUserInfoCacheRepository.json")),
-                new TopCardInfoRepository(plugin, resolveFunctionRepositoryFile("TopCardInfoRepository.json"))
+                new TopCardInfoRepository(plugin, resolveFunctionRepositoryFile("TopCardInfoRepository.json")),
+                resolveFunctionCacheFileFolder()
                 );
         this.configRepository = new SingletonDocumentRepository<>(
                 plugin,
@@ -145,8 +146,7 @@ public class WeiboFunction extends BaseFunction<WeiboFunction.SessionData> {
                 String uid= entry.getKey();
                 WeiboViewFormat format = entry.getValue();
 
-                File cacheFolder = resolveFunctionCacheFileFolder();
-                WeiboCardView cardCacheAndImage = weiboService.updateAndGetTopBlog(uid, cacheFolder, format);
+                WeiboCardView cardCacheAndImage = weiboService.updateAndGetTopBlog(uid, format);
                 if (cardCacheAndImage != null) {
                     String summary = "来自：" + cardCacheAndImage.getWeiboCardCache().getScreenName() + "，最新的饼的时间是：" + cardCacheAndImage.getWeiboCardCache().getBlogCreatedDateTime().toString();
                     builder.append(summary).append("\n");
@@ -180,8 +180,7 @@ public class WeiboFunction extends BaseFunction<WeiboFunction.SessionData> {
             if (format == null) {
                 sender.sendMessage("未订阅：" + name);
             } else {
-                File cacheFolder = resolveFunctionCacheFileFolder();
-                WeiboCardView cardCacheAndImage = weiboService.updateAndGetTopBlog(targetUid, cacheFolder, format);
+                WeiboCardView cardCacheAndImage = weiboService.updateAndGetTopBlog(targetUid, format);
 
                 sendBlogToBot(cardCacheAndImage, new FunctionReplyReceiver(sender, log));
             }
@@ -287,8 +286,7 @@ public class WeiboFunction extends BaseFunction<WeiboFunction.SessionData> {
                         String uid= entry.getKey();
                         WeiboViewFormat format = entry.getValue();
 
-                        File cacheFolder = resolveFunctionCacheFileFolder();
-                        WeiboCardView cardCacheAndImage = weiboService.updateAndGetTopBlog(uid, cacheFolder, format);
+                        WeiboCardView cardCacheAndImage = weiboService.updateAndGetTopBlog(uid, format);
                         if (cardCacheAndImage == null) {
                             continue;
                         }

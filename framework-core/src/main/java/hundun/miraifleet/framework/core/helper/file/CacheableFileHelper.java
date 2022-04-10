@@ -4,30 +4,26 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
+import java.util.function.Function;
 
 import hundun.miraifleet.framework.core.helper.Utils;
 import lombok.extern.slf4j.Slf4j;
 
 /**
- * @Deprecated use CachableFileHelper
  * @author hundun
  * Created on 2021/05/06
  */
-@Deprecated
 @Slf4j
-public class FileOperationDelegate {
-
-
-
-    IFileOperationDelegator provider;
-
-    public FileOperationDelegate(IFileOperationDelegator kcwikiService) {
-        this.provider = kcwikiService;
+public class CacheableFileHelper {
+    
+    File rootCacheFolder;
+    
+    public CacheableFileHelper(File rootCacheFolder) {
+        this.rootCacheFolder = rootCacheFolder;
     }
 
 
-
-    private File fromCache(String fileId, File rootCacheFolder) {
+    private File cacheIdToFile(String fileId) {
         String subFolerName = "FileCache";
         String subFolerPathName = Utils.checkFolder(subFolerName, rootCacheFolder.getAbsolutePath());
         String saveFilePathName = subFolerPathName + File.separator + fileId;
@@ -36,13 +32,13 @@ public class FileOperationDelegate {
         return file;
     }
 
-    public File fromCacheOrDownloadOrFromLocal(String fileId, File rootCacheFolder, File localDataFolder) {
+    public File fromCacheOrProvider(String fileId, Function<String, InputStream> uncachedFileProvider) {
         //String subFolerName = "FileCache";
-        File file = fromCache(fileId, rootCacheFolder);
+        File file = cacheIdToFile(fileId);
         if (file.exists()) {
             log.debug("image from cache :{}", fileId);
         } else {
-            InputStream inputStream = provider.downloadOrFromLocal(fileId, localDataFolder);
+            InputStream inputStream = uncachedFileProvider.apply(fileId);
 
             if (inputStream == null) {
                 log.info("provider not support download, image null for: {}", fileId);

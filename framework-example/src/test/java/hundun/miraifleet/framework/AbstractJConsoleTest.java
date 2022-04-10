@@ -13,6 +13,8 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import kotlinx.coroutines.CoroutineScopeKt;
+
 import static org.junit.Assert.assertEquals;
 
 /**
@@ -25,14 +27,13 @@ public abstract class AbstractJConsoleTest {
 
     @Before
     public void initializeConsole() {
-//        consoleInstance = new MiraiConsoleImplementationTerminal();
-//        MiraiConsoleTerminalLoader.INSTANCE.startAsDaemon((MiraiConsoleImplementationTerminal) consoleInstance);
+        consoleInstance = new MiraiConsoleImplementationTerminal();
+        MiraiConsoleTerminalLoader.INSTANCE.startAsDaemon((MiraiConsoleImplementationTerminal) consoleInstance);
     }
 
     @After
     public void cancelConsole() {
-        // need something likes MiraiConsole.cancel in java :
-        // consoleInstance.cancel() or MiraiConsoleTerminalLoader.INSTANCE.cancelConsole()
+        CoroutineScopeKt.cancel(consoleInstance, null);
     }
 
 }

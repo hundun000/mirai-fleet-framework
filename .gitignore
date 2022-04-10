@@ -2,6 +2,8 @@
 /framework-example/bots/
 /framework-example/plugins/
 /framework-example/data/
+/framework-example/logs/
+/framework-example/plugin-shared-libraries/
 
 HELP.md
 .gradle
