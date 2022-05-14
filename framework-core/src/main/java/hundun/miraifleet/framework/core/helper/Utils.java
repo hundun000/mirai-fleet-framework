@@ -14,16 +14,13 @@ import net.mamoe.mirai.utils.MiraiLogger;
  * Created on 2021/06/21
  */
 public class Utils {
+    
     public static String checkFolder(String subFolerName, String parentFoler) {
-        File directory = new File(parentFoler);
-        if (! directory.exists()){
-            directory.mkdir();
-        }
 
         String subFolerPathName = parentFoler + File.separator + subFolerName;
         File subFoler = new File(subFolerPathName);
         if (!subFoler.exists()){
-            subFoler.mkdir();
+            subFoler.mkdirs();
         }
 
         return subFolerPathName;

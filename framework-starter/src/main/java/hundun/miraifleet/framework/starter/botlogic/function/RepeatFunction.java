@@ -72,10 +72,10 @@ public class RepeatFunction extends BaseFunction<RepeatFunction.SessionData> {
         if (!checkCosPermission(event)) {
             return;
         }
-
+        
         String newMessageMiraiCode = event.getMessage().serializeToMiraiCode();
         String commandPrefix = CommandManager.INSTANCE.getCommandPrefix();
-        if (newMessageMiraiCode.startsWith(commandPrefix)) {
+        if (newMessageMiraiCode.startsWith(commandPrefix) || newMessageMiraiCode.isEmpty()) {
             return;
         }
         
