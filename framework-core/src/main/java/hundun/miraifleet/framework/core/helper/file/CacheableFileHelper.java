@@ -8,23 +8,31 @@ import java.util.function.Function;
 
 import hundun.miraifleet.framework.core.helper.Utils;
 import lombok.extern.slf4j.Slf4j;
+import net.mamoe.mirai.utils.MiraiLogger;
 
 /**
  * @author hundun
  * Created on 2021/05/06
  */
-@Slf4j
 public class CacheableFileHelper {
     
     File rootCacheFolder;
+    MiraiLogger log;
     
-    public CacheableFileHelper(File rootCacheFolder) {
-        this.rootCacheFolder = rootCacheFolder;
+    static final String DEFAULT_SUBFOLER_NAME = "default";
+    String subFolerName;
+    
+    public CacheableFileHelper(File rootCacheFolder, MiraiLogger log) {
+        this(rootCacheFolder, DEFAULT_SUBFOLER_NAME, log);
     }
 
+    public CacheableFileHelper(File rootCacheFolder, String subFolerName, MiraiLogger log) {
+        this.rootCacheFolder = rootCacheFolder;
+        this.subFolerName = subFolerName;
+        this.log = log;
+    }
 
     private File cacheIdToFile(String fileId) {
-        String subFolerName = "FileCache";
         String subFolerPathName = Utils.checkFolder(subFolerName, rootCacheFolder.getAbsolutePath());
         String saveFilePathName = subFolerPathName + File.separator + fileId;
         File file = new File(saveFilePathName);
@@ -36,12 +44,12 @@ public class CacheableFileHelper {
         //String subFolerName = "FileCache";
         File file = cacheIdToFile(fileId);
         if (file.exists()) {
-            log.debug("image from cache :{}", fileId);
+            log.debug("image from cache :" + fileId);
         } else {
             InputStream inputStream = uncachedFileProvider.apply(fileId);
 
             if (inputStream == null) {
-                log.info("provider not support download, image null for: {}", fileId);
+                log.info("provider not support download, image null for: " + fileId);
                 return null;
             }
 
@@ -59,16 +67,16 @@ public class CacheableFileHelper {
                 FileOutputStream fos = new FileOutputStream(file);
                 fos.write(outBytes);
                 fos.close();
-                log.info("FileOutputStream success: {}", fileId);
+                log.info("FileOutputStream success: " + fileId);
             } catch (Exception e) {
-                log.info("FileOutputStream faild {} {}", fileId, e);
+                log.info("FileOutputStream faild " +  fileId, e);
                 return null;
             }
 
             if (file != null && file.exists()) {
-                log.info("image from download and success :{}", fileId);
+                log.info("image from download and success :" + fileId);
             } else {
-                log.warn("image from download but fail :{}", fileId);
+                log.warning("image from download but fail :" + fileId);
             }
         }
         return file;
