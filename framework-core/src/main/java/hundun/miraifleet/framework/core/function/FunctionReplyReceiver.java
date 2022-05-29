@@ -8,6 +8,8 @@ import lombok.Getter;
 import net.mamoe.mirai.console.command.CommandSender;
 import net.mamoe.mirai.console.command.ConsoleCommandSender;
 import net.mamoe.mirai.console.command.MemberCommandSender;
+import net.mamoe.mirai.console.command.UserCommandSender;
+import net.mamoe.mirai.contact.AudioSupported;
 import net.mamoe.mirai.contact.Contact;
 import net.mamoe.mirai.contact.Group;
 import net.mamoe.mirai.message.data.Image;
@@ -52,6 +54,8 @@ public class FunctionReplyReceiver {
             description = ((MemberCommandSender)commandSender).getGroup().getId() + "." + ((MemberCommandSender)commandSender).getUser().getId();
         } else if (commandSender instanceof ConsoleCommandSender) {
             description = CONSOLE_SENDER_DESCRIPTION;
+        } else if (commandSender instanceof UserCommandSender) {
+            description = "u" + ((UserCommandSender)commandSender).getUser().getId();
         } else {
             description = UNHANDLED_SENDER_DESCRIPTION;
         }
@@ -85,8 +89,8 @@ public class FunctionReplyReceiver {
      */
     public Image uploadImage(ExternalResource externalResource) {
         if (commandSender != null) {
-            if (commandSender instanceof MemberCommandSender) {
-                return ((MemberCommandSender)commandSender).getGroup().uploadImage(externalResource);
+            if (commandSender.getSubject() != null) {
+                return commandSender.getSubject().uploadImage(externalResource);
             }
         } else if (contact != null) {
             return contact.uploadImage(externalResource);
@@ -120,12 +124,13 @@ public class FunctionReplyReceiver {
      */
     public OfflineAudio uploadVoice(ExternalResource externalResource) {
         if (commandSender != null) {
-            if (commandSender instanceof MemberCommandSender) {
-                return ((MemberCommandSender)commandSender).getGroup().uploadAudio(externalResource);
+            if (commandSender.getSubject() != null 
+                    && commandSender.getSubject() instanceof AudioSupported) {
+                return ((AudioSupported)commandSender.getSubject()).uploadAudio(externalResource);
             }
         } else if (contact != null) {
-            if (contact instanceof Group) {
-                return ((Group)contact).uploadAudio(externalResource);
+            if (contact instanceof AudioSupported) {
+                return ((AudioSupported)contact).uploadAudio(externalResource);
             }
         }
         return null;
