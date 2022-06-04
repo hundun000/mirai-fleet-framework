@@ -47,7 +47,7 @@ public abstract class BaseFunction<T> implements ListenerHost {
 
     public static enum GroupMessageToSessionIdType {
         USE_GROUP_ID,
-        USE_GROUP_AND_MENBER_ID
+        USE_GROUP_AND_MEMBER_ID
     }
     
     public static abstract class AbstractSimpleCommandFunctionComponent extends SimpleCommand {
@@ -108,17 +108,9 @@ public abstract class BaseFunction<T> implements ListenerHost {
     protected final String functionName;
     protected final String characterName;
     @Getter
-    //@Setter
+    @Setter
     private boolean skipRegisterCommand;
     protected GroupMessageToSessionIdType groupMessageToSessionIdType;
-
-    public void setSkipRegisterCommand(boolean skipRegisterCommand) {
-        this.skipRegisterCommand = skipRegisterCommand;
-    }
-
-    public void mySetSkipRegisterCommand(boolean skipRegisterCommand) {
-        this.skipRegisterCommand = skipRegisterCommand;
-    }
 
     Map<String, T> sessionDataMap = new ConcurrentHashMap<>();
 
@@ -213,7 +205,6 @@ public abstract class BaseFunction<T> implements ListenerHost {
     }
 
     protected T getOrCreateSessionData(String sessionId) {
-
         T sessionData = sessionDataMap.get(sessionId);
         if (sessionData == null) {
             sessionData = sessionDataSupplier.get();
@@ -222,6 +213,10 @@ public abstract class BaseFunction<T> implements ListenerHost {
         return sessionData;
     }
 
+    protected T removeSessionData(String sessionId) {
+        T sessionData = sessionDataMap.remove(sessionId);
+        return sessionData;
+    }
 
     protected File resolveFunctionConfigRootFolder() {
         return plugin.resolveConfigFile(functionName);

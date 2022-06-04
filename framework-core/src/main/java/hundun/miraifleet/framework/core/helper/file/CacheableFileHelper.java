@@ -41,15 +41,14 @@ public class CacheableFileHelper {
     }
 
     public File fromCacheOrProvider(String fileId, Function<String, InputStream> uncachedFileProvider) {
-        //String subFolerName = "FileCache";
         File file = cacheIdToFile(fileId);
         if (file.exists()) {
-            log.debug("image from cache :" + fileId);
+            log.debug("file from cache for id: " + fileId);
         } else {
             InputStream inputStream = uncachedFileProvider.apply(fileId);
 
             if (inputStream == null) {
-                log.info("provider not support download, image null for: " + fileId);
+                log.info("provider return null for id: " + fileId);
                 return null;
             }
 
@@ -67,16 +66,14 @@ public class CacheableFileHelper {
                 FileOutputStream fos = new FileOutputStream(file);
                 fos.write(outBytes);
                 fos.close();
-                log.info("FileOutputStream success: " + fileId);
             } catch (Exception e) {
-                log.info("FileOutputStream faild " +  fileId, e);
-                return null;
+                log.error("FileOutputStream faild", e);
             }
 
             if (file != null && file.exists()) {
-                log.info("image from download and success :" + fileId);
+                log.info("file from provider and success: " + fileId);
             } else {
-                log.warning("image from download but fail :" + fileId);
+                log.warning("file from provider but fail: " + fileId);
             }
         }
         return file;
