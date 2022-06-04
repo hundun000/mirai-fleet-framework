@@ -3,6 +3,7 @@ package hundun.miraifleet.framework.core.function;
 import java.io.IOException;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import lombok.Getter;
 import net.mamoe.mirai.console.command.CommandSender;
@@ -20,7 +21,7 @@ import net.mamoe.mirai.utils.ExternalResource;
 import net.mamoe.mirai.utils.MiraiLogger;
 
 /**
- * 找不到一个同时代表CommandSender和Contact的类，姑且先用本类来实现。作为Function的操作对象（Reply对象），提供uploadImage、uploadVoice、sendMessage等Reply方式。
+ * 找不到一个同时代表CommandSender和Contact的类，姑且先用本类（装饰器）来实现。作为Function的操作对象（Reply对象），提供uploadImage、uploadVoice、sendMessage等Reply方式。
  */
 public class FunctionReplyReceiver {
     private static final String CONSOLE_SENDER_DESCRIPTION = "CONSOLE_SENDER";
@@ -29,20 +30,22 @@ public class FunctionReplyReceiver {
     public final static int CONSOLE_FAKE_CONTACT_ID = 0;
     public final static int CONSOLE_FAKE_BOT_ID = 0;
 
-    MiraiLogger miraiLogger;
-    CommandSender commandSender;
-    Contact contact;
+    private final MiraiLogger miraiLogger;
+    private final CommandSender commandSender;
+    private final Contact contact;
 
     @Getter
-    String senderDescription;
+    private final String senderDescription;
 
     public FunctionReplyReceiver(CommandSender commandSender, MiraiLogger miraiLogger) {
         this.commandSender = commandSender;
+        this.contact = null;
         this.miraiLogger = miraiLogger;
         this.senderDescription = initSenderDescription();
     }
 
     public FunctionReplyReceiver(Contact contact, MiraiLogger miraiLogger) {
+        this.commandSender = null;
         this.contact = contact;
         this.miraiLogger = miraiLogger;
         this.senderDescription = initSenderDescription();
@@ -85,60 +88,76 @@ public class FunctionReplyReceiver {
     }
 
     /**
-     * do nothing and return null if not supported
+     * @Deprecated enhanced and renamed
      */
+    @Deprecated
     public Image uploadImage(ExternalResource externalResource) {
+        return uploadImageAndClose(externalResource);
+    }
+    
+    /**
+     * return null if not supported; externalResource will must be closed.
+     */
+    @Nullable
+    public Image uploadImageAndClose(ExternalResource externalResource) {
+        Image result = null;
         if (commandSender != null) {
             if (commandSender.getSubject() != null) {
-                return commandSender.getSubject().uploadImage(externalResource);
+                result = commandSender.getSubject().uploadImage(externalResource);
             }
         } else if (contact != null) {
-            return contact.uploadImage(externalResource);
+            result = contact.uploadImage(externalResource);
         }
-        return null;
+        try {
+            externalResource.close();
+        } catch (IOException e) {
+            miraiLogger.error("externalResource.close fail:", e);
+        }
+        return result;
     }
 
+    /**
+     * @Deprecated enhanced and renamed
+     */
+    @Deprecated
     @NotNull
     public Message uploadImageOrNotSupportPlaceholder(ExternalResource externalResource) {
-        Image image = uploadImage(externalResource);
+        return uploadImageAndCloseOrNotSupportPlaceholder(externalResource);
+    }
+    
+    @NotNull
+    public Message uploadImageAndCloseOrNotSupportPlaceholder(ExternalResource externalResource) {
+        Image image = uploadImageAndClose(externalResource);
         return image != null ? image : new PlainText(NOT_SUPPORT_RESOURCE_PLACEHOLDER);
     }
 
     /**
-     * @Deprecated use ExternalResource.autoClose
      * @return null if not supported
      */
-    @Deprecated
-    public Image uploadImageAndClose(ExternalResource externalResource) {
-        Image image = uploadImage(externalResource);
-        try {
-            externalResource.close();
-        } catch (IOException e) {
-            miraiLogger.error(e);
-        }
-        return image;
-    }
-
-    /**
-     * @return null if not supported
-     */
-    public OfflineAudio uploadVoice(ExternalResource externalResource) {
+    @Nullable
+    public OfflineAudio uploadVoiceAndClose(ExternalResource externalResource) {
+        OfflineAudio result = null;
         if (commandSender != null) {
             if (commandSender.getSubject() != null 
                     && commandSender.getSubject() instanceof AudioSupported) {
-                return ((AudioSupported)commandSender.getSubject()).uploadAudio(externalResource);
+                result = ((AudioSupported)commandSender.getSubject()).uploadAudio(externalResource);
             }
         } else if (contact != null) {
             if (contact instanceof AudioSupported) {
-                return ((AudioSupported)contact).uploadAudio(externalResource);
+                result = ((AudioSupported)contact).uploadAudio(externalResource);
             }
         }
-        return null;
+        try {
+            externalResource.close();
+        } catch (Exception e) {
+            miraiLogger.error("externalResource.close fail:", e);
+        }
+        return result;
     }
 
     @NotNull
-    public Message uploadVoiceOrNotSupportPlaceholder(ExternalResource externalResource) {
-        OfflineAudio audio = uploadVoice(externalResource);
+    public Message uploadVoiceAndCloseOrNotSupportPlaceholder(ExternalResource externalResource) {
+        OfflineAudio audio = uploadVoiceAndClose(externalResource);
         return audio != null ? audio : new PlainText(NOT_SUPPORT_RESOURCE_PLACEHOLDER);
     }
 

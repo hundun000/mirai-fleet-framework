@@ -7,8 +7,13 @@
 - [欧根插件(砍口垒助手)](https://github.com/hundun000/mirai-fleet-prinzeugen)
 - [阿米娅插件(明日方舟助手)](https://github.com/hundun000/mirai-fleet-amiya)
 - [音乐插件](https://github.com/hundun000/mirai-fleet-music)
+- [图片合成插件](https://github.com/hundun000/mirai-fleet-image)
 
 ## 分层关系
+
+Plugin间复用的对象是Function，即使用对方项目的Share-Function，而不是将对方Plugin作为前置插件。
+
+虽然MusicProject和ImageProject具有打出MusicPlugin和ImagePlugin的能力，但是这些plugin一般只用来验证Share-Function。MusicProject和ImageProject主要目的是提供Share-Function给AmiyaProject和PrinzeugenProject。
 
 ```mermaid
 flowchart LR
@@ -31,11 +36,29 @@ flowchart LR
     end
     subgraph MusicFunctionPackage ["Share-Function包: 提供数个音乐Function"]
       MusicFunction("音乐功能"):::functionColor
+      Mider("Mider项目: midi生成工具")
+      MusicFunction --> |依赖| Mider
     end
   end
   MusicProject --> |依赖| BaseClass
   MusicBotLogicA --> |持有| MusicFunction
   MusicBotLogicB --> |持有| MusicFunction
+
+  subgraph ImageProject ["Image插件项目"]
+    subgraph ImagePluginPackage ["Plugin包: 可打包出一个Plugin"]
+      ImagePlugin:::pluginColor
+      ImageBotLogic:::botLogicColor
+
+      ImagePlugin --> |持有| ImageBotLogic
+    end
+    subgraph ImageFunctionPackage ["Share-Function包: 提供数个图片合成Function"]
+      ImageFunction("图片合成功能"):::functionColor
+      Petpet("Petpet项目: 图片生成工具")
+      ImageFunction --> |依赖| Petpet
+    end
+  end
+  ImageProject --> |依赖| BaseClass
+  ImageBotLogic --> |持有| ImageFunction
 
   subgraph AmiyaProject ["Amiya插件项目"]
     subgraph AmiyaFunctionPackage ["Function包: 提供数个阿米娅特有Function"]
@@ -52,6 +75,7 @@ flowchart LR
   AmiyaBotLogic --> |持有| WeiboFunction
   AmiyaBotLogic --> |持有| AmiyaChatFunction
   AmiyaBotLogic --> |持有| MusicFunction
+  AmiyaBotLogic --> |持有| ImageFunction
 
   subgraph frameworkCore ["framework核心包: 提供基类和工具类"]
     BaseClass("基类")
@@ -89,6 +113,7 @@ flowchart LR
   ConsolePluginManager --> |加载| ExamplePlugin
   ConsolePluginManager --> |加载| MusicPluginA
   ConsolePluginManager --> |加载| MusicPluginB
+  ConsolePluginManager --> |加载| ImagePlugin
 
   subgraph miraiGroup1 ["miraiConsoleApi"]
     ConsolefileApi("miraiConsole.fileApi")

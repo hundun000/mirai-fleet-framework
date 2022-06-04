@@ -70,7 +70,7 @@ public class WeiboService {
         this.userInfoCacheRepository = userInfoCacheRepository;
         this.topCardInfoRepository = topCardInfoRepository;
 
-        this.cacheableFileHelper = new CacheableFileHelper(rootCacheFolder, "weiboImage", log);
+        this.cacheableFileHelper = new CacheableFileHelper(rootCacheFolder, "weiboImage", miraiLogger);
         this.log = miraiLogger;
         this.uncachedWeiboImageProvider = fileId -> downloadUncachedWeiboImage(fileId);
     }
