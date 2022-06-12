@@ -1,12 +1,13 @@
 package hundun.miraifleet.framework.core.botlogic;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
 import hundun.miraifleet.framework.core.function.AbstractAllCompositeCommandProxy;
 import hundun.miraifleet.framework.core.function.AsListenerHost;
 import hundun.miraifleet.framework.core.function.BaseFunction;
+import lombok.Getter;
 import net.mamoe.mirai.console.command.AbstractCommand;
 import net.mamoe.mirai.console.command.CommandManager;
 import net.mamoe.mirai.console.permission.Permission;
@@ -24,22 +25,19 @@ import net.mamoe.mirai.event.GlobalEventChannel;
  * Created on 2021/08/09
  */
 public abstract class BaseBotLogic {
+    @Getter
     private Permission characterCosPermission;
     protected final String characterName;
     protected final JvmPlugin plugin;
 
-    protected List<BaseFunction<?>> functions = new ArrayList<>();
+    private Map<Class<?>, BaseFunction<?>> functionMap = new HashMap<>();
     protected AbstractAllCompositeCommandProxy<?> allCompositeCommandProxy;
     
-    //protected PluginPrivateConfig pluginPrivateConfig;
-
-    //private final PluginConfigRepository<PluginPrivateConfig> configRepository;
 
     public BaseBotLogic(JvmPlugin plugin, String characterName) {
         super();
         this.characterName = characterName;
         this.plugin = plugin;
-        //this.configRepository = new PluginConfigRepository<>(plugin, resolveBotLogicConfigFile("BasePluginPrivateConfig.json"), PluginPrivateConfig.class);
     }
 
     protected File resolveBotLogicConfigFile(String jsonFileName) {
@@ -54,7 +52,7 @@ public abstract class BaseBotLogic {
         StringBuilder listenerHosts = new StringBuilder();
 
 
-        for (BaseFunction<?> function : functions) {
+        for (BaseFunction<?> function : functionMap.values()) {
             Class<?> clazz = function.getClass();
             AbstractCommand command = function.provideCommand();
             if (command != null && !function.isSkipRegisterCommand()) {
@@ -70,11 +68,6 @@ public abstract class BaseBotLogic {
 
         plugin.getLogger().info("has commands: " + commands.toString());
         plugin.getLogger().info("has listenerHosts: " + listenerHosts.toString());
-
-
-//        if (configRepository.findSingleton() == null) {
-//            configRepository.saveSingleton(defaultPluginPrivateConfig());
-//        }
 
         characterCosPermission = registerCosPermission();
         
@@ -94,11 +87,26 @@ public abstract class BaseBotLogic {
 
     public abstract JavaPluginScheduler getPluginScheduler();
 
-    public Permission getCharacterCosPermission() {
-        return characterCosPermission;
+    
+    /**
+     * function将会：
+     * 1. onBotLogicEnable时，向mirai注册function.provideCommand()（若有）<br>
+     * 2. onBotLogicEnable时，向mirai注册function为ListenerHost（若是）<br>
+     * 3. 可被fleet框架的其他组件通过getFunction(class)获得，用于其他用途
+     */
+    protected <T extends BaseFunction<?>> void registerFunction(T function) {
+        functionMap.put(function.getClass(), function);
+    }
+    
+    @SuppressWarnings("unchecked")
+    public <T extends BaseFunction<?>> T getFunction(Class<T> clazz) {
+        if (!functionMap.containsKey(clazz)) {
+            plugin.getLogger().warning("未找到Function: " + clazz.getName());
+        }
+        return (T) functionMap.get(clazz);
     }
 
-    protected Permission registerCosPermission() {
+    private Permission registerCosPermission() {
         PermissionId functionPermission = plugin.permissionId("temp");
         String newHost = functionPermission.getNamespace() + ".cos";
         String newName = "INSTANCE";

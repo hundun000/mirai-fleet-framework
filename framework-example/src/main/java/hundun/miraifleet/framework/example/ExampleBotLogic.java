@@ -15,32 +15,24 @@ import net.mamoe.mirai.console.plugin.jvm.JavaPlugin;
  */
 public class ExampleBotLogic extends BaseJavaBotLogic {
 
-    WeiboFunction weiboFunction;
-    ReminderFunction reminderFunction;
-    RepeatFunction repeatFunction;
-    CharacterHelpFunction characterHelpFunction;
-    DriveFunction driveFunction;
     
     public ExampleBotLogic(JavaPlugin plugin) {
         super(plugin, "framework样例");
 
-        weiboFunction = new WeiboFunction(this, plugin, characterName, 
-                ExampleDefaultConfigAndData.weiboConfigDefaultDataSupplier());
-        functions.add(weiboFunction);
+        registerFunction(new WeiboFunction(this, plugin, characterName, 
+                        ExampleDefaultConfigAndData.weiboConfigDefaultDataSupplier())
+                );
 
-        reminderFunction = new ReminderFunction(this, plugin, characterName, 
-                null,
-                ExampleDefaultConfigAndData.hourlyChatConfigDefaultDataSupplier());
-        functions.add(reminderFunction);
+        registerFunction(new ReminderFunction(this, plugin, characterName, 
+                        null,
+                        ExampleDefaultConfigAndData.hourlyChatConfigDefaultDataSupplier())
+                );
+        
+        registerFunction(new RepeatFunction(this, plugin, characterName));
 
-        repeatFunction = new RepeatFunction(this, plugin, characterName);
-        functions.add(repeatFunction);
-        
-        characterHelpFunction = new CharacterHelpFunction(this, plugin, characterName);
-        functions.add(characterHelpFunction);
-        
-        driveFunction = new DriveFunction(this, plugin, characterName);
-        functions.add(driveFunction);
+        registerFunction(new CharacterHelpFunction(this, plugin, characterName));
+
+        registerFunction(new DriveFunction(this, plugin, characterName));
         
         allCompositeCommandProxy = new ExamleAllCompositeCommandProxy(this, plugin, characterName);
     }

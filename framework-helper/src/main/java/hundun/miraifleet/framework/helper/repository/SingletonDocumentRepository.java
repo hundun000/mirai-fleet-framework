@@ -32,7 +32,8 @@ public class SingletonDocumentRepository<V> extends FileRepository<V> {
             ) {
         super(plugin, file, documentClazz, 
                 // singleton-Supplier to map-Supplier
-                () -> Map.of(THE_SINGLETON_KEY, defaultDataSupplier.get())
+                defaultDataSupplier != null ?
+                        () -> Map.of(THE_SINGLETON_KEY, defaultDataSupplier.get()) : null
                 );
     }
 

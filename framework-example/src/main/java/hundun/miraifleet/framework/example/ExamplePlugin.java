@@ -21,11 +21,6 @@ public class ExamplePlugin extends JavaPlugin {
     }
 
     @Override
-    public void onLoad(@NotNull PluginComponentStorage $this$onLoad) {
-
-    }
-
-    @Override
     public void onEnable() {
         botLogic = new ExampleBotLogic(this);
         botLogic.onBotLogicEnable();

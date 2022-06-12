@@ -21,4 +21,5 @@ public abstract class AbstractAllCompositeCommandProxy<T extends BaseBotLogic> e
         super(plugin, characterName, new String[]{}, "我是" + characterName, plugin.getParentPermission(), CommandArgumentContext.EMPTY);
         this.botLogic = botLogic;
     }
+    
 }
