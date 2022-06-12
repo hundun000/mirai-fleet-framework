@@ -18,7 +18,7 @@ import org.quartz.CronExpression;
 
 import hundun.miraifleet.framework.core.botlogic.BaseBotLogic;
 import hundun.miraifleet.framework.core.function.BaseFunction;
-import hundun.miraifleet.framework.core.helper.repository.SingletonDocumentRepository;
+import hundun.miraifleet.framework.helper.repository.SingletonDocumentRepository;
 import hundun.miraifleet.framework.starter.botlogic.function.reminder.config.HourlyChatConfig;
 import hundun.miraifleet.framework.starter.botlogic.function.reminder.domain.ReminderItem;
 import hundun.miraifleet.framework.starter.botlogic.function.reminder.domain.ReminderList;
@@ -27,7 +27,6 @@ import lombok.Setter;
 import net.mamoe.mirai.Bot;
 import net.mamoe.mirai.console.command.AbstractCommand;
 import net.mamoe.mirai.console.command.CommandSender;
-import net.mamoe.mirai.console.plugin.jvm.JavaPlugin;
 import net.mamoe.mirai.console.plugin.jvm.JvmPlugin;
 import net.mamoe.mirai.contact.Group;
 
@@ -51,8 +50,8 @@ public class ReminderFunction extends BaseFunction<Void> {
             BaseBotLogic baseBotLogic,
             JvmPlugin plugin,
             String characterName,
-            @Nullable Supplier<Map<String, ReminderList>> reminderListDefaultDataSupplier,
-            @Nullable Supplier<Map<String, HourlyChatConfig>> hourlyChatConfigDefaultDataSupplier
+            @Nullable Supplier<ReminderList> reminderListDefaultDataSupplier,
+            @Nullable Supplier<HourlyChatConfig> hourlyChatConfigDefaultDataSupplier
             ) {
         super(
             baseBotLogic,
@@ -61,7 +60,7 @@ public class ReminderFunction extends BaseFunction<Void> {
             "ReminderFunction",
             null
             );
-        this.reminderListRepository = new SingletonDocumentRepository<>(plugin, resolveFunctionRepositoryFile("ReminderListRepository.json"), ReminderList.class, reminderListDefaultDataSupplier);
+        this.reminderListRepository = new SingletonDocumentRepository<>(plugin, resolveDataRepositoryFile("ReminderListRepository.json"), ReminderList.class, reminderListDefaultDataSupplier);
         this.configRepository = new SingletonDocumentRepository<>(plugin, resolveFunctionConfigFile("HourlyChatConfig.json"), HourlyChatConfig.class, hourlyChatConfigDefaultDataSupplier);
         botLogic.getPluginScheduler().repeating(60 * 1000, new ReminderTimerTask());
         this.commandComponent = new CompositeCommandFunctionComponent(plugin, characterName, functionName);

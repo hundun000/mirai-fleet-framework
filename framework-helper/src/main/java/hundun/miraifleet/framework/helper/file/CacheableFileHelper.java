@@ -1,4 +1,4 @@
-package hundun.miraifleet.framework.core.helper.file;
+package hundun.miraifleet.framework.helper.file;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -6,7 +6,7 @@ import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.util.function.Function;
 
-import hundun.miraifleet.framework.core.helper.Utils;
+import hundun.miraifleet.framework.helper.Utils;
 import lombok.extern.slf4j.Slf4j;
 import net.mamoe.mirai.utils.MiraiLogger;
 
@@ -32,7 +32,7 @@ public class CacheableFileHelper {
         this.log = log;
     }
 
-    private File cacheIdToFile(String fileId) {
+    private File fileIdToFile(String fileId) {
         String subFolerPathName = Utils.checkFolder(subFolerName, rootCacheFolder.getAbsolutePath());
         String saveFilePathName = subFolerPathName + File.separator + fileId;
         File file = new File(saveFilePathName);
@@ -40,8 +40,12 @@ public class CacheableFileHelper {
         return file;
     }
 
+    /**
+     * 命中缓存：从缓存中读出file，返回之<br>
+     * 未命中缓存：使用Provider得到InputStream，存为缓存file，返回之
+     */
     public File fromCacheOrProvider(String fileId, Function<String, InputStream> uncachedFileProvider) {
-        File file = cacheIdToFile(fileId);
+        File file = fileIdToFile(fileId);
         if (file.exists()) {
             log.debug("file from cache for id: " + fileId);
         } else {

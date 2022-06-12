@@ -5,7 +5,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Supplier;
 
-import hundun.miraifleet.framework.core.helper.repository.SingletonDocumentRepository;
+import hundun.miraifleet.framework.helper.repository.SingletonDocumentRepository;
 import hundun.miraifleet.framework.starter.botlogic.function.reminder.config.HourlyChatConfig;
 import hundun.miraifleet.framework.starter.botlogic.function.reminder.domain.ReminderItem;
 import hundun.miraifleet.framework.starter.botlogic.function.reminder.domain.ReminderList;
@@ -39,33 +39,30 @@ public class ExampleDefaultConfigAndData {
      * 过滤：RETWEET
      * @return
      */
-    public static Supplier<Map<String, WeiboConfig>> weiboConfigDefaultDataSupplier() {
+    public static Supplier<WeiboConfig> weiboConfigDefaultDataSupplier() {
         return () -> {
             WeiboConfig weiboConfig = new WeiboConfig(
                     mapOf("6279793937", WeiboViewFormat.ALL_IMAGE),
                     mapOf("6279793937", Arrays.asList(WeiboPushFilterFlag.RETWEET)));
-            Map<String, WeiboConfig> defaultData = mapOf(SingletonDocumentRepository.THE_SINGLETON_KEY, weiboConfig);
-            return defaultData;
+            return weiboConfig;
         };
     }
 
-    public static Supplier<Map<String, ReminderList>> reminderListDefaultDataSupplier() {
+    public static Supplier<ReminderList> reminderListDefaultDataSupplier() {
         return () -> {
             ReminderList reminderList = new ReminderList();
             reminderList.setItems(Arrays.asList(new ReminderItem(null, "现在是周日晚上10点。", "* 0 22 ? * 7")));
-            Map<String, ReminderList> defaultData = mapOf(SingletonDocumentRepository.THE_SINGLETON_KEY, reminderList);
-            return defaultData;
+            return reminderList;
         };
     }
 
-    public static Supplier<Map<String, HourlyChatConfig>> hourlyChatConfigDefaultDataSupplier() {
+    public static Supplier<HourlyChatConfig> hourlyChatConfigDefaultDataSupplier() {
         return () -> {
             HourlyChatConfig hourlyChatConfig = new HourlyChatConfig();
             hourlyChatConfig.setChatTexts(mapOf(
                     "9", "早上好，现在是9点。"
                     ));
-            Map<String, HourlyChatConfig> defaultData = mapOf(SingletonDocumentRepository.THE_SINGLETON_KEY, hourlyChatConfig);
-            return defaultData;
+            return hourlyChatConfig;
         };
     }
 }

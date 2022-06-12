@@ -58,6 +58,11 @@ subprojects {
     artifacts {
         archives sourcesJar
     }
+    
+    dependencies {
+        compileOnly 'org.projectlombok:lombok:1.18.4'
+        annotationProcessor 'org.projectlombok:lombok:1.18.4'
+    }
 }
 
 
@@ -69,10 +74,7 @@ project(":framework-core") {
     eclipse.project.name = rootProject.name + "-core"
 
     dependencies {
-        api 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.12.4'
-    
-        compileOnly 'org.projectlombok:lombok:1.18.4'
-        annotationProcessor 'org.projectlombok:lombok:1.18.4'
+        api project(":framework-helper")
     }
     
     publishing {
@@ -88,6 +90,27 @@ project(":framework-core") {
     }
 }
 
+project(":framework-helper") {
+    apply plugin: 'maven-publish'
+    
+    eclipse.project.name = rootProject.name + "-helper"
+
+    dependencies {
+        api 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.12.4'
+    }
+    
+    publishing {
+        publications {
+            mavenJava(MavenPublication) {
+                // useless for jitpack: groupId = GROUP
+                artifactId = ARTIFACT_ID_START + "-helper"
+                // useless for jitpack: version = VERSION
+    
+                from components.java
+            }
+        }
+    }
+}
 
 project(":framework-starter") {
     apply plugin: 'maven-publish'
@@ -95,15 +118,12 @@ project(":framework-starter") {
     eclipse.project.name = rootProject.name + "-starter"
 
     dependencies {
-        implementation project(":framework-core")
+        api project(":framework-core")
     
         api 'io.github.openfeign:feign-jackson:11.1'
         api 'io.github.openfeign:feign-core:11.1'
         
         api 'org.quartz-scheduler:quartz:2.3.2'
-    
-        compileOnly 'org.projectlombok:lombok:1.18.4'
-        annotationProcessor 'org.projectlombok:lombok:1.18.4'
     }
     
     publishing {
@@ -131,8 +151,6 @@ project(":framework-example") {
         //implementation 'com.github.hundun000.mirai-fleet-framework:mirai-fleet-framework-core:0.5.0'
         //implementation 'com.github.hundun000.mirai-fleet-framework:mirai-fleet-framework-starter:0.5.0'
         
-        compileOnly 'org.projectlombok:lombok:1.18.4'
-        annotationProcessor 'org.projectlombok:lombok:1.18.4'
         
         testImplementation "junit:junit:4.11"
     }

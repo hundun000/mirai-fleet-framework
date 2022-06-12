@@ -230,8 +230,20 @@ public abstract class BaseFunction<T> implements ListenerHost {
         return plugin.resolveDataFile(functionName + File.separator + "caches");
     }
 
+    /**
+     * @Deprecated use resolveDataRepositoryFile or resolveConfigRepositoryFile
+     */
+    @Deprecated
     protected File resolveFunctionRepositoryFile(String jsonFileName) {
+        return resolveDataRepositoryFile(jsonFileName);
+    }
+    
+    protected File resolveDataRepositoryFile(String jsonFileName) {
         return plugin.resolveDataFile(functionName + File.separator + "repositories" + File.separator + jsonFileName);
+    }
+    
+    protected File resolveConfigRepositoryFile(String jsonFileName) {
+        return plugin.resolveConfigFile(functionName + File.separator + "repositories" + File.separator + jsonFileName);
     }
 
     protected File resolveFunctionDataFile(String fileName) {

@@ -1,4 +1,4 @@
-package hundun.miraifleet.framework.core.helper.repository;
+package hundun.miraifleet.framework.helper.repository;
 
 import java.io.File;
 import java.util.Map;
@@ -28,9 +28,12 @@ public class SingletonDocumentRepository<V> extends FileRepository<V> {
             JvmPlugin plugin,
             File file,
             Class<V> documentClazz,
-            @Nullable Supplier<Map<String, V>> defaultDataSupplier
+            @Nullable Supplier<V> defaultDataSupplier
             ) {
-        super(plugin, file, documentClazz, defaultDataSupplier);
+        super(plugin, file, documentClazz, 
+                // singleton-Supplier to map-Supplier
+                () -> Map.of(THE_SINGLETON_KEY, defaultDataSupplier.get())
+                );
     }
 
 

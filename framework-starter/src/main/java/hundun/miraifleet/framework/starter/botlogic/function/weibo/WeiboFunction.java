@@ -16,7 +16,7 @@ import org.jetbrains.annotations.Nullable;
 import hundun.miraifleet.framework.core.botlogic.BaseBotLogic;
 import hundun.miraifleet.framework.core.function.BaseFunction;
 import hundun.miraifleet.framework.core.function.FunctionReplyReceiver;
-import hundun.miraifleet.framework.core.helper.repository.SingletonDocumentRepository;
+import hundun.miraifleet.framework.helper.repository.SingletonDocumentRepository;
 import hundun.miraifleet.framework.starter.botlogic.function.weibo.WeiboService.WeiboCardView;
 import hundun.miraifleet.framework.starter.botlogic.function.weibo.config.WeiboConfig;
 import hundun.miraifleet.framework.starter.botlogic.function.weibo.config.WeiboPushFilterFlag;
@@ -58,7 +58,7 @@ public class WeiboFunction extends BaseFunction<WeiboFunction.SessionData> {
             BaseBotLogic baseBotLogic,
             JvmPlugin plugin,
             String characterName,
-            @Nullable Supplier<Map<String, WeiboConfig>> weiboConfigDefaultDataSupplier
+            @Nullable Supplier<WeiboConfig> weiboConfigDefaultDataSupplier
             ) {
         super(
             baseBotLogic,
@@ -72,8 +72,8 @@ public class WeiboFunction extends BaseFunction<WeiboFunction.SessionData> {
                 plugin.getLogger(),
                 WeiboApiFeignClient.instance(plugin.getLogger()),
                 WeiboPictureApiFeignClient.instance(plugin.getLogger()),
-                new WeiboUserInfoCacheRepository(plugin, resolveFunctionRepositoryFile("WeiboUserInfoCacheRepository.json")),
-                new TopCardInfoRepository(plugin, resolveFunctionRepositoryFile("TopCardInfoRepository.json")),
+                new WeiboUserInfoCacheRepository(plugin, resolveDataRepositoryFile("WeiboUserInfoCacheRepository.json")),
+                new TopCardInfoRepository(plugin, resolveDataRepositoryFile("TopCardInfoRepository.json")),
                 resolveFunctionCacheFileFolder()
                 );
         this.configRepository = new SingletonDocumentRepository<>(

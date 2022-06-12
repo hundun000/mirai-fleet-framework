@@ -14,9 +14,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import feign.Response;
-import hundun.miraifleet.framework.core.helper.file.CacheableFileHelper;
-import hundun.miraifleet.framework.core.helper.file.FileOperationDelegate;
-import hundun.miraifleet.framework.core.helper.file.IFileOperationDelegator;
+import hundun.miraifleet.framework.helper.file.CacheableFileHelper;
 import hundun.miraifleet.framework.starter.botlogic.function.weibo.config.WeiboViewFormat;
 import hundun.miraifleet.framework.starter.botlogic.function.weibo.db.TopCardInfoRepository;
 import hundun.miraifleet.framework.starter.botlogic.function.weibo.db.WeiboUserInfoCacheRepository;
