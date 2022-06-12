@@ -110,6 +110,9 @@ public abstract class BaseFunction<T> implements ListenerHost {
     @Getter
     @Setter
     private boolean skipRegisterCommand;
+    @Getter
+    @Setter
+    private boolean skipCosCheck;
     protected GroupMessageToSessionIdType groupMessageToSessionIdType;
 
     Map<String, T> sessionDataMap = new ConcurrentHashMap<>();
@@ -129,6 +132,7 @@ public abstract class BaseFunction<T> implements ListenerHost {
         this.characterName = characterName;
         // default values
         this.skipRegisterCommand = true;
+        this.skipCosCheck = false;
         this.groupMessageToSessionIdType = GroupMessageToSessionIdType.USE_GROUP_ID;
     }
 
@@ -255,6 +259,9 @@ public abstract class BaseFunction<T> implements ListenerHost {
     }
 
     protected boolean checkCosPermission(NudgeEvent event) {
+        if (skipCosCheck) {
+            return true;
+        }
         if (event.getSubject() instanceof Group) {
             return checkCosPermission(event.getBot(), (Group)event.getSubject());
         } else if (event.getSubject() instanceof User) {
@@ -264,6 +271,9 @@ public abstract class BaseFunction<T> implements ListenerHost {
     }
 
     protected boolean checkCosPermission(Bot bot, Group group) {
+        if (skipCosCheck) {
+            return true;
+        }
         Permission targetPermission = botLogic.getCharacterCosPermission();
         if (targetPermission == null) {
             log.warning("checkCosPermission false because Permission is null, maybe Permission register failed");
@@ -274,6 +284,9 @@ public abstract class BaseFunction<T> implements ListenerHost {
     }
 
     protected boolean checkCosPermission(Bot bot, User user) {
+        if (skipCosCheck) {
+            return true;
+        }
         Permission targetPermission = botLogic.getCharacterCosPermission();
         if (targetPermission == null) {
             log.warning("checkCosPermission false because Permission is null, maybe Permission register failed");
@@ -284,6 +297,9 @@ public abstract class BaseFunction<T> implements ListenerHost {
     }
   
     protected boolean checkCosPermission(MessageEvent event) {
+        if (skipCosCheck) {
+            return true;
+        }
         if (event.getSubject() instanceof Group) {
             return checkCosPermission(event.getBot(), (Group)event.getSubject());
         } else if (event.getSubject() instanceof User) {
@@ -293,6 +309,9 @@ public abstract class BaseFunction<T> implements ListenerHost {
     }
 
     protected boolean checkCosPermission(CommandSender sender) {
+        if (skipCosCheck) {
+            return true;
+        }
         if (sender instanceof ConsoleCommandSender) {
             return true;
         } else if (sender instanceof MemberCommandSender) {
