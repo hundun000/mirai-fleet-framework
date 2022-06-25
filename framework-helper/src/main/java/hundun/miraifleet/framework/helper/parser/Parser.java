@@ -5,10 +5,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Function;
 
-import hundun.miraifleet.framework.helper.parser.statement.LiteralValueStatement;
+import org.jetbrains.annotations.NotNull;
+
 import hundun.miraifleet.framework.helper.parser.statement.Statement;
-import hundun.miraifleet.framework.helper.parser.statement.SubFunctionCallStatement;
+import hundun.miraifleet.framework.helper.parser.statement.SyntaxsErrorStatement;
 import lombok.extern.slf4j.Slf4j;
 import net.mamoe.mirai.message.data.Message;
 import net.mamoe.mirai.message.data.MessageChain;
@@ -20,11 +22,13 @@ import net.mamoe.mirai.message.data.MessageChain;
  * Created on 2021/04/27
  */
 @Slf4j
-public abstract class Parser<T> {
+public abstract class Parser {
 
-    public Tokenizer<T> tokenizer = new Tokenizer<>();
+    private Tokenizer tokenizer = new Tokenizer();
     
-    public SyntaxsTree syntaxsTree = new SyntaxsTree();
+    private SyntaxsTree syntaxsTree = new SyntaxsTree();
+    
+    private Map<StatementType, Function<List<Token>, Statement>> constructorFunctionMap = new HashMap<>();
     
     public Parser() {
         initParser();
@@ -32,33 +36,25 @@ public abstract class Parser<T> {
     
     protected abstract void initParser();
     
-    public Statement<T> simpleParse(MessageChain messageChain) {
+    public Statement simpleParse(MessageChain messageChain) {
         
         
-        List<Token<T>> tokens = new ArrayList<>();
+        List<Token> tokens = new ArrayList<>();
         for (Message message : messageChain) {
-            List<Token<T>> newTokens = tokenizer.simpleTokenize(message);
+            List<Token> newTokens = tokenizer.simpleTokenize(message);
             tokens.addAll(newTokens);
         }
         
-        StatementType type = syntaxsTree.root.accept(tokens, 0);
-        if (type == null) {
-            type = StatementType.SYNTAX_ERROR;
+        StatementType statementType = syntaxsTree.root.accept(tokens, 0);
+        Statement statement;
+        if (statementType == StatementType.SYNTAX_ERROR) {
+            statement = new SyntaxsErrorStatement();
+        } else {
+            Function<List<Token>, Statement> function = constructorFunctionMap.get(statementType);
+            statement = function.apply(tokens);
         }
-        Statement<T> statement;
-        switch (type) {
-            case SUB_FUNCTION_CALL:
-                statement = new SubFunctionCallStatement<T>(tokens);
-                break;
-            case SYNTAX_ERROR:
-            default:
-                type = StatementType.PLAIN_TEXT;
-                statement = new LiteralValueStatement<T>(tokens);
-                break;
-        }
-        
-        
-        statement.setType(type);
+
+        statement.setType(statementType);
         statement.setTokens(tokens);
         statement.setOriginMiraiCode(messageChain.serializeToMiraiCode());
         return statement;
@@ -121,20 +117,20 @@ public abstract class Parser<T> {
         /**
          * 特别地，当token的原type非accept时，会尝试把token类型改变为LITERAL_VALU再次检查
          */
-        public StatementType accept(List<Token<T>> tokens, int currentIndex) {
+        @NotNull
+        public StatementType accept(List<Token> tokens, int currentIndex) {
             if (tokens == null) {
                 return null;
             }
             if (tokens.size() > currentIndex) {
-                Token<T> top = tokens.get(currentIndex);
+                Token top = tokens.get(currentIndex);
                 DFANode nextNode = getChildNode(top.getType());
                 if (nextNode == null) {
                     nextNode = getChildNode(TokenType.LITERAL_VALUE);
                     if (nextNode == null) {
                         return StatementType.SYNTAX_ERROR;
                     } else {
-                        top.setType(TokenType.LITERAL_VALUE);
-                        top.setExtraContent((T)null);
+                        top.changeToLiteralValue();
                     }
                 }
                 return nextNode.accept(tokens, currentIndex + 1);
@@ -159,11 +155,11 @@ public abstract class Parser<T> {
         }
     }
     
-    protected void registerSubFunctionByCustomSetting(T subFunction, String customIdentifier) {
+    protected void registerSubCommand(String standardText, String... aliasTexts) {
         
-        
-        this.tokenizer.registerSubFunction(subFunction, customIdentifier);
-        //guideFunction.putDocument(this.getId(), subFunction, customIdentifier);
+        for (String aliasText : aliasTexts) {
+            this.tokenizer.registerSubCommand(standardText, aliasText);
+        }
     }
     
     
@@ -173,16 +169,20 @@ public abstract class Parser<T> {
 
     
     
-    protected void registerWakeUpKeyword(String keyword) {
+    protected void registerMainCommand(String keyword) {
         try {
-            this.tokenizer.registerKeyword(keyword, TokenType.WAKE_UP);
+            this.tokenizer.registerKeyword(keyword, TokenType.MAIN_COMMAND_NAME);
         } catch (Exception e) {
             log.error("registerWakeUpKeyword fail:{}", e.getMessage());
         }
     }
     
-    protected void registerSyntaxs(List<List<TokenType>> syntaxs, StatementType type) {
+    protected void registerSyntaxs(
+            Function<List<Token>, Statement> constructorFunction,
+            List<List<TokenType>> syntaxs, 
+            StatementType type) {
         this.syntaxsTree.registerSyntaxs(syntaxs, type);
+        this.constructorFunctionMap.put(type, constructorFunction);
     }
     
 }

@@ -33,10 +33,10 @@ subprojects {
     apply plugin: 'java-library'
     
     java {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
+        sourceCompatibility = JavaVersion.VERSION_11
+        targetCompatibility = JavaVersion.VERSION_11
     }
-    
+    mirai { jvmTarget = JavaVersion.VERSION_11}
     configurations {
         compileOnly {
             extendsFrom annotationProcessor

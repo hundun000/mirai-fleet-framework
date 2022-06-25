@@ -13,20 +13,21 @@ import lombok.Getter;
  * @author hundun
  * Created on 2021/04/27
  */
+@Deprecated
 @Getter
-public class SubFunctionCallStatement<T> extends Statement<T> {
+public class SubFunctionCallStatement extends Statement {
     
     public static List<List<TokenType>> syntaxs = new ArrayList<>();
     static {
-        syntaxs.add(Arrays.asList(TokenType.WAKE_UP, TokenType.AT, TokenType.FUNCTION_NAME));
-        syntaxs.add(Arrays.asList(TokenType.WAKE_UP, TokenType.AT, TokenType.FUNCTION_NAME, TokenType.LITERAL_VALUE));
+        syntaxs.add(Arrays.asList(TokenType.MAIN_COMMAND_NAME, TokenType.AT, TokenType.SUB_COMMAND_NAME));
+        syntaxs.add(Arrays.asList(TokenType.MAIN_COMMAND_NAME, TokenType.AT, TokenType.SUB_COMMAND_NAME, TokenType.LITERAL_VALUE));
     }
     
-    T subFunction;
+    String subFunction;
     List<String> args;
     
-    public SubFunctionCallStatement(List<Token<T>> tokens) {
-        this.subFunction = tokens.get(1).getExtraContent();
+    public SubFunctionCallStatement(List<Token> tokens) {
+        this.subFunction = tokens.get(1).getExtraTextContent();
         int argsStartIndex = 2;
         this.args = new ArrayList<>(tokens.size() - argsStartIndex);
         for (int i = argsStartIndex; i < tokens.size(); i ++) {
