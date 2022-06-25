@@ -16,33 +16,36 @@
 
 ### 3. 配置mirai-console权限
 
-除了常规插件需要允许群员使用指令的权限，还有一个`特殊权限`来作为本插件所有服务开关，具体的`<特殊权限名>`见对应插件的说明文档(阿米娅插件示例：`hundun.fleet.amiya.cos:INSTANCE`)。该权限精确到 群号+bot账号 ，也就是说如果在console里运行了多个bot，可以通过权限配置仅让指定的bot，仅在指定的群，启用本插件的服务。
+本插件的指令受mirai-console权限系统管理，[权限授予说明](https://github.com/mamoe/mirai/blob/dev/docs/ConsoleTerminal.md#%E5%9C%A8%E7%BE%A4%E8%81%8A%E4%B8%AD%E4%BD%BF%E7%94%A8%E5%91%BD%E4%BB%A4-%E6%9D%83%E9%99%90%E6%8E%88%E4%BA%88)。本文后续只描述“需要将某个权限授予给某个被许可人”，具体操作方法见上述官方文档。
 
-#### 方式1：通过PermissionCommand授权
+使用本插件时，一方面和常规插件一样，需要授予不同用户对应的指令权限（`hundun.fleet.XXX:command.XXX`或`hundun.fleet.XXX:*`）。另一方面，还需要授予一种fleet框架插件的`特殊权限`。注意，是两种权限都要授予。
 
-[用PermissionCommand授权群员使用指令的权限](https://github.com/mamoe/mirai-console/blob/master/docs/BuiltInCommands.md#%E6%8E%88%E4%BA%88%E4%B8%80%E4%B8%AA%E7%94%A8%E6%88%B7%E6%89%A7%E8%A1%8C%E6%89%80%E6%9C%89%E6%8C%87%E4%BB%A4%E7%9A%84%E6%9D%83%E9%99%90)
+#### 特殊权限设计说明
 
-用PermissionCommand授权特殊权限：
-> /perm permit m<目标groupId>.<目标botId> <特殊权限名>
-> 
-> 表示bot账号<目标botId>在群<目标groupId>启用<特殊权限名>对应的插件
+常规的指令权限只能控制指令，为了控制那些指令以外的形式触发的功能（戳一戳事件响应，定时自动发送），引入`特殊权限`作为本插件所有服务开关，具体的`<特殊权限id>`见具体插件的说明文档(例如对于`阿米娅插件`，则`<特殊权限id>`为：`hundun.fleet.amiya.cos:INSTANCE`)。
 
-阿米娅插件示例：
+- 特殊权限授予给“群成员身份的bot”时，表示特定群的特定bot，启用该插件（即包括事件响应，定时自动发送）。
+
+> 阿米娅插件示例，表示群111111里的bot账号222222，启用阿米娅插件。
+>
 > /perm permit m111111.222222 hundun.fleet.amiya.cos:INSTANCE  
-> 
-> 表示bot账号222222在群1111111启用阿米娅插件。注意，这里的222222是bot自身的账号。
 
-#### 方式2：直接编辑PermissionService.yml
+- 特殊权限授予给“用户身份的人”时，表示任意bot，对好友身份的特定人，启用该插件（即包括事件响应，对好友一般不含定时自动发送）。
 
-授权后的config/Console/PermissionService.yml内容，阿米娅插件示例：
-```
-grantedPermissionMap: 
-  ……
-  'hundun.fleet.amiya:*':                 # 常规权限
-    - 'm111111.*'                         # 允许111111群的任意群员使用本插件的所有指令
-  'hundun.fleet.amiya.cos:INSTANCE':      # 特殊权限，表示本插件的开关
-    - m111111.222222                      # bot账号222222在群1111111启用本插件
-```
+> 阿米娅插件示例，表示任意bot对好友333333，启用阿米娅插件。
+>
+> /perm permit u333333 hundun.fleet.amiya.cos:INSTANCE  
+
+
+#### 进阶用法例子
+
+阿米娅插件为例。console里运行了botA(id=222222)和botB(id=333333)，加入了同一个群(id=111111)，只希望群里botA启用本插件，botB不启用本插件，则可：
+
+一方面，授予群111111任意群员使用指令的权限。
+> /perm permit m111111.\* hundun.fleet.amiya:\*  
+
+另一方面，授予botA特殊权限，不授予botB特殊权限。
+> /perm permit m111111.222222 hundun.fleet.amiya.cos:INSTANCE
 
 ### 4. 启动和登录
 

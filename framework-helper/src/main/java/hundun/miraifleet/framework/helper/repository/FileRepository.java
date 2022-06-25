@@ -86,7 +86,7 @@ public abstract class FileRepository<V> {
     protected void readFile() {
         try {
             if (!file.exists()) {
-                plugin.getLogger().info("file of " + documentClazz.getSimpleName() + " not exists, will create empty.");
+                plugin.getLogger().info("file of " + documentClazz.getSimpleName() + " not exists, will create empty or default.");
                 data.clear();
                 if (defaultDataSupplier != null) {
                     data.putAll(defaultDataSupplier.get());

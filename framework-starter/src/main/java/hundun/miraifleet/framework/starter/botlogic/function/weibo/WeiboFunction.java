@@ -1,7 +1,6 @@
 package hundun.miraifleet.framework.starter.botlogic.function.weibo;
 
 import java.io.File;
-import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.HashMap;
@@ -32,7 +31,6 @@ import lombok.Getter;
 import net.mamoe.mirai.Bot;
 import net.mamoe.mirai.console.command.AbstractCommand;
 import net.mamoe.mirai.console.command.CommandSender;
-import net.mamoe.mirai.console.plugin.jvm.JavaPlugin;
 import net.mamoe.mirai.console.plugin.jvm.JvmPlugin;
 import net.mamoe.mirai.contact.Group;
 import net.mamoe.mirai.message.data.Image;
@@ -217,13 +215,7 @@ public class WeiboFunction extends BaseFunction<WeiboFunction.SessionData> {
         }
 
         for (File imageFile : newCardCacheAndImage.getImages()) {
-            ExternalResource externalResource = ExternalResource.create(imageFile);
-            Image image = group.uploadImage(externalResource);
-            try {
-                externalResource.close();
-            } catch (IOException e) {
-                log.error(e);
-            }
+            Image image = group.uploadImageAndClose(ExternalResource.create(imageFile));
             if (image != null) {
                 chain = chain.plus(image);
             }
@@ -232,9 +224,6 @@ public class WeiboFunction extends BaseFunction<WeiboFunction.SessionData> {
         if (!newCardCacheAndImage.getImageUrls().isEmpty()) {
             StringBuilder builder = new StringBuilder();
             builder.append("\n以及" + newCardCacheAndImage.getImageUrls().size() + "张图片。");
-//            for (String url : newBlog.getPicsLargeUrls()) {
-//                builder.append(url).append("\n");
-//            }
             chain = chain.plus(new PlainText(builder.toString()));
         }
 
