@@ -62,6 +62,7 @@ subprojects {
     dependencies {
         compileOnly 'org.projectlombok:lombok:1.18.4'
         annotationProcessor 'org.projectlombok:lombok:1.18.4'
+        testImplementation "junit:junit:4.11"
     }
 }
 
@@ -152,7 +153,7 @@ project(":framework-example") {
         //implementation 'com.github.hundun000.mirai-fleet-framework:mirai-fleet-framework-starter:0.5.0'
         
         
-        testImplementation "junit:junit:4.11"
+        
     }
 }
 
