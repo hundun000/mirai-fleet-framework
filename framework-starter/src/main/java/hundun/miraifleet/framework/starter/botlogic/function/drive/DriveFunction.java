@@ -32,7 +32,7 @@ public class DriveFunction extends BaseFunction<Void>{
             "DriveFunction",
             null
             );
-        this.commandComponent = new CompositeCommandFunctionComponent(plugin, characterName, functionName);
+        this.commandComponent = new CompositeCommandFunctionComponent();
     }
 
 
@@ -42,14 +42,14 @@ public class DriveFunction extends BaseFunction<Void>{
     }
 
     public class CompositeCommandFunctionComponent extends AbstractCompositeCommandFunctionComponent {
-        public CompositeCommandFunctionComponent(JvmPlugin plugin, String characterName, String functionName) {
-            super(plugin, characterName, functionName);
+        public CompositeCommandFunctionComponent() {
+            super(plugin, botLogic, characterName, functionName);
         }
 
 
         @SubCommand("立刻私聊")
         public void chat(CommandSender sender, User target, String messageCode) {
-            if (!checkCosPermission(sender)) {
+            if (!checkAdminCommandPermission(sender)) {
                 return;
             }
             target.sendMessage(MiraiCode.deserializeMiraiCode(messageCode));
@@ -57,7 +57,7 @@ public class DriveFunction extends BaseFunction<Void>{
         
         @SubCommand("立刻群聊")
         public void chat(CommandSender sender, Group target, String messageCode) {
-            if (!checkCosPermission(sender)) {
+            if (!checkAdminCommandPermission(sender)) {
                 return;
             }
             target.sendMessage(MiraiCode.deserializeMiraiCode(messageCode));

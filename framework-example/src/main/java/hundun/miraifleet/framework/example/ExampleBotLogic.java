@@ -2,6 +2,7 @@ package hundun.miraifleet.framework.example;
 
 import hundun.miraifleet.framework.core.botlogic.BaseBotLogic;
 import hundun.miraifleet.framework.core.botlogic.BaseJavaBotLogic;
+import hundun.miraifleet.framework.starter.botlogic.function.CharacterAdminHelperFunction;
 import hundun.miraifleet.framework.starter.botlogic.function.CharacterHelpFunction;
 import hundun.miraifleet.framework.starter.botlogic.function.RepeatFunction;
 import hundun.miraifleet.framework.starter.botlogic.function.drive.DriveFunction;
@@ -18,10 +19,13 @@ public class ExampleBotLogic extends BaseJavaBotLogic {
     
     public ExampleBotLogic(JavaPlugin plugin) {
         super(plugin, "framework样例");
+    }
 
+    @Override
+    protected void onFunctionsEnable() {
         registerFunction(new WeiboFunction(this, plugin, characterName, 
-                        ExampleDefaultConfigAndData.weiboConfigDefaultDataSupplier())
-                );
+                ExampleDefaultConfigAndData.weiboConfigDefaultDataSupplier())
+        );
 
         registerFunction(new ReminderFunction(this, plugin, characterName, 
                         null,
@@ -29,12 +33,15 @@ public class ExampleBotLogic extends BaseJavaBotLogic {
                 );
         
         registerFunction(new RepeatFunction(this, plugin, characterName));
-
+        
         registerFunction(new CharacterHelpFunction(this, plugin, characterName));
-
+        
         registerFunction(new DriveFunction(this, plugin, characterName));
         
+        registerFunction(new CharacterAdminHelperFunction(this, plugin, characterName));
+        
         allCompositeCommandProxy = new ExamleAllCompositeCommandProxy(this, plugin, characterName);
+
     }
 
 }

@@ -63,7 +63,7 @@ public class ReminderFunction extends BaseFunction<Void> {
         this.reminderListRepository = new SingletonDocumentRepository<>(plugin, resolveDataRepositoryFile("ReminderListRepository.json"), ReminderList.class, reminderListDefaultDataSupplier);
         this.configRepository = new SingletonDocumentRepository<>(plugin, resolveFunctionConfigFile("HourlyChatConfig.json"), HourlyChatConfig.class, hourlyChatConfigDefaultDataSupplier);
         botLogic.getPluginScheduler().repeating(60 * 1000, new ReminderTimerTask());
-        this.commandComponent = new CompositeCommandFunctionComponent(plugin, characterName, functionName);
+        this.commandComponent = new CompositeCommandFunctionComponent();
         initHourlyChatConfigToReminderItems();
     }
 
@@ -73,8 +73,8 @@ public class ReminderFunction extends BaseFunction<Void> {
     }
 
     public class CompositeCommandFunctionComponent extends AbstractCompositeCommandFunctionComponent {
-        public CompositeCommandFunctionComponent(JvmPlugin plugin, String characterName, String functionName) {
-            super(plugin, characterName, functionName);
+        public CompositeCommandFunctionComponent() {
+            super(plugin, botLogic, characterName, functionName);
         }
 
         @SubCommand("查询报时")

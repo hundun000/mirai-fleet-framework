@@ -8,6 +8,7 @@ import java.util.Set;
 import java.util.function.Function;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import hundun.miraifleet.framework.helper.parser.statement.Statement;
 import hundun.miraifleet.framework.helper.parser.statement.SyntaxsErrorStatement;
@@ -47,9 +48,10 @@ public abstract class Parser {
         
         StatementType statementType = syntaxsTree.root.accept(tokens, 0);
         Statement statement;
-        if (statementType == StatementType.SYNTAX_ERROR) {
+        if (statementType == null || statementType == StatementType.SYNTAX_ERROR) {
+            statementType = StatementType.SYNTAX_ERROR;
             statement = new SyntaxsErrorStatement();
-        } else {
+        }  else {
             Function<List<Token>, Statement> function = constructorFunctionMap.get(statementType);
             statement = function.apply(tokens);
         }
@@ -117,7 +119,7 @@ public abstract class Parser {
         /**
          * 特别地，当token的原type非accept时，会尝试把token类型改变为LITERAL_VALU再次检查
          */
-        @NotNull
+        @Nullable
         public StatementType accept(List<Token> tokens, int currentIndex) {
             if (tokens == null) {
                 return null;

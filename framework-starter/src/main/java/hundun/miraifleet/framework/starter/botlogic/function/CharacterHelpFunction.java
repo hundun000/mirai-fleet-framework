@@ -33,7 +33,7 @@ public class CharacterHelpFunction extends BaseFunction<Void> {
             "CharacterHelpFunction",
             null
             );
-        this.commandComponent = new CompositeCommandFunctionComponent(plugin, characterName, functionName);
+        this.commandComponent = new CompositeCommandFunctionComponent();
     }
     
     @Override
@@ -42,8 +42,8 @@ public class CharacterHelpFunction extends BaseFunction<Void> {
     }
 
     public class CompositeCommandFunctionComponent extends AbstractCompositeCommandFunctionComponent {
-        public CompositeCommandFunctionComponent(JvmPlugin plugin, String characterName, String functionName) {
-            super(plugin, characterName, functionName);
+        public CompositeCommandFunctionComponent() {
+            super(plugin, botLogic, characterName, functionName);
         }
         
         @SubCommand("help")

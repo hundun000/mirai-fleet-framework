@@ -25,8 +25,23 @@ import net.mamoe.mirai.event.GlobalEventChannel;
  * Created on 2021/08/09
  */
 public abstract class BaseBotLogic {
+    /**
+     * NotNull after lazyInit
+     */
     @Getter
     private Permission characterCosPermission;
+
+    /**
+     * NotNull after lazyInit
+     */
+    @Getter
+    private Permission userCommandRootPermission;
+    /**
+     * NotNull after lazyInit
+     */
+    @Getter
+    private Permission adminCommandRootPermission;
+    
     protected final String characterName;
     protected final JvmPlugin plugin;
 
@@ -43,15 +58,26 @@ public abstract class BaseBotLogic {
     protected File resolveBotLogicConfigFile(String jsonFileName) {
         return plugin.resolveConfigFile(jsonFileName);
     }
+    
+    private void onBotLogicEnablePre() {
+        Permission commandRoot = registerAnyCommandRootPermission("command.*", "所有Command");
+        characterCosPermission = registerAnyCommandRootPermission("cos.instance", "总开关（command、event、timer）");
+        userCommandRootPermission = registerAnyCommandRootPermission(commandRoot, "command.user*", "所有User级别的command");
+        adminCommandRootPermission = registerAnyCommandRootPermission(commandRoot, "command.admin*", "所有Admin级别的command");
+        plugin.getLogger().info("已注册权限： " 
+                + characterCosPermission.getId().toString() + ", "
+                + userCommandRootPermission.getId().toString() + ", "
+                + adminCommandRootPermission.getId().toString() + ", "
+                );
+    }
 
-    public void onBotLogicEnable() {
+    
 
-        EventChannel<Event> eventChannel = GlobalEventChannel.INSTANCE.parentScope(plugin);
-
+    private void onBotLogicEnablePost() {
         StringBuilder commands = new StringBuilder();
         StringBuilder listenerHosts = new StringBuilder();
-
-
+        EventChannel<Event> eventChannel = GlobalEventChannel.INSTANCE.parentScope(plugin);
+        
         for (BaseFunction<?> function : functionMap.values()) {
             Class<?> clazz = function.getClass();
             AbstractCommand command = function.provideCommand();
@@ -69,12 +95,19 @@ public abstract class BaseBotLogic {
         plugin.getLogger().info("has commands: " + commands.toString());
         plugin.getLogger().info("has listenerHosts: " + listenerHosts.toString());
 
-        characterCosPermission = registerCosPermission();
-        
         if (allCompositeCommandProxy != null) {
             CommandManager.INSTANCE.registerCommand(allCompositeCommandProxy, false);
             plugin.getLogger().info("has allCompositeCommandProxy");
         }
+    }
+    
+    protected abstract void onFunctionsEnable();
+    
+    public final void onBotLogicEnable() {
+
+        onBotLogicEnablePre();
+        onFunctionsEnable();
+        onBotLogicEnablePost();
         
     }
 
@@ -105,24 +138,25 @@ public abstract class BaseBotLogic {
         }
         return (T) functionMap.get(clazz);
     }
+    
+    private Permission registerAnyCommandRootPermission(String plugiBasedPermissionId, String description) {
+        return registerAnyCommandRootPermission(plugin.getParentPermission(), plugiBasedPermissionId, description);
+    }
 
-    private Permission registerCosPermission() {
-        PermissionId functionPermission = plugin.permissionId("temp");
-        String newHost = functionPermission.getNamespace() + ".cos";
-        String newName = "INSTANCE";
-        Permission newParent = Permission.getRootPermission();
-        PermissionId permissionId = new PermissionId(newHost, newName);
-        plugin.getLogger().info("CosPermissionId = " + permissionId.toString());
+    
+    private Permission registerAnyCommandRootPermission(Permission parent, String plugiBasedPermissionId, String description) {
+        PermissionId newPermissionId = plugin.permissionId(plugiBasedPermissionId);
         try {
-            return PermissionService.Companion.getInstance().register(
-                    permissionId,
-                    "略",
-                    newParent
+            return PermissionService.getInstance().register(
+                    newPermissionId,
+                    description,
+                    parent
                     );
         } catch (PermissionRegistryConflictException e) {
             plugin.getLogger().error(e);
-            return null;
+            throw new RuntimeException("关键权限注册失败，本插件抛出异常放弃加载");
         }
     }
-
+    
+    
 }
