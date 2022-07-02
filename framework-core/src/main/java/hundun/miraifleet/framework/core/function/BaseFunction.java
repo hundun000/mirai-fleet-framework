@@ -53,19 +53,31 @@ public abstract class BaseFunction<T> implements ListenerHost {
     public static abstract class AbstractSimpleCommandFunctionComponent extends SimpleCommand {
         public AbstractSimpleCommandFunctionComponent(
                 JvmPlugin plugin,
+                Permission parentPermission,
                 String characterName,
                 String functionName,
                 String forceCommandName
                 ) {
-            super(plugin, forceCommandName, new String[]{}, "我是" + functionName, plugin.getParentPermission(), CommandArgumentContext.EMPTY);
+            super(plugin, 
+                    forceCommandName, 
+                    new String[]{}, 
+                    "略", 
+                    parentPermission,
+                    CommandArgumentContext.EMPTY);
         }
 
         public AbstractSimpleCommandFunctionComponent(
                 JvmPlugin plugin,
+                BaseBotLogic baseBotLogic,
                 String characterName,
                 String functionName
                 ) {
-            this(plugin, characterName, functionName, toCommandName(characterName, functionName));
+            this(plugin, 
+                    baseBotLogic.getUserCommandRootPermission(),
+                    characterName, 
+                    functionName, 
+                    toCommandName(characterName, functionName)
+                    );
         }
     }
 
@@ -76,18 +88,31 @@ public abstract class BaseFunction<T> implements ListenerHost {
     public static abstract class AbstractCompositeCommandFunctionComponent extends CompositeCommand {
         public AbstractCompositeCommandFunctionComponent(
                 JvmPlugin plugin,
+                Permission parentPermission,
                 String characterName,
                 String functionName,
                 String forceCommandName
                 ) {
-            super(plugin, forceCommandName, new String[]{}, "我是" + functionName, plugin.getParentPermission(), CommandArgumentContext.EMPTY);
+            super(plugin, 
+                    forceCommandName, 
+                    new String[]{}, 
+                    "略", 
+                    parentPermission, 
+                    CommandArgumentContext.EMPTY
+                    );
         }
         public AbstractCompositeCommandFunctionComponent(
                 JvmPlugin plugin,
+                BaseBotLogic baseBotLogic,
                 String characterName,
                 String functionName
                 ) {
-            this(plugin, characterName, functionName, toCommandName(characterName, functionName));
+            this(plugin, 
+                    baseBotLogic.getUserCommandRootPermission(), 
+                    characterName, 
+                    functionName, 
+                    toCommandName(characterName, functionName)
+                    );
         }
     }
 
@@ -112,7 +137,7 @@ public abstract class BaseFunction<T> implements ListenerHost {
     private boolean skipRegisterCommand;
     @Getter
     @Setter
-    private boolean skipCosCheck;
+    private boolean forcePassCosCheck;
     protected GroupMessageToSessionIdType groupMessageToSessionIdType;
 
     Map<String, T> sessionDataMap = new ConcurrentHashMap<>();
@@ -132,7 +157,7 @@ public abstract class BaseFunction<T> implements ListenerHost {
         this.characterName = characterName;
         // default values
         this.skipRegisterCommand = true;
-        this.skipCosCheck = false;
+        this.forcePassCosCheck = false;
         this.groupMessageToSessionIdType = GroupMessageToSessionIdType.USE_GROUP_ID;
     }
 
@@ -259,7 +284,7 @@ public abstract class BaseFunction<T> implements ListenerHost {
     }
 
     protected boolean checkCosPermission(NudgeEvent event) {
-        if (skipCosCheck) {
+        if (forcePassCosCheck) {
             return true;
         }
         if (event.getSubject() instanceof Group) {
@@ -271,33 +296,34 @@ public abstract class BaseFunction<T> implements ListenerHost {
     }
 
     protected boolean checkCosPermission(Bot bot, Group group) {
-        if (skipCosCheck) {
+        if (forcePassCosCheck) {
             return true;
         }
         Permission targetPermission = botLogic.getCharacterCosPermission();
-        if (targetPermission == null) {
-            log.warning("checkCosPermission false because Permission is null, maybe Permission register failed");
-            return false;
-        }
         ExactMember exactGroup = new ExactMember(group.getId(), bot.getId());
         return PermissionService.testPermission(targetPermission, exactGroup);
     }
 
     protected boolean checkCosPermission(Bot bot, User user) {
-        if (skipCosCheck) {
+        if (forcePassCosCheck) {
             return true;
         }
         Permission targetPermission = botLogic.getCharacterCosPermission();
-        if (targetPermission == null) {
-            log.warning("checkCosPermission false because Permission is null, maybe Permission register failed");
-            return false;
-        }
         ExactUser exact = new ExactUser(user.getId());
         return PermissionService.testPermission(targetPermission, exact);
     }
+    
+    protected boolean checkAdminCommandPermission(CommandSender sender) {
+        if (forcePassCosCheck) {
+            return true;
+        }
+        return PermissionService.testPermission(
+                botLogic.getAdminCommandRootPermission(), 
+                sender.getPermitteeId());
+    }
   
     protected boolean checkCosPermission(MessageEvent event) {
-        if (skipCosCheck) {
+        if (forcePassCosCheck) {
             return true;
         }
         if (event.getSubject() instanceof Group) {
@@ -309,7 +335,7 @@ public abstract class BaseFunction<T> implements ListenerHost {
     }
 
     protected boolean checkCosPermission(CommandSender sender) {
-        if (skipCosCheck) {
+        if (forcePassCosCheck) {
             return true;
         }
         if (sender instanceof ConsoleCommandSender) {

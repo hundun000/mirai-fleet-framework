@@ -81,7 +81,7 @@ public class WeiboFunction extends BaseFunction<WeiboFunction.SessionData> {
                 weiboConfigDefaultDataSupplier
                 );
         botLogic.getPluginScheduler().repeating(5 * 60 * 1000, new WeiboTask());
-        this.commandComponent = new CompositeCommandFunctionComponent(plugin, characterName, functionName);
+        this.commandComponent = new CompositeCommandFunctionComponent();
     }
 
 
@@ -99,8 +99,8 @@ public class WeiboFunction extends BaseFunction<WeiboFunction.SessionData> {
 
     public class CompositeCommandFunctionComponent extends AbstractCompositeCommandFunctionComponent {
 
-        public CompositeCommandFunctionComponent(JvmPlugin plugin, String characterName, String functionName) {
-            super(plugin, characterName, functionName);
+        public CompositeCommandFunctionComponent() {
+            super(plugin, botLogic, characterName, functionName);
         }
 
         @SubCommand("刷新微博订阅")

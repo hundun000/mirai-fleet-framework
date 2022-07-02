@@ -9,14 +9,14 @@ import net.mamoe.mirai.console.plugin.jvm.JavaPluginScheduler;
  * Created on 2022/04/08
  */
 public abstract class BaseJavaBotLogic extends BaseBotLogic {
-    private JavaPlugin plugin;
+    private JavaPlugin jplugin;
     public BaseJavaBotLogic(JavaPlugin plugin, String characterName) {
         super(plugin, characterName);
-        this.plugin = plugin;
+        this.jplugin = plugin;
     }
     
     @Override
     public JavaPluginScheduler getPluginScheduler() {
-        return plugin.getScheduler();
+        return jplugin.getScheduler();
     }
 }

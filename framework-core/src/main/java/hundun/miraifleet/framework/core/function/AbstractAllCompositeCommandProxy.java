@@ -18,7 +18,12 @@ public abstract class AbstractAllCompositeCommandProxy<T extends BaseBotLogic> e
             JvmPlugin plugin,
             String characterName
             ) {
-        super(plugin, characterName, new String[]{}, "我是" + characterName, plugin.getParentPermission(), CommandArgumentContext.EMPTY);
+        super(plugin, 
+                characterName, 
+                new String[]{}, 
+                "我是" + characterName + "的聚合指令", 
+                botLogic.getUserCommandRootPermission(), 
+                CommandArgumentContext.EMPTY);
         this.botLogic = botLogic;
     }
     

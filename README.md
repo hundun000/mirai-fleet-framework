@@ -149,50 +149,6 @@ BotLogic负责的具体的逻辑包括：
 
 对于开发者，Function即是实现了跨插件复用业务功能。同时，也允许具体Plugin自定义实际注册Command时的指令语法（见AllCompositeCommandProxy）。
 
-## 权限管理
-
-本框架设计的权限管理的最小单位是启用或禁用(character, botId, groupId)三元组。也就是仅支持控制某组(botId, groupId)启用/禁用`某个Character的所有功能`；不支持单独控制某组(botId, groupId)启用/禁用`某个Character中的一部分Functions`；这是权衡用户理解和管理成本后的结果。[需求来源](https://mirai.mamoe.net/topic/535/)
-
-启用(character, botId, groupId)，可以理解为：`botId在groupId里扮演character`，扮演行为即为提供对应插件内的所有功能。
-
-### 权限管理应用例子
-
-在一个console里放入AmiyaPlugin和PrinzEugenPlugin，登录两个bot，两个bot均加在同一个群(id:111111)。配置后，在这同一个群里，AmiyaBot(id:222222)只回应AmiyaPlugin的Command/EventHandler，启用AmiyaPlugin的Timer，且使用AmiyaPlugin的配置；PrinzEugenBot(id:333333)同理，只回应PrinzEugenPlugin的Command/EventHandler，启用PrinzEugenPlugin的Timer，且使用PrinzEugenPlugin的配置。
-
-```
-grantedPermissionMap: 
-  'hundun.fleet.example.prinzeugen:*': 
-    - 'm111111.*' #群111111可使用prinzeugen插件指令
-  'hundun.fleet.example.prinzeugen.cos:INSTANCE': 
-    - m111111.333333 #Bot333333在群111111扮演prinzeugen插件角色（欧根），即响应相关的Command/EventHandler/Timer
-  'hundun.fleet.example.amiya:*': 
-    - 'm111111.*' #群111111可使用amiya插件指令
-  'hundun.fleet.example.amiya.cos:INSTANCE': 
-    - m111111.222222 #Bot222222在群111111扮演amiya插件角色（阿米娅），即响应相关的Command/EventHandler/Timer
-```
-
-#### plugin command example 
-0. 群11111发出一条AmiyaCommand。
-1. 由于command权限配置，群11111的群员确实有AmiyaCommand的权限。
-2. AmiyaCommand方法将会被调用两次，两次的CommandSender.getBot()分别是两个bot。
-3. 对于bot==PrinzEugen(id:333333)，由于cos权限配置，其跳出了AmiyaCommand方法。
-4. 对于bot==Amiya(id:222222)，由于cos权限配置，其可执行AmiyaCommand方法的后续代码。
-5. AmiyaCommand方法里执行resolveConfig，一定是在AmiyaPlugin的目录下。
-
-#### plugin eventHandle example 
-0. 群11111发出一条MessageEvent。
-1. AmiyaEventHandler方法将会被调用两次，两次的Event.getBot()分别是两个bot。
-2. 对于bot==PrinzEugen(id:333333)，由于cos权限配置，其跳出了AmiyaEventHandler方法。
-3. 对于bot==Amiya(id:222222)，由于cos权限配置，其可执行AmiyaEventHandler方法的后续代码。
-4. AmiyaEventHandler方法里执行resolveConfig，一定是在AmiyaPlugin的目录下。
-
-#### plugin command from console example 
-0. Console发出一条AmiyaCommand。
-1. 由于command权限配置，console确实有AmiyaCommand的权限。
-2. AmiyaCommand方法将会被调用1次，其中CommandSender instanceOf ConsoleCommandSender。
-3. 对于ConsoleCommandSender，由于cos权限配置，其可执行AmiyaCommand方法的后续代码。
-4. AmiyaCommand方法里执行resolveConfig，一定是在AmiyaPlugin的目录下。
-
 ## 发展历史
 
 来自[ZacaFleetBot](https://github.com/hundun000/ZacaFleetBot)项目的拆分方案。故框架的大部分来自原项目。
