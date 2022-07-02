@@ -28,14 +28,14 @@
 
 使用[权限助手指令](./starter-functions/CharacterAdminHelperFunction.md)
 
-因为这本身也是一种指令，所以调用者首先要拥有权限`<插件id>:command.权限助手`。
+因为这本身也是一种指令，所以调用者首先要拥有权限`<插件id>:command.<角色名>权限助手`。
 
 - 若想在console内使用权限助手指令，此时一定符合权限要求。
 - 若想在聊天环境使用权限助手指令，则需[人工将上述权限授予某些对象](https://github.com/mamoe/mirai/blob/dev/docs/ConsoleTerminal.md#%E5%9C%A8%E7%BE%A4%E8%81%8A%E4%B8%AD%E4%BD%BF%E7%94%A8%E5%91%BD%E4%BB%A4-%E6%9D%83%E9%99%90%E6%8E%88%E4%BA%88)。
 
-> 人工通过perm指令，将上述权限授予id为123456的用户
+> 以阿米娅插件为例，人工通过perm指令，将上述权限授予id为123456的用户
 >
-> /perm permit u114514 hundun.fleet.XXX:command.权限助手  
+> /perm permit u114514 hundun.fleet.amiya:command.阿米娅权限助手  
 
 然后使用权限助手模块里的具体指令即可。
 

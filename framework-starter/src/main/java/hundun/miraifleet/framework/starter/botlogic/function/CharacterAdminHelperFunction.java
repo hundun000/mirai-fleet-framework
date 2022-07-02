@@ -48,7 +48,7 @@ public class CharacterAdminHelperFunction extends BaseFunction<Void> {
                     botLogic.getAdminCommandRootPermission(), 
                     characterName, 
                     functionName, 
-                    "权限助手"
+                    characterName + "权限助手"
                     );
         }
         
