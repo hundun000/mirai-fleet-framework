@@ -61,7 +61,7 @@ public class CharacterAdminHelperFunction extends BaseFunction<Void> {
         @Description("变更群开关")
         @SubCommand("群开关")
         public void groupEnableSetter(CommandSender sender, boolean setToEnable, Group targetGroup) {
-            generalGroupEnableSetter(sender, setToEnable, targetGroup.getId(), targetGroup.getId());
+            generalGroupEnableSetter(sender, setToEnable, targetGroup.getId(), targetGroup.getBot().getId());
         }
 
         private void generalGroupEnableSetter(CommandSender sender, boolean setToEnable, long groupId, long botId) {
