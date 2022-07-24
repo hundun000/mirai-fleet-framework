@@ -54,16 +54,37 @@ public class CharacterAdminHelperFunction extends BaseFunction<Void> {
         
         @Description("变更群开关")
         @SubCommand("群开关Console")
-        public void groupEnableSetterConsole(ConsoleCommandSender sender, boolean setToEnable, long botId, long groupId) {
+        public void groupEnableSetterConsole(ConsoleCommandSender sender, 
+                @Name("setToEnable") boolean setToEnable, 
+                @Name("botId") long botId, 
+                @Name("groupId") long groupId) {
             generalGroupEnableSetter(sender, setToEnable, groupId, botId);
         }
         
         @Description("变更群开关")
         @SubCommand("群开关")
-        public void groupEnableSetter(CommandSender sender, boolean setToEnable, Group targetGroup) {
+        public void groupEnableSetter(CommandSender sender, 
+                @Name("setToEnable") boolean setToEnable, 
+                @Name("Group智能参数解析") Group targetGroup) {
             generalGroupEnableSetter(sender, setToEnable, targetGroup.getId(), targetGroup.getBot().getId());
         }
 
+        @Description("展示关键权限节点id")
+        @SubCommand("help")
+        public void help(CommandSender sender) {
+            if (!checkAdminCommandPermission(sender)) {
+                return;
+            }
+            sender.sendMessage(String.format(
+                    "CharacterCos: %s\n"
+                    + "UserCommandRoot: %s\n"
+                    + "AdminCommandRoot: %s\n", 
+                    botLogic.getCharacterCosPermission().getId().toString(),
+                    botLogic.getUserCommandRootPermission().getId().toString(),
+                    botLogic.getAdminCommandRootPermission().getId().toString()
+                    ));
+        }
+        
         private void generalGroupEnableSetter(CommandSender sender, boolean setToEnable, long groupId, long botId) {
             if (!checkAdminCommandPermission(sender)) {
                 return;
