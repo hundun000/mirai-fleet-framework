@@ -1,4 +1,4 @@
-package hundun.miraifleet.framework.starter.botlogic.function.reminder.domain;
+package hundun.miraifleet.framework.starter.botlogic.function.reminder.data;
 
 import java.util.List;
 

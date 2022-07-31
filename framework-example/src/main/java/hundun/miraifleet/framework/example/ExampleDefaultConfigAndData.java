@@ -5,10 +5,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Supplier;
 
-import hundun.miraifleet.framework.helper.repository.SingletonDocumentRepository;
-import hundun.miraifleet.framework.starter.botlogic.function.reminder.config.HourlyChatConfig;
-import hundun.miraifleet.framework.starter.botlogic.function.reminder.domain.ReminderItem;
-import hundun.miraifleet.framework.starter.botlogic.function.reminder.domain.ReminderList;
+import hundun.miraifleet.framework.starter.botlogic.function.reminder.data.HourlyChatConfigV2;
+import hundun.miraifleet.framework.starter.botlogic.function.reminder.data.ReminderItem;
+import hundun.miraifleet.framework.starter.botlogic.function.reminder.data.ReminderList;
 import hundun.miraifleet.framework.starter.botlogic.function.weibo.config.WeiboConfig;
 import hundun.miraifleet.framework.starter.botlogic.function.weibo.config.WeiboPushFilterFlag;
 import hundun.miraifleet.framework.starter.botlogic.function.weibo.config.WeiboViewFormat;
@@ -51,16 +50,16 @@ public class ExampleDefaultConfigAndData {
     public static Supplier<ReminderList> reminderListDefaultDataSupplier() {
         return () -> {
             ReminderList reminderList = new ReminderList();
-            reminderList.setItems(Arrays.asList(new ReminderItem(null, "现在是周日晚上10点。", "* 0 22 ? * 7")));
+            reminderList.setItems(Arrays.asList(ReminderItem.Factory.create("现在是周日晚上10点。", "* 0 22 ? * 7")));
             return reminderList;
         };
     }
 
-    public static Supplier<HourlyChatConfig> hourlyChatConfigDefaultDataSupplier() {
+    public static Supplier<HourlyChatConfigV2> hourlyChatConfigDefaultDataSupplier() {
         return () -> {
-            HourlyChatConfig hourlyChatConfig = new HourlyChatConfig();
-            hourlyChatConfig.setChatTexts(mapOf(
-                    "9", "早上好，现在是9点。"
+            HourlyChatConfigV2 hourlyChatConfig = new HourlyChatConfigV2();
+            hourlyChatConfig.setItems(Arrays.asList(
+                    ReminderItem.Factory.createByHourlyChatCron(9, "早上好，现在是9点。")
                     ));
             return hourlyChatConfig;
         };

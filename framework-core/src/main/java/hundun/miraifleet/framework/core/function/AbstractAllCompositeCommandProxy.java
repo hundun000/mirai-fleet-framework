@@ -19,7 +19,7 @@ public abstract class AbstractAllCompositeCommandProxy<T extends BaseBotLogic> e
             String characterName
             ) {
         super(plugin, 
-                characterName, 
+                botLogic.getAllCompositeCommandProxyConfig().getPrimaryName(), 
                 new String[]{}, 
                 "我是" + characterName + "的聚合指令", 
                 botLogic.getUserCommandRootPermission(), 
@@ -27,4 +27,7 @@ public abstract class AbstractAllCompositeCommandProxy<T extends BaseBotLogic> e
         this.botLogic = botLogic;
     }
     
+    public static class CreateHelper {
+        
+    }
 }

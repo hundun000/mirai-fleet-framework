@@ -9,6 +9,7 @@ import java.util.Map;
 import lombok.Data;
 
 @Data
+@Deprecated
 public class HourlyChatConfig {
     Map<String, String> chatTexts;
 }

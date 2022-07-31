@@ -1,5 +1,7 @@
 package hundun.miraifleet.framework.starter.botlogic.function.reminder;
 
+import java.io.File;
+import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -12,16 +14,19 @@ import java.util.List;
 import java.util.Map;
 import java.util.TimerTask;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 import org.jetbrains.annotations.Nullable;
 import org.quartz.CronExpression;
 
 import hundun.miraifleet.framework.core.botlogic.BaseBotLogic;
 import hundun.miraifleet.framework.core.function.BaseFunction;
+import hundun.miraifleet.framework.core.function.FunctionReplyReceiver;
 import hundun.miraifleet.framework.helper.repository.SingletonDocumentRepository;
 import hundun.miraifleet.framework.starter.botlogic.function.reminder.config.HourlyChatConfig;
-import hundun.miraifleet.framework.starter.botlogic.function.reminder.domain.ReminderItem;
-import hundun.miraifleet.framework.starter.botlogic.function.reminder.domain.ReminderList;
+import hundun.miraifleet.framework.starter.botlogic.function.reminder.data.HourlyChatConfigV2;
+import hundun.miraifleet.framework.starter.botlogic.function.reminder.data.ReminderItem;
+import hundun.miraifleet.framework.starter.botlogic.function.reminder.data.ReminderList;
 import lombok.Getter;
 import lombok.Setter;
 import net.mamoe.mirai.Bot;
@@ -29,6 +34,9 @@ import net.mamoe.mirai.console.command.AbstractCommand;
 import net.mamoe.mirai.console.command.CommandSender;
 import net.mamoe.mirai.console.plugin.jvm.JvmPlugin;
 import net.mamoe.mirai.contact.Group;
+import net.mamoe.mirai.message.data.Message;
+import net.mamoe.mirai.message.data.PlainText;
+import net.mamoe.mirai.utils.ExternalResource;
 
 /**
  * @author hundun
@@ -37,7 +45,7 @@ import net.mamoe.mirai.contact.Group;
 public class ReminderFunction extends BaseFunction<Void> {
 
     SingletonDocumentRepository<ReminderList> reminderListRepository;
-    private SingletonDocumentRepository<HourlyChatConfig> configRepository;
+    private SingletonDocumentRepository<HourlyChatConfigV2> configRepository;
     List<ReminderItem> hourlyChatReminderItems = new ArrayList<>();
     
     private Map<String, CronExpression> cronExpressionCaches = new HashMap<>();
@@ -45,13 +53,15 @@ public class ReminderFunction extends BaseFunction<Void> {
     private boolean logMinuteClockArrival = false;
     @Getter
     private final CompositeCommandFunctionComponent commandComponent;
-
+    
+    private final ReminderMessageCodeParser reminderMessageCodeParser;
+    
     public ReminderFunction(
             BaseBotLogic baseBotLogic,
             JvmPlugin plugin,
             String characterName,
             @Nullable Supplier<ReminderList> reminderListDefaultDataSupplier,
-            @Nullable Supplier<HourlyChatConfig> hourlyChatConfigDefaultDataSupplier
+            @Nullable Supplier<HourlyChatConfigV2> hourlyChatConfigDefaultDataSupplier
             ) {
         super(
             baseBotLogic,
@@ -60,10 +70,17 @@ public class ReminderFunction extends BaseFunction<Void> {
             "ReminderFunction",
             null
             );
-        this.reminderListRepository = new SingletonDocumentRepository<>(plugin, resolveDataRepositoryFile("ReminderListRepository.json"), ReminderList.class, reminderListDefaultDataSupplier);
-        this.configRepository = new SingletonDocumentRepository<>(plugin, resolveFunctionConfigFile("HourlyChatConfig.json"), HourlyChatConfig.class, hourlyChatConfigDefaultDataSupplier);
+        this.reminderListRepository = new SingletonDocumentRepository<>(plugin, 
+                resolveDataRepositoryFile("ReminderListRepository.json"), 
+                ReminderList.class, 
+                reminderListDefaultDataSupplier);
+        this.configRepository = new SingletonDocumentRepository<>(plugin, 
+                resolveFunctionConfigFile("HourlyChatConfigV2.json"), 
+                HourlyChatConfigV2.class, 
+                hourlyChatConfigDefaultDataSupplier);
         botLogic.getPluginScheduler().repeating(60 * 1000, new ReminderTimerTask());
         this.commandComponent = new CompositeCommandFunctionComponent();
+        this.reminderMessageCodeParser = new ReminderMessageCodeParser();
         initHourlyChatConfigToReminderItems();
     }
 
@@ -82,7 +99,7 @@ public class ReminderFunction extends BaseFunction<Void> {
             if (!checkCosPermission(sender)) {
                 return;
             }
-            sender.sendMessage(itemsToText(hourlyChatReminderItems));
+            sender.sendMessage(itemModelsToText(hourlyChatReminderItems));
         }
 
         @SubCommand("查询提醒")
@@ -126,14 +143,14 @@ public class ReminderFunction extends BaseFunction<Void> {
                 }
             }
             ReminderList reminderList  = reminderListRepository.findSingleton();
-            reminderList.getItems().add(createByCommand(cornRawFomat, text, count));
+            reminderList.getItems().add(ReminderItem.Factory.create(cornRawFomat, text, count));
             reminderListRepository.saveSingleton(reminderList);
             sender.sendMessage("OK");
         }
 
         @SubCommand("debugTimerCallReminderItem")
         public void debugTimerCallReminderItem(CommandSender sender, String timeString) {
-            if (!checkCosPermission(sender)) {
+            if (!checkAdminCommandPermission(sender)) {
                 return;
             }
             SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy年M月d日H时m分");
@@ -156,7 +173,7 @@ public class ReminderFunction extends BaseFunction<Void> {
 
 
 
-    private String itemsToText(List<ReminderItem> items) {
+    private static String itemsToText(List<ReminderItem> items) {
         StringBuilder builder = new StringBuilder();
         builder.append("items:\n");
         for (int i = 0; i < items.size(); i++) {
@@ -172,6 +189,17 @@ public class ReminderFunction extends BaseFunction<Void> {
 
 
 
+    private String itemModelsToText(List<ReminderItem> items) {
+        StringBuilder builder = new StringBuilder();
+        builder.append("items:\n");
+        for (int i = 0; i < items.size(); i++) {
+            ReminderItem item = items.get(i);
+            builder.append("id:").append(i).append("\t");
+            builder.append(item.toString()).append("\n");
+        }
+        return builder.toString();
+    }
+
     private CronExpression getCronExpression(String cronText) {
         if (!cronExpressionCaches.containsKey(cronText)) {
             try {
@@ -186,14 +214,13 @@ public class ReminderFunction extends BaseFunction<Void> {
     }
 
 
-
+//    @SuppressWarnings("deprecation")
     private void initHourlyChatConfigToReminderItems() {
-        HourlyChatConfig config = configRepository.findSingleton();
-        if (config != null) {
-            config.getChatTexts().forEach((hour, text) -> {
-                int hourCondition = Integer.valueOf(hour);
-                ReminderItem item = createByHourlyChatCron(hourCondition, text);
-                hourlyChatReminderItems.add(item);
+        HourlyChatConfigV2 config = configRepository.findSingleton();
+
+        if (config.getItems() != null) {
+            config.getItems().forEach(it -> {
+                hourlyChatReminderItems.add(it);
             });
         }
     }
@@ -227,56 +254,27 @@ public class ReminderFunction extends BaseFunction<Void> {
             if (!checkCosPermission(bot, group)) {
                 continue;
             }
-            group.sendMessage(reminderItem.getText());
+            FunctionReplyReceiver receiver = new FunctionReplyReceiver(group, log);
+            if (reminderItem.getReminderMessageCodes() != null) {
+                List<Message> messages = reminderMessageCodeParser.parse(receiver, reminderItem.getReminderMessageCodes());
+                messages.forEach(it -> receiver.sendMessage(it));
+            }
         }
 
     }
 
-    private boolean checkTimeConditions(ReminderItem task, Calendar now) {
+    private boolean checkTimeConditions(ReminderItem reminderItem, Calendar now) {
         Date date = now.getTime();
-        CronExpression cronExpression = getCronExpression(task.getCron());
+        CronExpression cronExpression = getCronExpression(reminderItem.getCron());
         return cronExpression != null && cronExpression.isSatisfiedBy(date);
     }
 
 
 
-    private ReminderItem createByCommand(
-            String cornRawFomat,
-            String text,
-            Integer count
-            ) {
-        ReminderItem task = new ReminderItem();
-        try {
-            String cron = cornRawFomat.replace("~", " ");
-            task.setCron(cron);
-            task.setCount(count);
-            task.setText(text);
-        } catch (Exception e) {
-            log.error("createReminderItem error:", e);
-            return null;
-        }
-
-        return task;
-    }
+    
 
 
-    private ReminderItem createByHourlyChatCron(
-            int hourCondition,
-            String text
-            ) {
-        ReminderItem task = new ReminderItem();
-        try {
-            String cron = "* 0 " + hourCondition + " * * ?";
-            task.setCron(cron);
-            task.setCount(null);
-            task.setText(text);
-        } catch (Exception e) {
-            log.error("createReminderItem error:", e);
-            return null;
-        }
-
-        return task;
-    }
+    
 
     private void logHourlyHeatBeat(Calendar now) {
         if (now.get(Calendar.MINUTE) == 0) {
@@ -300,6 +298,38 @@ public class ReminderFunction extends BaseFunction<Void> {
             reminderListRepository.saveSingleton(reminderList);
         }
 
+    }
+    
+    private class ReminderMessageCodeParser {
+        
+        public static final String IMAGE_CODE_PREFIX = "IMAGE:";
+        public static final String AUDIO_CODE_PREFIX = "AUDIO:";
+        
+        private static final String IMAGE_FOLDER = "images/";
+        public static final String AUDIO_FOLDER = "audios/";
+        
+        public ReminderMessageCodeParser() {
+            resolveFunctionDataFile(IMAGE_FOLDER).mkdir();
+            resolveFunctionDataFile(AUDIO_FOLDER).mkdir();
+        }
+        
+        public List<Message> parse(FunctionReplyReceiver receiver, List<String> codes) {
+            return codes.stream().map(it -> parse(receiver, it)).collect(Collectors.toList());
+        }
+        
+        public Message parse(FunctionReplyReceiver receiver, String code) {
+            if (code.startsWith(IMAGE_CODE_PREFIX)) {
+                String fileName = code.substring(IMAGE_CODE_PREFIX.length());
+                var externalResource = ExternalResource.create(resolveFunctionDataFile(IMAGE_FOLDER + fileName));
+                return receiver.uploadImageAndCloseOrNotSupportPlaceholder(externalResource);
+            } else if (code.startsWith(AUDIO_CODE_PREFIX)) {
+                String fileName = code.substring(AUDIO_CODE_PREFIX.length());
+                var externalResource = ExternalResource.create(resolveFunctionDataFile(AUDIO_FOLDER + fileName));
+                return receiver.uploadImageAndCloseOrNotSupportPlaceholder(externalResource);
+            } else {
+                return new PlainText(code);
+            }
+        }
     }
 
     private class ReminderTimerTask extends TimerTask {

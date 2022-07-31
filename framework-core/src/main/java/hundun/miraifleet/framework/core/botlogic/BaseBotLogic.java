@@ -5,8 +5,10 @@ import java.util.HashMap;
 import java.util.Map;
 
 import hundun.miraifleet.framework.core.function.AbstractAllCompositeCommandProxy;
+import hundun.miraifleet.framework.core.function.AllCompositeCommandProxyConfig;
 import hundun.miraifleet.framework.core.function.AsListenerHost;
 import hundun.miraifleet.framework.core.function.BaseFunction;
+import hundun.miraifleet.framework.helper.repository.SingletonDocumentRepository;
 import lombok.Getter;
 import net.mamoe.mirai.console.command.AbstractCommand;
 import net.mamoe.mirai.console.command.CommandManager;
@@ -47,7 +49,7 @@ public abstract class BaseBotLogic {
 
     private Map<Class<?>, BaseFunction<?>> functionMap = new HashMap<>();
     protected AbstractAllCompositeCommandProxy<?> allCompositeCommandProxy;
-    
+    protected SingletonDocumentRepository<AllCompositeCommandProxyConfig> proxyConfigRepository;
 
     public BaseBotLogic(JvmPlugin plugin, String characterName) {
         super();
@@ -55,8 +57,13 @@ public abstract class BaseBotLogic {
         this.plugin = plugin;
     }
 
+    @Deprecated
     protected File resolveBotLogicConfigFile(String jsonFileName) {
         return plugin.resolveConfigFile(jsonFileName);
+    }
+    
+    public AllCompositeCommandProxyConfig getAllCompositeCommandProxyConfig() {
+        return proxyConfigRepository.findSingleton();
     }
     
     private void onBotLogicEnablePre() {
@@ -68,6 +75,13 @@ public abstract class BaseBotLogic {
                 + characterCosPermission.getId().toString() + ", "
                 + userCommandRootPermission.getId().toString() + ", "
                 + adminCommandRootPermission.getId().toString() + ", "
+                );
+        
+        proxyConfigRepository = new SingletonDocumentRepository<>(
+                plugin, 
+                plugin.resolveConfigFile("proxyConfigRepository.json"), 
+                AllCompositeCommandProxyConfig.class, 
+                () -> new AllCompositeCommandProxyConfig(characterName)
                 );
     }
 
