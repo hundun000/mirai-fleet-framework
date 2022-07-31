@@ -4,7 +4,7 @@
 
 方法：
 
-1）手动编辑（重启后生效）`data\hundun.fleet.amiya\ReminderFunction\repositories\ReminderListRepository.json`   
+1）手动编辑（重启后生效）`data\具体插件id\ReminderFunction\repositories\ReminderListRepository.json`   
 2）指令创建，详见后文。
 
 json文件数据结构说明：
@@ -13,7 +13,7 @@ json文件数据结构说明：
 |---|---|---|
 |cron|* 0 22 ? * 1|执行的时间条件。一个 [cron表达式](https://docs.oracle.com/cd/E12058_01/doc/doc.1014/e12030/cron_expressions.htm)|
 |count|null|执行次数条件。无限次对应null|
-|text|现在是周日晚上10点|提醒内容。即bot会发送的文本|
+|reminderMessageCodes|["现在是周日晚上10点", "IMAGE:name.jpg"]|一个数组。数组里每个元素按照ReminderMessageCode规则解读|
 
 【注意】本项目的cron实现使用quartz库。特别地，其对于星期几的数值表示和某些其他标准中的表示不同，注意不要混淆。例如周日的的数值表示是1（而不是某些其他标准中的0或7）。具体如下，
 ```
@@ -26,6 +26,12 @@ json文件数据结构说明：
 ("SAT", 7);
 ```
 
+ReminderMessageCode规则：
+
+- "IMAGE:name.jpg" 将发送`data\具体插件id\ReminderFunction\images\name.jpg`
+- "AUDIO:name.wmv" 将发送`data\具体插件id\ReminderFunction\audios\name.wmv`
+- 其他文本内容，将发送为文本
+
 ### 【定时】整点报时
 
 定时触发。报时文本来自配置文件。
@@ -34,7 +40,7 @@ json文件数据结构说明：
 
 配置方法：
 
-手动编辑（重启后生效）`config\hundun.fleet.amiya\ReminderFunction\HourlyChatConfig.json`
+手动编辑（重启后生效）`config\具体插件id\ReminderFunction\HourlyChatConfig.json`
 
 #### 【指令】查看整点报时配置
 
@@ -42,7 +48,7 @@ json文件数据结构说明：
 
 简单打印报时配置，仅作为调试。
 
->  -> /<角色名> 查询报时  
+>  -> /<主指令名> 查询报时  
 > <- HourlyChatConfig(chatTexts={0=……, 1=……, ……})
 
 #### 【定时】自定义提醒
@@ -58,7 +64,7 @@ json文件数据结构说明：
 **<指令参数2>: 执行次数条件。值域：x次，无限次**  
 **<指令参数3>: 提醒内容。即bot会发送的文本**  
 
->  -> /<角色名> 创建提醒 \*\~0\~22\~?\~\*\~1 无限次 现在是周日晚上10点。请博士记得完成本周剿灭作战。  
+>  -> /<主指令名> 创建提醒 \*\~0\~22\~?\~\*\~1 无限次 现在是周日晚上10点。请博士记得完成本周剿灭作战。  
 >  <- OK
 
 【注意】插件只会每分钟（的某一个毫秒）检查一次提醒任务，所以cron表达式中的毫秒条件只应填`*`。
@@ -67,14 +73,14 @@ json文件数据结构说明：
 
 **<子指令>: 查询提醒**  
 
->  -> /<角色名> 查询提醒  
+>  -> /<主指令名> 查询提醒  
 >  <- items:  
->     id:0	ReminderItem(count=null, text=现在是周日晚上10点。请博士记得完成本周剿灭作战。, cron=* 0 22 ? * 7)
+>     id:0	ReminderItem(count=null, reminderMessageCodes=[现在是周日晚上10点。请博士记得完成本周剿灭作战。,IMAGE:name.jpg], cron=* 0 22 ? * 7)
 
 #### 【指令】删除提醒任务
 
 **<子指令>: 删除提醒**  
 **<指令参数1>: id。即查询提醒里看到的id**
 
->  -> /<角色名> 删除提醒 0  
+>  -> /<主指令名> 删除提醒 0  
 >  <- OK
