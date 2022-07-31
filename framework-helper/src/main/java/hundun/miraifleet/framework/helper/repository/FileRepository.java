@@ -12,6 +12,7 @@ import java.util.function.Supplier;
 
 import org.jetbrains.annotations.Nullable;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
@@ -61,6 +62,7 @@ public abstract class FileRepository<V> {
                 .registerModule(javaTimeModule)
                 .enable(SerializationFeature.INDENT_OUTPUT)
                 .disable(SerializationFeature.FAIL_ON_EMPTY_BEANS)
+                //.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
                 ;
         readFile();
     }
