@@ -101,17 +101,22 @@ public class FunctionReplyReceiver {
     @Nullable
     public Image uploadImageAndClose(ExternalResource externalResource) {
         Image result = null;
-        if (commandSender != null) {
-            if (commandSender.getSubject() != null) {
-                result = commandSender.getSubject().uploadImage(externalResource);
-            }
-        } else if (contact != null) {
-            result = contact.uploadImage(externalResource);
-        }
         try {
-            externalResource.close();
-        } catch (IOException e) {
-            miraiLogger.error("externalResource.close fail:", e);
+            if (commandSender != null) {
+                if (commandSender.getSubject() != null) {
+                    result = commandSender.getSubject().uploadImage(externalResource);
+                }
+            } else if (contact != null) {
+                result = contact.uploadImage(externalResource);
+            }
+        } catch (Exception e) {
+            miraiLogger.error(String.format("uploadImage fail, FormatName = %s", externalResource.getFormatName()), e);
+        } finally {
+            try {
+                externalResource.close();
+            } catch (IOException e) {
+                miraiLogger.error("externalResource.close fail:", e);
+            }
         }
         return result;
     }
@@ -137,20 +142,25 @@ public class FunctionReplyReceiver {
     @Nullable
     public OfflineAudio uploadVoiceAndClose(ExternalResource externalResource) {
         OfflineAudio result = null;
-        if (commandSender != null) {
-            if (commandSender.getSubject() != null 
-                    && commandSender.getSubject() instanceof AudioSupported) {
-                result = ((AudioSupported)commandSender.getSubject()).uploadAudio(externalResource);
-            }
-        } else if (contact != null) {
-            if (contact instanceof AudioSupported) {
-                result = ((AudioSupported)contact).uploadAudio(externalResource);
-            }
-        }
         try {
-            externalResource.close();
+            if (commandSender != null) {
+                if (commandSender.getSubject() != null 
+                        && commandSender.getSubject() instanceof AudioSupported) {
+                    result = ((AudioSupported)commandSender.getSubject()).uploadAudio(externalResource);
+                }
+            } else if (contact != null) {
+                if (contact instanceof AudioSupported) {
+                    result = ((AudioSupported)contact).uploadAudio(externalResource);
+                }
+            }
         } catch (Exception e) {
-            miraiLogger.error("externalResource.close fail:", e);
+            miraiLogger.error(String.format("uploadAudio fail, FormatName = %s", externalResource.getFormatName()), e);
+        } finally {
+            try {
+                externalResource.close();
+            } catch (Exception e) {
+                miraiLogger.error("externalResource.close fail:", e);
+            }
         }
         return result;
     }

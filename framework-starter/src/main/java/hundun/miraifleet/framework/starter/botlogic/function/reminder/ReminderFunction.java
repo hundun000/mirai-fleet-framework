@@ -23,7 +23,6 @@ import hundun.miraifleet.framework.core.botlogic.BaseBotLogic;
 import hundun.miraifleet.framework.core.function.BaseFunction;
 import hundun.miraifleet.framework.core.function.FunctionReplyReceiver;
 import hundun.miraifleet.framework.helper.repository.SingletonDocumentRepository;
-import hundun.miraifleet.framework.starter.botlogic.function.reminder.config.HourlyChatConfig;
 import hundun.miraifleet.framework.starter.botlogic.function.reminder.data.HourlyChatConfigV2;
 import hundun.miraifleet.framework.starter.botlogic.function.reminder.data.ReminderItem;
 import hundun.miraifleet.framework.starter.botlogic.function.reminder.data.ReminderList;
@@ -44,6 +43,9 @@ import net.mamoe.mirai.utils.ExternalResource;
  */
 public class ReminderFunction extends BaseFunction<Void> {
 
+    public static final String IMAGE_CODE_PREFIX = "IMAGE:";
+    public static final String AUDIO_CODE_PREFIX = "AUDIO:";
+    
     SingletonDocumentRepository<ReminderList> reminderListRepository;
     private SingletonDocumentRepository<HourlyChatConfigV2> configRepository;
     List<ReminderItem> hourlyChatReminderItems = new ArrayList<>();
@@ -238,7 +240,7 @@ public class ReminderFunction extends BaseFunction<Void> {
             }
             if (reminderItem.getCount() != null && reminderItem.getCount() > 0) {
                 reminderItem.setCount(reminderItem.getCount() - 1);
-                log.info("reminderItem(text=" + reminderItem.getText() + ") count cahnge to " + reminderItem.getCount());
+                log.info("reminderItem(ReminderMessageCodes=" + reminderItem.getReminderMessageCodes() + ") count cahnge to " + reminderItem.getCount());
                 modified = true;
                 if (reminderItem.getCount() == 0) {
                     iterator.remove();
@@ -302,11 +304,10 @@ public class ReminderFunction extends BaseFunction<Void> {
     
     private class ReminderMessageCodeParser {
         
-        public static final String IMAGE_CODE_PREFIX = "IMAGE:";
-        public static final String AUDIO_CODE_PREFIX = "AUDIO:";
+        
         
         private static final String IMAGE_FOLDER = "images/";
-        public static final String AUDIO_FOLDER = "audios/";
+        private static final String AUDIO_FOLDER = "audios/";
         
         public ReminderMessageCodeParser() {
             resolveFunctionDataFile(IMAGE_FOLDER).mkdir();
@@ -314,17 +315,31 @@ public class ReminderFunction extends BaseFunction<Void> {
         }
         
         public List<Message> parse(FunctionReplyReceiver receiver, List<String> codes) {
-            return codes.stream().map(it -> parse(receiver, it)).collect(Collectors.toList());
+            return codes.stream()
+                    .map(it -> parse(receiver, it))
+                    .filter(it -> it != null)
+                    .collect(Collectors.toList());
         }
         
+        @Nullable
         public Message parse(FunctionReplyReceiver receiver, String code) {
             if (code.startsWith(IMAGE_CODE_PREFIX)) {
                 String fileName = code.substring(IMAGE_CODE_PREFIX.length());
-                var externalResource = ExternalResource.create(resolveFunctionDataFile(IMAGE_FOLDER + fileName));
+                File file = resolveFunctionDataFile(IMAGE_FOLDER + fileName);
+                log.info(String.format("ReminderMessageCodeParser using %s, exists = %s", fileName, file.exists()));
+                if (!file.exists()) {
+                    return null;
+                }
+                var externalResource = ExternalResource.create(file);
                 return receiver.uploadImageAndCloseOrNotSupportPlaceholder(externalResource);
             } else if (code.startsWith(AUDIO_CODE_PREFIX)) {
                 String fileName = code.substring(AUDIO_CODE_PREFIX.length());
-                var externalResource = ExternalResource.create(resolveFunctionDataFile(AUDIO_FOLDER + fileName));
+                File file = resolveFunctionDataFile(AUDIO_FOLDER + fileName);
+                log.info(String.format("ReminderMessageCodeParser using %s, exists = %s", fileName, file.exists()));
+                if (!file.exists()) {
+                    return null;
+                }
+                var externalResource = ExternalResource.create(file);
                 return receiver.uploadImageAndCloseOrNotSupportPlaceholder(externalResource);
             } else {
                 return new PlainText(code);

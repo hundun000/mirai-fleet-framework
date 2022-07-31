@@ -17,8 +17,6 @@ import net.mamoe.mirai.utils.MiraiLogger;
 @Data
 public class ReminderItem {
     Integer count;
-    @Deprecated
-    String text;
     List<String> reminderMessageCodes;
     String cron;
     
