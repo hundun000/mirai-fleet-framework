@@ -340,7 +340,7 @@ public class ReminderFunction extends BaseFunction<Void> {
                     return null;
                 }
                 var externalResource = ExternalResource.create(file);
-                return receiver.uploadImageAndCloseOrNotSupportPlaceholder(externalResource);
+                return receiver.uploadVoiceAndCloseOrNotSupportPlaceholder(externalResource);
             } else {
                 return new PlainText(code);
             }
