@@ -1,7 +1,7 @@
 package hundun.miraifleet.framework.example;
 
 import hundun.miraifleet.framework.core.function.AbstractAllCompositeCommandProxy;
-import hundun.miraifleet.framework.starter.botlogic.function.reminder.ReminderFunction;
+import hundun.miraifleet.framework.starter.botlogic.function.CharacterHelpFunction;
 import hundun.miraifleet.framework.starter.botlogic.function.weibo.WeiboFunction;
 import net.mamoe.mirai.console.command.CommandSender;
 import net.mamoe.mirai.console.plugin.jvm.JvmPlugin;
@@ -23,9 +23,9 @@ public class ExamleAllCompositeCommandProxy extends AbstractAllCompositeCommandP
         super(botLogic, plugin, characterName);
     }
 
-    @SubCommand("查询报时")
-    public void listHourlyChatConfig(CommandSender sender) {
-        botLogic.getFunction(ReminderFunction.class).getCommandComponent().listHourlyChatConfig(sender);
+    @SubCommand("help")
+    public void help(CommandSender sender) {
+        botLogic.getFunction(CharacterHelpFunction.class).getCommandComponent().help(sender);
     }
 
 

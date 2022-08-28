@@ -6,7 +6,6 @@ import hundun.miraifleet.framework.starter.botlogic.function.CharacterAdminHelpe
 import hundun.miraifleet.framework.starter.botlogic.function.CharacterHelpFunction;
 import hundun.miraifleet.framework.starter.botlogic.function.RepeatFunction;
 import hundun.miraifleet.framework.starter.botlogic.function.drive.DriveFunction;
-import hundun.miraifleet.framework.starter.botlogic.function.reminder.ReminderFunction;
 import hundun.miraifleet.framework.starter.botlogic.function.weibo.WeiboFunction;
 import net.mamoe.mirai.console.plugin.jvm.JavaPlugin;
 
@@ -26,11 +25,6 @@ public class ExampleBotLogic extends BaseJavaBotLogic {
         registerFunction(new WeiboFunction(this, plugin, characterName, 
                 ExampleDefaultConfigAndData.weiboConfigDefaultDataSupplier())
         );
-
-        registerFunction(new ReminderFunction(this, plugin, characterName, 
-                        null,
-                        ExampleDefaultConfigAndData.hourlyChatConfigDefaultDataSupplier())
-                );
         
         registerFunction(new RepeatFunction(this, plugin, characterName));
         
