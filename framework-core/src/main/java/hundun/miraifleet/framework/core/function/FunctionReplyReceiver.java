@@ -12,7 +12,6 @@ import net.mamoe.mirai.console.command.MemberCommandSender;
 import net.mamoe.mirai.console.command.UserCommandSender;
 import net.mamoe.mirai.contact.AudioSupported;
 import net.mamoe.mirai.contact.Contact;
-import net.mamoe.mirai.contact.Group;
 import net.mamoe.mirai.message.data.Image;
 import net.mamoe.mirai.message.data.Message;
 import net.mamoe.mirai.message.data.OfflineAudio;

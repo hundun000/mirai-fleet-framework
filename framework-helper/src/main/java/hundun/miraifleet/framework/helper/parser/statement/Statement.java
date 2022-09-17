@@ -1,12 +1,8 @@
 package hundun.miraifleet.framework.helper.parser.statement;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Function;
-
 import hundun.miraifleet.framework.helper.parser.StatementType;
 import hundun.miraifleet.framework.helper.parser.Token;
-import hundun.miraifleet.framework.helper.parser.TokenType;
 import lombok.Data;
 
 /**

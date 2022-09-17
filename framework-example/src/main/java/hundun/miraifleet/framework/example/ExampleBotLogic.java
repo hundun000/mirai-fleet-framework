@@ -1,6 +1,5 @@
 package hundun.miraifleet.framework.example;
 
-import hundun.miraifleet.framework.core.botlogic.BaseBotLogic;
 import hundun.miraifleet.framework.core.botlogic.BaseJavaBotLogic;
 import hundun.miraifleet.framework.starter.botlogic.function.CharacterAdminHelperFunction;
 import hundun.miraifleet.framework.starter.botlogic.function.CharacterHelpFunction;

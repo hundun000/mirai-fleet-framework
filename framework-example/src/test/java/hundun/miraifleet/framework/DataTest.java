@@ -1,22 +1,5 @@
 package hundun.miraifleet.framework;
 
-import static org.junit.Assert.assertEquals;
-
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-
-import net.mamoe.mirai.console.data.Value;
-import net.mamoe.mirai.console.data.java.JAutoSavePluginData;
-import net.mamoe.mirai.console.plugin.PluginManager;
-import net.mamoe.mirai.console.plugin.jvm.JavaPlugin;
-import net.mamoe.mirai.console.plugin.jvm.JvmPluginDescriptionBuilder;
-import net.mamoe.mirai.console.terminal.MiraiConsoleImplementationTerminal;
-import net.mamoe.mirai.console.terminal.MiraiConsoleTerminalLoader;
-
-import java.util.ArrayList;
-import java.util.List;
-
 /**
  * @author hundun
  * Created on 2021/12/18

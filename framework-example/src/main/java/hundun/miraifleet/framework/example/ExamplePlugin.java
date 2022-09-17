@@ -1,8 +1,5 @@
 package hundun.miraifleet.framework.example;
 
-import org.jetbrains.annotations.NotNull;
-
-import net.mamoe.mirai.console.extension.PluginComponentStorage;
 import net.mamoe.mirai.console.plugin.jvm.JavaPlugin;
 import net.mamoe.mirai.console.plugin.jvm.JvmPluginDescriptionBuilder;
 

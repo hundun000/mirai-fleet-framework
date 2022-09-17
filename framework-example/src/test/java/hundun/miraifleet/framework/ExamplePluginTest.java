@@ -1,10 +1,6 @@
 package hundun.miraifleet.framework;
 
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-
 import hundun.miraifleet.framework.example.ExamplePlugin;
 import net.mamoe.mirai.console.plugin.PluginManager;
 import net.mamoe.mirai.console.terminal.MiraiConsoleImplementationTerminal;
