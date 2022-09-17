@@ -26,7 +26,7 @@
 
 **推荐的授权方法：**
 
-#### 授权管理级指令
+#### 第一步：授权管理级指令
 
 [权限助手指令](./starter-functions/CharacterAdminHelperFunction.md)是一种管理级指令，以此为例介绍。
 
@@ -37,11 +37,11 @@
 >
 > /perm permit u114514 hundun.fleet.amiya:command.阿米娅权限助手  
 
-#### 授权用户级指令+事件触发/定时触发的功能的启用/禁用+区分控制每个bot
+#### 第二步：授权用户级指令+事件触发/定时触发的功能的启用/禁用+区分控制每个bot
 
 使用[权限助手指令](./starter-functions/CharacterAdminHelperFunction.md)，前提是调用者首先要拥有权限`<插件id>:command.<角色名>权限助手`，授权方法见上文。
 
-然后使用权限助手模块里的具体指令即可。
+然后使用权限助手模块里的具体指令，即可控制：授权用户级指令+事件触发/定时触发的功能的启用/禁用+区分控制每个bot。
 
 **候选授权方法：**
 
@@ -49,11 +49,7 @@
 
 **从旧版权限配置升级：**
 
-旧版指的是以前需要用户人工授权`<插件id>.cos:INSTANCE`
-
-方法1：删除`config/Console/PermissionService.yml`里有关`<插件id>:`和`<插件id>.cos:`的部分，用新方法重新配置。
-
-方法2：人工将`<插件id>.cos:INSTANCE`改成`<插件id>:cos.instance`，不推荐。
+旧版指的是以前需要用户人工授权`<插件id>.cos:INSTANCE`。删除`config/Console/PermissionService.yml`里有关`<插件id>:`和`<插件id>.cos:`的部分，用新方法重新配置。
 
 ### 4. 启动和登录
 

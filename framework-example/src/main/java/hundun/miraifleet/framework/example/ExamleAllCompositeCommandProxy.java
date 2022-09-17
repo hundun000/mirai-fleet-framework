@@ -29,10 +29,14 @@ public class ExamleAllCompositeCommandProxy extends AbstractAllCompositeCommandP
     }
 
 
+    @SubCommand("刷新微博订阅")
+    public void updateAndGetUserInfoCache(CommandSender sender) {
+        botLogic.getFunction(WeiboFunction.class).getCommandComponent().updateAndGetUserInfoCache(sender);
+    }
+
     @SubCommand("查询微博订阅")
     public void listListen(CommandSender sender) {
         botLogic.getFunction(WeiboFunction.class).getCommandComponent().listListen(sender);
     }
-
 
 }

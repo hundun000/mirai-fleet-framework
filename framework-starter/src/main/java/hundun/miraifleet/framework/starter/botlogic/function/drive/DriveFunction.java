@@ -15,7 +15,7 @@ import net.mamoe.mirai.message.code.MiraiCode;
  * @author hundun
  * Created on 2022/01/23
  */
-public class DriveFunction extends BaseFunction<Void>{
+public class DriveFunction extends BaseFunction {
 
     @Getter
     private final CompositeCommandFunctionComponent commandComponent;
@@ -29,8 +29,7 @@ public class DriveFunction extends BaseFunction<Void>{
             baseBotLogic,
             plugin,
             characterName,
-            "DriveFunction",
-            null
+            "DriveFunction"
             );
         this.commandComponent = new CompositeCommandFunctionComponent();
     }

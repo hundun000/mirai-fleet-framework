@@ -17,7 +17,7 @@ import net.mamoe.mirai.console.command.CommandSender;
 import net.mamoe.mirai.console.permission.PermissionService;
 import net.mamoe.mirai.console.plugin.jvm.JvmPlugin;
 
-public class CharacterHelpFunction extends BaseFunction<Void> {
+public class CharacterHelpFunction extends BaseFunction {
     @Getter
     private final CompositeCommandFunctionComponent commandComponent;
     
@@ -30,8 +30,7 @@ public class CharacterHelpFunction extends BaseFunction<Void> {
             baseBotLogic,
             plugin,
             characterName,
-            "CharacterHelpFunction",
-            null
+            "CharacterHelpFunction"
             );
         this.commandComponent = new CompositeCommandFunctionComponent();
     }

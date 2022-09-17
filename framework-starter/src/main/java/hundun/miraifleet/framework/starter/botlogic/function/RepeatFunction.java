@@ -5,6 +5,8 @@ import org.jetbrains.annotations.NotNull;
 import hundun.miraifleet.framework.core.botlogic.BaseBotLogic;
 import hundun.miraifleet.framework.core.function.AsListenerHost;
 import hundun.miraifleet.framework.core.function.BaseFunction;
+import hundun.miraifleet.framework.core.function.SessionDataMap;
+import hundun.miraifleet.framework.core.function.SessionDataMap.GroupMessageToSessionIdType;
 import net.mamoe.mirai.console.command.AbstractCommand;
 import net.mamoe.mirai.console.command.CommandManager;
 import net.mamoe.mirai.console.plugin.jvm.JvmPlugin;
@@ -19,10 +21,12 @@ import net.mamoe.mirai.message.code.MiraiCode;
  * Created on 2021/04/21
  */
 @AsListenerHost
-public class RepeatFunction extends BaseFunction<RepeatFunction.SessionData> {
+public class RepeatFunction extends BaseFunction {
 
     final static int COUNT_LIMIT = 3;
 
+    final SessionDataMap<RepeatFunction.SessionData> sessionDataMap;
+    
     public static class SessionData {
         public RepeatState state = RepeatState.CURRENT_MESSAGE_HANDLED;
         public String messageMiraiCode = "";
@@ -44,9 +48,12 @@ public class RepeatFunction extends BaseFunction<RepeatFunction.SessionData> {
             baseBotLogic,
             plugin,
             characterName,
-            "RepeatFunction",
-            (() -> new RepeatFunction.SessionData())
+            "RepeatFunction"
             );
+        this.sessionDataMap = new SessionDataMap<>(
+                GroupMessageToSessionIdType.USE_GROUP_ID,
+                (() -> new RepeatFunction.SessionData())
+                );
     }
 
     @EventHandler
@@ -56,7 +63,7 @@ public class RepeatFunction extends BaseFunction<RepeatFunction.SessionData> {
             return;
         }
 
-        SessionData sessionData = getOrCreateSessionData(event);
+        SessionData sessionData = sessionDataMap.getOrCreateSessionData(event);
 
 
         if (sessionData.state == RepeatState.CURRENT_MESSAGE_COUNTING) {
@@ -79,7 +86,7 @@ public class RepeatFunction extends BaseFunction<RepeatFunction.SessionData> {
             return;
         }
         
-        SessionData sessionData = getOrCreateSessionData(event);
+        SessionData sessionData = sessionDataMap.getOrCreateSessionData(event);
 
         switch (sessionData.state) {
             case CURRENT_MESSAGE_HANDLED:

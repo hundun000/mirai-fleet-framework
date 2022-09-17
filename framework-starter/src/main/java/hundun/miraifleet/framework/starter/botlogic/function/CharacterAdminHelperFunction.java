@@ -17,7 +17,7 @@ import net.mamoe.mirai.contact.Group;
  * @author hundun
  *
  */
-public class CharacterAdminHelperFunction extends BaseFunction<Void> {
+public class CharacterAdminHelperFunction extends BaseFunction {
     @Getter
     private final CompositeCommandFunctionComponent commandComponent;
     
@@ -30,8 +30,7 @@ public class CharacterAdminHelperFunction extends BaseFunction<Void> {
             baseBotLogic,
             plugin,
             characterName,
-            "CharacterAdminHelperFunction",
-            null
+            "CharacterAdminHelperFunction"
             );
         this.setSkipRegisterCommand(false);
         this.commandComponent = new CompositeCommandFunctionComponent();
@@ -44,11 +43,11 @@ public class CharacterAdminHelperFunction extends BaseFunction<Void> {
 
     public class CompositeCommandFunctionComponent extends AbstractCompositeCommandFunctionComponent {
         public CompositeCommandFunctionComponent() {
-            super(plugin, 
-                    botLogic.getAdminCommandRootPermission(), 
-                    characterName, 
-                    functionName, 
-                    characterName + "权限助手"
+            super(plugin, botLogic, new AdminLevelFunctionComponentConstructPack(
+                            characterName, 
+                            functionName, 
+                            "权限助手"
+                            )
                     );
         }
         

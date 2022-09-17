@@ -1,6 +1,5 @@
 package hundun.miraifleet.framework.core.botlogic;
 
-import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -47,7 +46,7 @@ public abstract class BaseBotLogic {
     protected final String characterName;
     protected final JvmPlugin plugin;
 
-    private Map<Class<?>, BaseFunction<?>> functionMap = new HashMap<>();
+    private Map<Class<?>, BaseFunction> functionMap = new HashMap<>();
     protected AbstractAllCompositeCommandProxy<?> allCompositeCommandProxy;
     protected SingletonDocumentRepository<AllCompositeCommandProxyConfig> proxyConfigRepository;
 
@@ -88,7 +87,7 @@ public abstract class BaseBotLogic {
         StringBuilder listenerHosts = new StringBuilder();
         EventChannel<Event> eventChannel = GlobalEventChannel.INSTANCE.parentScope(plugin);
         
-        for (BaseFunction<?> function : functionMap.values()) {
+        for (BaseFunction function : functionMap.values()) {
             Class<?> clazz = function.getClass();
             AbstractCommand command = function.provideCommand();
             if (command != null && !function.isSkipRegisterCommand()) {
@@ -142,12 +141,12 @@ public abstract class BaseBotLogic {
      * 2. onBotLogicEnable时，向mirai注册function为ListenerHost（若是）<br>
      * 3. 可被fleet框架的其他组件通过getFunction(class)获得，用于其他用途
      */
-    protected <T extends BaseFunction<?>> void registerFunction(T function) {
+    protected <T extends BaseFunction> void registerFunction(T function) {
         functionMap.put(function.getClass(), function);
     }
     
     @SuppressWarnings("unchecked")
-    public <T extends BaseFunction<?>> T getFunction(Class<T> clazz) {
+    public <T extends BaseFunction> T getFunction(Class<T> clazz) {
         if (!functionMap.containsKey(clazz)) {
             plugin.getLogger().warning("未找到Function: " + clazz.getName());
         }

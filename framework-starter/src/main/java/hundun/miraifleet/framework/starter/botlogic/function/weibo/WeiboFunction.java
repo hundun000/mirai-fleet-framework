@@ -15,6 +15,8 @@ import org.jetbrains.annotations.Nullable;
 import hundun.miraifleet.framework.core.botlogic.BaseBotLogic;
 import hundun.miraifleet.framework.core.function.BaseFunction;
 import hundun.miraifleet.framework.core.function.FunctionReplyReceiver;
+import hundun.miraifleet.framework.core.function.SessionDataMap;
+import hundun.miraifleet.framework.core.function.SessionDataMap.GroupMessageToSessionIdType;
 import hundun.miraifleet.framework.helper.repository.SingletonDocumentRepository;
 import hundun.miraifleet.framework.starter.botlogic.function.weibo.WeiboService.WeiboCardView;
 import hundun.miraifleet.framework.starter.botlogic.function.weibo.config.WeiboConfig;
@@ -31,6 +33,7 @@ import lombok.Getter;
 import net.mamoe.mirai.Bot;
 import net.mamoe.mirai.console.command.AbstractCommand;
 import net.mamoe.mirai.console.command.CommandSender;
+import net.mamoe.mirai.console.command.ConsoleCommandSender;
 import net.mamoe.mirai.console.plugin.jvm.JvmPlugin;
 import net.mamoe.mirai.contact.Group;
 import net.mamoe.mirai.message.data.Image;
@@ -43,7 +46,7 @@ import net.mamoe.mirai.utils.ExternalResource;
  * @author hundun
  * Created on 2021/08/12
  */
-public class WeiboFunction extends BaseFunction<WeiboFunction.SessionData> {
+public class WeiboFunction extends BaseFunction {
 
     private static final String BLOG_SCREENNAME_PLACEHOLDER = "${screenName}";
     private static final String BLOG_TIME_PLACEHOLDER = "${time}";
@@ -59,7 +62,7 @@ public class WeiboFunction extends BaseFunction<WeiboFunction.SessionData> {
     
     private final WeiboService weiboService;
     private final SingletonDocumentRepository<WeiboConfig> configRepository;
-
+    private final SessionDataMap<WeiboFunction.SessionData> sessionDataMap;
     @Getter
     private final CompositeCommandFunctionComponent commandComponent;
 
@@ -73,10 +76,12 @@ public class WeiboFunction extends BaseFunction<WeiboFunction.SessionData> {
             baseBotLogic,
             plugin,
             characterName,
-            "WeiboFunction",
-            (() -> new WeiboFunction.SessionData())
+            "WeiboFunction"
             );
-
+        this.sessionDataMap = new SessionDataMap<>(
+                GroupMessageToSessionIdType.USE_GROUP_ID, 
+                (() -> new WeiboFunction.SessionData())
+                );
         this.weiboService = new WeiboService(
                 plugin.getLogger(),
                 WeiboApiFeignClient.instance(plugin.getLogger()),
@@ -138,11 +143,15 @@ public class WeiboFunction extends BaseFunction<WeiboFunction.SessionData> {
     public class DebugCompositeCommandFunctionComponent extends AbstractCompositeCommandFunctionComponent {
 
         public DebugCompositeCommandFunctionComponent() {
-            super(plugin, botLogic, new DebugLevelFunctionComponentConstructPack(characterName, functionName));
+            super(plugin, botLogic, new DebugLevelFunctionComponentConstructPack(
+                    characterName, 
+                    functionName
+                    ));
         }
         
-        @SubCommand("debugChangeTopCardCreateTime")
-        public void debugChangeTopCardCreateTime(CommandSender sender, String uid) {
+        @SubCommand("changeTopCardCreateTime")
+        public void debugChangeTopCardCreateTime(ConsoleCommandSender sender, 
+                @Name("uid") String uid) {
             if (!checkCosPermission(sender)) {
                 return;
             }
@@ -154,7 +163,7 @@ public class WeiboFunction extends BaseFunction<WeiboFunction.SessionData> {
     public class CompositeCommandFunctionComponent extends AbstractCompositeCommandFunctionComponent {
 
         public CompositeCommandFunctionComponent() {
-            super(plugin, botLogic, characterName, functionName);
+            super(plugin, botLogic, new UserLevelFunctionComponentConstructPack(characterName, functionName));
         }
 
         @SubCommand("刷新微博订阅")
@@ -213,7 +222,8 @@ public class WeiboFunction extends BaseFunction<WeiboFunction.SessionData> {
         }
 
         @SubCommand("最新微博")
-        public void listTopForUid(CommandSender sender, String name) {
+        public void listTopForName(CommandSender sender, 
+                @Name("name") String name) {
             if (!checkCosPermission(sender)) {
                 return;
             }
@@ -315,7 +325,7 @@ public class WeiboFunction extends BaseFunction<WeiboFunction.SessionData> {
         }
 
         private void timerClockArrive() {
-            SessionData sessionData = getOrCreateSessionData();
+            SessionData sessionData = sessionDataMap.getOrCreateSessionData();
             WeiboConfig weiboConfig = configRepository.findSingleton();
             plugin.getLogger().info("checkNewBlog Scheduled arrival, LastCheckTime = " + sessionData.getTaskLastCheckTime().toString());
             Collection<Bot> bots = Bot.getInstances();
