@@ -19,7 +19,6 @@ plugins {
 allprojects {
     repositories {
         mavenCentral()
-        jcenter()
         maven { url 'https://jitpack.io' }
     }
 }
@@ -149,11 +148,6 @@ project(":framework-example") {
     dependencies {
         implementation project(":framework-core")
         implementation project(":framework-starter")
-        //implementation 'com.github.hundun000.mirai-fleet-framework:mirai-fleet-framework-core:0.5.0'
-        //implementation 'com.github.hundun000.mirai-fleet-framework:mirai-fleet-framework-starter:0.5.0'
-        
-        
-        
     }
 }
 

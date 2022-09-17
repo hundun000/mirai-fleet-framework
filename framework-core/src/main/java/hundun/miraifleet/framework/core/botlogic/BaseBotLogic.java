@@ -56,11 +56,6 @@ public abstract class BaseBotLogic {
         this.characterName = characterName;
         this.plugin = plugin;
     }
-
-    @Deprecated
-    protected File resolveBotLogicConfigFile(String jsonFileName) {
-        return plugin.resolveConfigFile(jsonFileName);
-    }
     
     public AllCompositeCommandProxyConfig getAllCompositeCommandProxyConfig() {
         return proxyConfigRepository.findSingleton();
@@ -89,6 +84,7 @@ public abstract class BaseBotLogic {
 
     private void onBotLogicEnablePost() {
         StringBuilder commands = new StringBuilder();
+        StringBuilder debugCommands = new StringBuilder();
         StringBuilder listenerHosts = new StringBuilder();
         EventChannel<Event> eventChannel = GlobalEventChannel.INSTANCE.parentScope(plugin);
         
@@ -99,7 +95,11 @@ public abstract class BaseBotLogic {
                 CommandManager.INSTANCE.registerCommand(command, false);
                 commands.append(clazz.getSimpleName()).append(",");
             }
-
+            AbstractCommand debugCommand = function.provideDebugCommand();
+            if (debugCommand != null) {
+                CommandManager.INSTANCE.registerCommand(debugCommand, false);
+                debugCommands.append(clazz.getSimpleName()).append(",");
+            }
             if (clazz.isAnnotationPresent(AsListenerHost.class)) {
                 eventChannel.registerListenerHost(function);
                 listenerHosts.append(clazz.getSimpleName()).append(",");
@@ -107,6 +107,7 @@ public abstract class BaseBotLogic {
         }
 
         plugin.getLogger().info("has commands: " + commands.toString());
+        plugin.getLogger().info("has debuCommands: " + debugCommands.toString());
         plugin.getLogger().info("has listenerHosts: " + listenerHosts.toString());
 
         if (allCompositeCommandProxy != null) {

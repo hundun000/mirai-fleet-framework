@@ -18,6 +18,9 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Data
 public class WeiboConfig {
-    Map<String, WeiboViewFormat> listenConfig = new HashMap<>(0);
-    Map<String, List<WeiboPushFilterFlag>> pushFilterFlags = new HashMap<>(0);
+    String noNewBlogMessageTemplate;
+    String newBlogMessageTemplate;
+    String summaryBlogMessageTemplate;
+    Map<String, WeiboViewFormat> listenConfig;
+    Map<String, List<WeiboPushFilterFlag>> pushFilterFlags;
 }

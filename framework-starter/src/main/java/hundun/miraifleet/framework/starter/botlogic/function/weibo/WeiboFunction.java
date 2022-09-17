@@ -45,8 +45,19 @@ import net.mamoe.mirai.utils.ExternalResource;
  */
 public class WeiboFunction extends BaseFunction<WeiboFunction.SessionData> {
 
+    private static final String BLOG_SCREENNAME_PLACEHOLDER = "${screenName}";
+    private static final String BLOG_TIME_PLACEHOLDER = "${time}";
+    public static final String DEFAULT_NONEWBLOGMESSAGETEMPLATE;
+    public static final String DEFAULT_NEWBLOGMESSAGETEMPLATE;
+    public static final String DEFAULT_SUMMARYBLOGMESSAGETEMPLATE;
+    
+    static {
+        DEFAULT_NONEWBLOGMESSAGETEMPLATE = "现在还没有饼哦~";
+        DEFAULT_NEWBLOGMESSAGETEMPLATE = String.format("新饼！来自：%s %s\n\n", BLOG_SCREENNAME_PLACEHOLDER, BLOG_TIME_PLACEHOLDER);
+        DEFAULT_SUMMARYBLOGMESSAGETEMPLATE = String.format("来自：%s，最新的饼的时间是：%s", BLOG_SCREENNAME_PLACEHOLDER, BLOG_TIME_PLACEHOLDER);
+    }
+    
     private final WeiboService weiboService;
-
     private final SingletonDocumentRepository<WeiboConfig> configRepository;
 
     @Getter
@@ -82,8 +93,31 @@ public class WeiboFunction extends BaseFunction<WeiboFunction.SessionData> {
                 );
         botLogic.getPluginScheduler().repeating(5 * 60 * 1000, new WeiboTask());
         this.commandComponent = new CompositeCommandFunctionComponent();
+        handleVersionChange();
     }
 
+    private void handleVersionChange() {
+        WeiboConfig weiboConfig = configRepository.findSingleton();
+        boolean dirty = false;
+        
+        if (weiboConfig.getNoNewBlogMessageTemplate() == null) {
+            dirty = true;
+            weiboConfig.setNoNewBlogMessageTemplate(DEFAULT_NONEWBLOGMESSAGETEMPLATE);
+        }
+        if (weiboConfig.getNewBlogMessageTemplate() == null) {
+            dirty = true;
+            weiboConfig.setNewBlogMessageTemplate(DEFAULT_NEWBLOGMESSAGETEMPLATE);
+        }
+        if (weiboConfig.getSummaryBlogMessageTemplate() == null) {
+            dirty = true;
+            weiboConfig.setSummaryBlogMessageTemplate(DEFAULT_SUMMARYBLOGMESSAGETEMPLATE);
+        }
+        
+        if (dirty) {
+            log.info("weiboConfig update for new version.");
+            configRepository.saveSingleton(weiboConfig);
+        }
+    }
 
     @Data
     public static class SessionData {
@@ -95,7 +129,27 @@ public class WeiboFunction extends BaseFunction<WeiboFunction.SessionData> {
     public AbstractCommand provideCommand() {
         return commandComponent;
     }
+    
+    @Override
+    public AbstractCommand provideDebugCommand() {
+        return new DebugCompositeCommandFunctionComponent();
+    }
 
+    public class DebugCompositeCommandFunctionComponent extends AbstractCompositeCommandFunctionComponent {
+
+        public DebugCompositeCommandFunctionComponent() {
+            super(plugin, botLogic, new DebugLevelFunctionComponentConstructPack(characterName, functionName));
+        }
+        
+        @SubCommand("debugChangeTopCardCreateTime")
+        public void debugChangeTopCardCreateTime(CommandSender sender, String uid) {
+            if (!checkCosPermission(sender)) {
+                return;
+            }
+            weiboService.debugChangeTopCardCreateTime(uid);
+        }
+        
+    }
 
     public class CompositeCommandFunctionComponent extends AbstractCompositeCommandFunctionComponent {
 
@@ -108,26 +162,22 @@ public class WeiboFunction extends BaseFunction<WeiboFunction.SessionData> {
             if (!checkCosPermission(sender)) {
                 return;
             }
-            Map<String, WeiboViewFormat> listenConfig = getListenConfigOrEmpty();
+            WeiboConfig weiboConfig = configRepository.findSingleton();
+            Map<String, WeiboViewFormat> listenConfig = weiboConfig.getListenConfig();
             listenConfig.forEach((uid, format) -> weiboService.getUserInfoCacheOptionUpdate(uid, true));
             sender.sendMessage("已刷新");
             return;
         }
 
-        @SubCommand("debugChangeTopCardCreateTime")
-        public void debugChangeTopCardCreateTime(CommandSender sender, String uid) {
-            if (!checkCosPermission(sender)) {
-                return;
-            }
-            weiboService.debugChangeTopCardCreateTime(uid);
-        }
+        
 
         @SubCommand("查询微博订阅")
         public void listListen(CommandSender sender) {
             if (!checkCosPermission(sender)) {
                 return;
             }
-            Map<String, WeiboViewFormat> listenConfig = getListenConfigOrEmpty();
+            WeiboConfig weiboConfig = configRepository.findSingleton();
+            Map<String, WeiboViewFormat> listenConfig = weiboConfig.getListenConfig();
             sender.sendMessage(listenConfig.toString());
         }
 
@@ -137,8 +187,9 @@ public class WeiboFunction extends BaseFunction<WeiboFunction.SessionData> {
                 return;
             }
 
-            Map<String, WeiboViewFormat> listenConfig = getListenConfigOrEmpty();
-
+            WeiboConfig weiboConfig = configRepository.findSingleton();
+            Map<String, WeiboViewFormat> listenConfig = weiboConfig.getListenConfig();
+            
             StringBuilder builder = new StringBuilder();
             for (Entry<String, WeiboViewFormat> entry : listenConfig.entrySet()) {
                 String uid= entry.getKey();
@@ -146,12 +197,15 @@ public class WeiboFunction extends BaseFunction<WeiboFunction.SessionData> {
 
                 WeiboCardView cardCacheAndImage = weiboService.updateAndGetTopBlog(uid, format);
                 if (cardCacheAndImage != null) {
-                    String summary = "来自：" + cardCacheAndImage.getWeiboCardCache().getScreenName() + "，最新的饼的时间是：" + cardCacheAndImage.getWeiboCardCache().getBlogCreatedDateTime().toString();
+                    String summary = weiboConfig.getSummaryBlogMessageTemplate()
+                            .replace(BLOG_SCREENNAME_PLACEHOLDER, cardCacheAndImage.getWeiboCardCache().getScreenName())
+                            .replace(BLOG_TIME_PLACEHOLDER, cardCacheAndImage.getWeiboCardCache().getBlogCreatedDateTime().toString())
+                            ;
                     builder.append(summary).append("\n");
                 }
             }
             if (builder.length() == 0) {
-                sender.sendMessage("现在还没有饼哦~");
+                sender.sendMessage(weiboConfig.getNoNewBlogMessageTemplate());
             } else {
                 sender.sendMessage(builder.toString());
             }
@@ -163,8 +217,8 @@ public class WeiboFunction extends BaseFunction<WeiboFunction.SessionData> {
             if (!checkCosPermission(sender)) {
                 return;
             }
-
-            Map<String, WeiboViewFormat> listenConfig = getListenConfigOrEmpty();
+            WeiboConfig weiboConfig = configRepository.findSingleton();
+            Map<String, WeiboViewFormat> listenConfig = weiboConfig.getListenConfig();
 
             String targetUid = "";
             for (String uid : listenConfig.keySet()) {
@@ -199,16 +253,21 @@ public class WeiboFunction extends BaseFunction<WeiboFunction.SessionData> {
 
 
     private void sendBlogToBot(WeiboCardView newCardCacheAndImage, FunctionReplyReceiver group) {
-
+        WeiboConfig weiboConfig = configRepository.findSingleton();
         if (newCardCacheAndImage == null) {
-            group.sendMessage("现在还没有饼哦~");
+            group.sendMessage(weiboConfig.getNoNewBlogMessageTemplate());
             return;
         }
 
         WeiboCardCache newBlog = newCardCacheAndImage.getWeiboCardCache();
         MessageChain chain = MessageUtils.newChain();
-
-        chain = chain.plus(new PlainText("新饼！来自：" + newBlog.getScreenName() + " " + newBlog.getBlogCreatedDateTime().toString() + "\n\n"));
+        
+        
+        String text = weiboConfig.getNewBlogMessageTemplate()
+                .replace(BLOG_SCREENNAME_PLACEHOLDER, newBlog.getScreenName())
+                .replace(BLOG_TIME_PLACEHOLDER, newBlog.getBlogCreatedDateTime().toString())
+                ;
+        chain = chain.plus(new PlainText(text));
 
         if (newBlog.getBlogTextDetail() != null) {
             chain = chain.plus(new PlainText(newBlog.getBlogTextDetail()));
@@ -234,14 +293,7 @@ public class WeiboFunction extends BaseFunction<WeiboFunction.SessionData> {
 
 
 
-    private Map<String, WeiboViewFormat> getListenConfigOrEmpty() {
-        WeiboConfig weiboConfig = configRepository.findSingleton();
-        if (weiboConfig == null) {
-            plugin.getLogger().warning("weiboConfig is null");
-            return new HashMap<>(0);
-        }
-        return weiboConfig.getListenConfig();
-    }
+
 
     private Map<String, List<WeiboPushFilterFlag>> getPushFilterFlagsOrEmpty() {
         WeiboConfig weiboConfig = configRepository.findSingleton();
@@ -264,13 +316,14 @@ public class WeiboFunction extends BaseFunction<WeiboFunction.SessionData> {
 
         private void timerClockArrive() {
             SessionData sessionData = getOrCreateSessionData();
+            WeiboConfig weiboConfig = configRepository.findSingleton();
             plugin.getLogger().info("checkNewBlog Scheduled arrival, LastCheckTime = " + sessionData.getTaskLastCheckTime().toString());
             Collection<Bot> bots = Bot.getInstances();
             for (Bot bot: bots) {
 
                 //log.info("checkGroupListen called");
                 try {
-                    Map<String, WeiboViewFormat> listenConfig = getListenConfigOrEmpty();
+                    Map<String, WeiboViewFormat> listenConfig = weiboConfig.getListenConfig();
                     for (Entry<String, WeiboViewFormat> entry : listenConfig.entrySet()) {
                         String uid= entry.getKey();
                         WeiboViewFormat format = entry.getValue();

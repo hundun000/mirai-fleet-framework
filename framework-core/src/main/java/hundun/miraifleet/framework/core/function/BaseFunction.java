@@ -6,6 +6,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Supplier;
 
 import hundun.miraifleet.framework.core.botlogic.BaseBotLogic;
+import lombok.AllArgsConstructor;
+import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 import net.mamoe.mirai.Bot;
@@ -45,7 +47,30 @@ public abstract class BaseFunction<T> implements ListenerHost {
         USE_GROUP_AND_MEMBER_ID
     }
     
+    @Getter
+    @AllArgsConstructor
+    public static class UserLevelFunctionComponentConstructPack {
+        private final String characterName;
+        private final String functionName;
+        public String toCommandName() {
+            return characterName + functionName;
+        }
+    }
+    
+    @Getter
+    @AllArgsConstructor
+    public static class DebugLevelFunctionComponentConstructPack {
+        private final String characterName;
+        private final String functionName;
+        public String toCommandName() {
+            return characterName + functionName + "Debug";
+        }
+    }
+    
     public static abstract class AbstractSimpleCommandFunctionComponent extends SimpleCommand {
+        /**
+         * for general
+         */
         public AbstractSimpleCommandFunctionComponent(
                 JvmPlugin plugin,
                 Permission parentPermission,
@@ -61,6 +86,9 @@ public abstract class BaseFunction<T> implements ListenerHost {
                     CommandArgumentContext.EMPTY);
         }
 
+        /**
+         * for user 
+         */
         public AbstractSimpleCommandFunctionComponent(
                 JvmPlugin plugin,
                 BaseBotLogic baseBotLogic,
@@ -68,16 +96,42 @@ public abstract class BaseFunction<T> implements ListenerHost {
                 String functionName
                 ) {
             this(plugin, 
-                    baseBotLogic.getUserCommandRootPermission(),
-                    characterName, 
-                    functionName, 
-                    toCommandName(characterName, functionName)
+                    baseBotLogic,
+                    new UserLevelFunctionComponentConstructPack(characterName, functionName)
                     );
         }
-    }
-
-    private static String toCommandName(String characterName, String functionName) {
-        return characterName + functionName;
+        
+        /**
+         * for user
+         */
+        public AbstractSimpleCommandFunctionComponent(
+                JvmPlugin plugin,
+                BaseBotLogic baseBotLogic,
+                UserLevelFunctionComponentConstructPack constructPack
+                ) {
+            this(plugin, 
+                    baseBotLogic.getUserCommandRootPermission(),
+                    constructPack.getCharacterName(), 
+                    constructPack.getFunctionName(), 
+                    constructPack.toCommandName()
+                    );
+        }
+        
+        /**
+         * for debug
+         */
+        public AbstractSimpleCommandFunctionComponent(
+                JvmPlugin plugin,
+                BaseBotLogic baseBotLogic,
+                DebugLevelFunctionComponentConstructPack constructPack
+                ) {
+            this(plugin, 
+                    baseBotLogic.getAdminCommandRootPermission(),
+                    constructPack.getCharacterName(), 
+                    constructPack.getFunctionName(), 
+                    constructPack.toCommandName()
+                    );
+        }
     }
 
     public static abstract class AbstractCompositeCommandFunctionComponent extends CompositeCommand {
@@ -96,6 +150,9 @@ public abstract class BaseFunction<T> implements ListenerHost {
                     CommandArgumentContext.EMPTY
                     );
         }
+        /**
+         * for user
+         */
         public AbstractCompositeCommandFunctionComponent(
                 JvmPlugin plugin,
                 BaseBotLogic baseBotLogic,
@@ -103,10 +160,40 @@ public abstract class BaseFunction<T> implements ListenerHost {
                 String functionName
                 ) {
             this(plugin, 
-                    baseBotLogic.getUserCommandRootPermission(), 
-                    characterName, 
-                    functionName, 
-                    toCommandName(characterName, functionName)
+                    baseBotLogic,
+                    new UserLevelFunctionComponentConstructPack(characterName, functionName)
+                    );
+        }
+        
+        /**
+         * for user
+         */
+        public AbstractCompositeCommandFunctionComponent(
+                JvmPlugin plugin,
+                BaseBotLogic baseBotLogic,
+                UserLevelFunctionComponentConstructPack constructPack
+                ) {
+            this(plugin, 
+                    baseBotLogic.getUserCommandRootPermission(),
+                    constructPack.getCharacterName(), 
+                    constructPack.getFunctionName(), 
+                    constructPack.toCommandName()
+                    );
+        }
+        
+        /**
+         * for debug
+         */
+        public AbstractCompositeCommandFunctionComponent(
+                JvmPlugin plugin,
+                BaseBotLogic baseBotLogic,
+                DebugLevelFunctionComponentConstructPack constructPack
+                ) {
+            this(plugin, 
+                    baseBotLogic.getAdminCommandRootPermission(),
+                    constructPack.getCharacterName(), 
+                    constructPack.getFunctionName(), 
+                    constructPack.toCommandName()
                     );
         }
     }
@@ -157,6 +244,9 @@ public abstract class BaseFunction<T> implements ListenerHost {
     }
 
     public abstract AbstractCommand provideCommand();
+    public AbstractCommand provideDebugCommand() {
+        return null;
+    };
     
     protected String getSessionId(CommandSender sender) {
         String sessionId;

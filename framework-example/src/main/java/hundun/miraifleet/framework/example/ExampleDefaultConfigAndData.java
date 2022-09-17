@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Supplier;
 
+import hundun.miraifleet.framework.starter.botlogic.function.weibo.WeiboFunction;
 import hundun.miraifleet.framework.starter.botlogic.function.weibo.config.WeiboConfig;
 import hundun.miraifleet.framework.starter.botlogic.function.weibo.config.WeiboPushFilterFlag;
 import hundun.miraifleet.framework.starter.botlogic.function.weibo.config.WeiboViewFormat;
@@ -14,19 +15,6 @@ import hundun.miraifleet.framework.starter.botlogic.function.weibo.config.WeiboV
  * Created on 2021/12/20
  */
 public class ExampleDefaultConfigAndData {
-
-    static <K, V> Map<K, V> mapOf(K k1, V v1) {
-        Map<K, V> map = new HashMap<>(1);
-        map.put(k1, v1);
-        return map;
-    }
-
-    static <K, V> Map<K, V> mapOf(K k1, V v1, K k2, V v2) {
-        Map<K, V> map = new HashMap<>(2);
-        map.put(k1, v1);
-        map.put(k2, v2);
-        return map;
-    }
 
     /**
      * 样例内容：<br>
@@ -38,8 +26,11 @@ public class ExampleDefaultConfigAndData {
     public static Supplier<WeiboConfig> weiboConfigDefaultDataSupplier() {
         return () -> {
             WeiboConfig weiboConfig = new WeiboConfig(
-                    mapOf("6279793937", WeiboViewFormat.ALL_IMAGE),
-                    mapOf("6279793937", Arrays.asList(WeiboPushFilterFlag.RETWEET)));
+                    WeiboFunction.DEFAULT_NONEWBLOGMESSAGETEMPLATE,
+                    WeiboFunction.DEFAULT_NEWBLOGMESSAGETEMPLATE,
+                    WeiboFunction.DEFAULT_SUMMARYBLOGMESSAGETEMPLATE,
+                    Map.of("6279793937", WeiboViewFormat.ALL_IMAGE),
+                    Map.of("6279793937", Arrays.asList(WeiboPushFilterFlag.RETWEET)));
             return weiboConfig;
         };
     }
