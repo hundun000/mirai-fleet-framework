@@ -1,7 +1,7 @@
 package hundun.miraifleet.framework.example;
 
 import hundun.miraifleet.framework.core.function.AbstractAllCompositeCommandProxy;
-import hundun.miraifleet.framework.starter.botlogic.function.CharacterHelpFunction;
+import hundun.miraifleet.framework.starter.botlogic.function.character.CharacterHelpFunction;
 import hundun.miraifleet.framework.starter.botlogic.function.weibo.WeiboFunction;
 import net.mamoe.mirai.console.command.CommandSender;
 import net.mamoe.mirai.console.plugin.jvm.JvmPlugin;

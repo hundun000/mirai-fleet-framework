@@ -1,4 +1,4 @@
-package hundun.miraifleet.framework.starter.botlogic.function;
+package hundun.miraifleet.framework.starter.botlogic.function.character;
 /**
  * @author hundun
  * Created on 2022/02/11
