@@ -60,14 +60,23 @@ public class CharacterAdminHelperFunction extends BaseFunction {
         if (config.getPermittedGroupInviters().contains(event.getInvitorId())) {
             log.info("InvitedJoinGroupRequest, 即将自动同意");
             event.accept();
-            try {
-                commandComponent.generalGroupEnableSetter(true, event.getGroupId(), event.getBot().getId());
-                log.info("自动开启群开关成功");
-            } catch (Exception e) {
-                log.error("自动开启群开关期间发生异常，失败", e);
-            }
         } else {
             log.info("InvitedJoinGroupRequest, 不会自动同意");
+        }
+    }
+    
+    @EventHandler
+    public void onBotJoinGroupInvite(@NotNull BotJoinGroupEvent.Invite event) throws Exception {
+        var config = functionConfigRepository.findSingleton();
+        if (config.getPermittedGroupInviters().contains(event.getInvitor().getId())) {
+            try {
+                commandComponent.generalGroupEnableSetter(true, event.getGroupId(), event.getBot().getId());
+                log.info("BotJoinGroupEvent.Invite, 自动开启群开关成功");
+            } catch (Exception e) {
+                log.error("BotJoinGroupEvent.Invite, 自动开启群开关期间发生异常，失败", e);
+            }
+        } else {
+            log.info("BotJoinGroupEvent.Invite, 不会自动同意");
         }
     }
     
@@ -172,15 +181,15 @@ public class CharacterAdminHelperFunction extends BaseFunction {
                     PermissionService.cancel(new AnyMember(groupId), 
                             botLogic.getUserCommandRootPermission().getId(),
                             true);
-                } catch (NoSuchElementException e) {
-                    log.info("skip UserCommandRootPermission");
+                } catch (NoSuchElementException | UnsupportedOperationException e) {
+                    log.info("skip cancel UserCommandRootPermission， 原因: " + e.getMessage());
                 }
                 try {
                     PermissionService.cancel(new ExactMember(groupId, botId), 
                             botLogic.getCharacterCosPermission().getId(),
                             true);
-                } catch (NoSuchElementException e) {
-                    log.info("skip CharacterCosPermission");
+                } catch (NoSuchElementException | UnsupportedOperationException e) {
+                    log.info("skip cancel CharacterCosPermission， 原因: " + e.getMessage());
                 }
             }
 
