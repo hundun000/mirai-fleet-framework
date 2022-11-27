@@ -1,8 +1,14 @@
 ### 微博功能模块
 
+#### 【配置】文案模板
+
+手动编辑`config\hundun.fleet.amiya\WeiboFunction\WeiboConfig.json`的`noNewBlogMessageTemplate`、`newBlogMessageTemplate`、`summaryBlogMessageTemplate`。
+
+各个文案模板用于何处，将在后文用到时给出。
+
 #### 【配置】订阅关系
 
-手动编辑`config\hundun.fleet.amiya\WeiboFunction\WeiboConfig.json`
+手动编辑`config\hundun.fleet.amiya\WeiboFunction\WeiboConfig.json`的`listenConfig`。
 
 微博输出格式枚举说明：
 
@@ -38,6 +44,8 @@
 >    来自：明日方舟朝陇山，最新的饼的时间是：2021-12-01T10:00:01  
 >    来自：泰拉记事社，最新的饼的时间是：2021-11-28T11:00:03  
 
+此时文案模板来自`WeiboConfig.summaryBlogMessageTemplate`或`WeiboConfig.noNewBlogMessageTemplate`。
+
 若带`微博用户名`参数，则回复指定微博用户的最新一条微博的内容
 
 > -> /<主指令名> 最新微博 明日方舟朝陇山  
@@ -65,6 +73,8 @@
 >   
 > 今天是十二月的第一天！不知道2021年的最后一个月，大家是忙碌还是清闲呢~   
 > 以及1张图片。  
+
+此时文案模板来自`WeiboConfig.newBlogMessageTemplate`。
 
 #### 【指令-Debug级】changeTopCardCreateTime
 
