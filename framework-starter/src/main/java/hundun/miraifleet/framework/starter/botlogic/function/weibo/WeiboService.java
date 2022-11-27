@@ -23,6 +23,7 @@ import hundun.miraifleet.framework.starter.botlogic.function.weibo.domain.WeiboC
 import hundun.miraifleet.framework.starter.botlogic.function.weibo.domain.WeiboUserInfoCache;
 import hundun.miraifleet.framework.starter.botlogic.function.weibo.feign.WeiboApiFeignClient;
 import hundun.miraifleet.framework.starter.botlogic.function.weibo.feign.WeiboPictureApiFeignClient;
+import kotlin.Pair;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.ToString;
@@ -70,7 +71,7 @@ public class WeiboService {
 
         this.cacheableFileHelper = new CacheableFileHelper(rootCacheFolder, "weiboImage", miraiLogger);
         this.log = miraiLogger;
-        this.uncachedWeiboImageProvider = fileId -> downloadUncachedWeiboImage(fileId);
+        this.uncachedWeiboImageProvider = cacheId -> downloadUncachedWeiboImage(cacheId);
     }
 
 
@@ -301,13 +302,13 @@ public class WeiboService {
 
         switch (format) {
             case FIRST_IMAGE:
-                File imageFile = removeUrlToImage(urls, 0);
+                File imageFile = removeUrlToImage(cardCache.getUid(), urls, 0);
                 if (imageFile != null) {
                     files.add(imageFile);
                 }
                 break;
             case ALL_IMAGE:
-                files = removeUrlsToImages(urls);
+                files = removeUrlsToImages(cardCache.getUid(), urls);
                 break;
             case NO_IMAGE:
             default:
@@ -318,22 +319,23 @@ public class WeiboService {
         return new WeiboCardView(cardCache, files, urls);
     }
 
-    private List<File> removeUrlsToImages(List<String> urls) {
+    private List<File> removeUrlsToImages(String uid, List<String> urls) {
         List<File> files = new ArrayList<>(urls.size());
 
         while (!urls.isEmpty()) {
-            File file = removeUrlToImage(urls, 0);
+            File file = removeUrlToImage(uid, urls, 0);
             files.add(file);
         }
 
         return files;
     }
 
-    private File removeUrlToImage(List<String> urls, int index) {
+    private File removeUrlToImage(String uid, List<String> urls, int index) {
         if (urls.size() > index) {
             int lastSlash = urls.get(index).lastIndexOf("/");
-            String id = urls.get(index).substring(lastSlash + 1);
-            File file = cacheableFileHelper.fromCacheOrProvider(id, uncachedWeiboImageProvider);
+            String imageId = urls.get(index).substring(lastSlash + 1);
+            String cacheId = toCacheId(uid, imageId);
+            File file = cacheableFileHelper.fromCacheOrProvider(cacheId, uncachedWeiboImageProvider);
             urls.remove(index);
             return file;
         } else {
@@ -342,16 +344,28 @@ public class WeiboService {
     }
 
 
-
+    static final String CACHE_ID_SPLITE = "_";
     
-    public InputStream downloadUncachedWeiboImage(String fileId) {
+    private String toCacheId(String uid, String imageId) {
+        return uid + CACHE_ID_SPLITE + imageId;
+    }
+    
+    private Pair<String, String> spliteCacheId(String cacheId) {
+        String[] parts = cacheId.split(CACHE_ID_SPLITE);
+        return new Pair<>(parts[0], parts[1]);
+    }
+
+
+
+    public InputStream downloadUncachedWeiboImage(String cacheId) {
         try {
-            final Response response = weiboPictureApiFeignClient.pictures(fileId);
+            Pair<String, String> idPatrs = spliteCacheId(cacheId);
+            final Response response = weiboPictureApiFeignClient.pictures(idPatrs.getFirst(), idPatrs.getSecond());
             final Response.Body body = response.body();
             final InputStream inputStream = body.asInputStream();
             return inputStream;
         } catch (Exception e) {
-            log.error("download image faild by " + fileId, e);
+            log.error("download image faild by " + cacheId, e);
             return null;
         }
     }

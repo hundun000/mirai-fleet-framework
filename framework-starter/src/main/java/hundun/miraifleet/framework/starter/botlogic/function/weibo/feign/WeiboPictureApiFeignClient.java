@@ -26,7 +26,8 @@ public interface WeiboPictureApiFeignClient {
 
     @RequestLine("GET /large/{id}")
     @Headers({
+        "Referer: https://m.weibo.cn/u/{uid}",
         "User-Agent: Mozilla/5.0 (iPhone; CPU iPhone OS 10_3_1 like Mac OS X) AppleWebKit/603.1.30 (KHTML, like Gecko) Version/10.0 Mobile/14E304 Safari/602.1"
         })
-    Response pictures(@Param("id") String id);
+    Response pictures(@Param("uid") String uid, @Param("id") String id);
 }
